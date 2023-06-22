@@ -279,3 +279,5 @@ $RECYCLE.BIN/
 # End of https://www.toptal.com/developers/gitignore/api/linux,windows,macos,jupyternotebooks,python
 
 credentials.yaml
+MNIST/
+lightning_logs/
