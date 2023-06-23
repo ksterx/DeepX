@@ -108,7 +108,10 @@ class ResNet(nn.Module):
 
 class ResNet50(ResNet):
     def __init__(
-        self, num_classes, in_channels: int = 3, block: Optional[nn.Module] = BottleneckBlock
+        self,
+        num_classes,
+        in_channels: int = 3,
+        block: Optional[nn.Module] = BottleneckBlock,
     ):
         super().__init__(in_channels, num_classes)
         self.layers = self._make_layers(block, [3, 4, 6, 3])
