@@ -7,7 +7,7 @@ from torchmetrics import Accuracy
 from torchvision import transforms
 from torchvision.datasets import CIFAR10, CIFAR100, MNIST
 
-from vision.nn.core.residual import ResNet50, ResNet101, ResNet152
+from vision.nn.core.resnet import ResNet50, ResNet101, ResNet152
 
 
 class ImageClassificationModel(L.LightningModule):
@@ -83,19 +83,16 @@ class ImageClassificationModel(L.LightningModule):
         return torch.optim.Adam(self.parameters(), lr=1e-3)
 
     def prepare_data(self):
-        # download
         self.dataset["class"](self.DATA_DIR, train=True, download=True)
         self.dataset["class"](self.DATA_DIR, train=False, download=True)
 
     def setup(self, stage=None):
-        # Assign train/val datasets for use in dataloaders
         if stage == "fit" or stage is None:
             data_full = self.dataset["class"](self.DATA_DIR, train=True, transform=self.transform)
             len_train = int(len(data_full) * self.TRAIN_RATIO)
             len_val = len(data_full) - len_train
             self.data_train, self.data_val = random_split(data_full, [len_train, len_val])
 
-        # Assign test dataset for use in dataloader(s)
         if stage == "test" or stage is None:
             self.data_test = self.dataset["class"](
                 self.DATA_DIR, train=False, transform=self.transform
@@ -111,21 +108,15 @@ class ImageClassificationModel(L.LightningModule):
         return DataLoader(self.data_test, batch_size=self.batch_size)
 
 
-def run(model_name, dataset_name, epochs=3, batch_size=32):
-    model = ImageClassificationModel(
-        model_name=model_name, dataset_name=dataset_name, batch_size=batch_size
-    )
+def test_run():
+    model = ImageClassificationModel(model_name="resnet50", dataset_name="mnist", batch_size=32)
 
     trainer = L.Trainer(
-        max_epochs=epochs,
+        max_epochs=2,
         accelerator="auto",
-        logger=TensorBoardLogger(f"./experiments/{dataset_name}", name=model_name),
+        logger=TensorBoardLogger("./experiments/tests/mnist", name="resnet50"),
         callbacks=[EarlyStopping(monitor="val_loss", patience=5), ModelSummary(max_depth=1)],
     )
 
     trainer.fit(model)
     trainer.test()
-
-
-if __name__ == "__main__":
-    run("resnet50", "mnist", epochs=3, batch_size=32)
