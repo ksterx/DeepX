@@ -39,9 +39,9 @@ class ImageClassificationModel(L.LightningModule):
 
         self.loss_fn = torch.nn.CrossEntropyLoss()
 
-        self.train_accuracy = Accuracy(task="multiclass", num_classes=self.NUM_CLASSES)
-        self.val_accuracy = Accuracy(task="multiclass", num_classes=self.NUM_CLASSES)
-        self.test_accuracy = Accuracy(task="multiclass", num_classes=self.NUM_CLASSES)
+        self.train_accuracy = Accuracy(task="multiclass", num_classes=self.dataset["num_classes"])
+        self.val_accuracy = Accuracy(task="multiclass", num_classes=self.dataset["num_classes"])
+        self.test_accuracy = Accuracy(task="multiclass", num_classes=self.dataset["num_classes"])
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.model(x)
@@ -119,9 +119,9 @@ def train(
     )
 
     if is_test:
-        log_dir = f"./experiments/tests/{dataset_name}"
+        log_dir = f"../../../experiments/tests/{dataset_name}"
     else:
-        log_dir = f"./experiments/{dataset_name}"
+        log_dir = f"../../../experiments/{dataset_name}"
 
     trainer = L.Trainer(
         max_epochs=epochs,
@@ -140,11 +140,25 @@ if __name__ == "__main__":
 
     # Argument parsing
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model_name", type=str, default="resnet50")
-    parser.add_argument("--dataset_name", type=str, default="cifar10")
-    parser.add_argument("--epochs", type=int, default=3)
-    parser.add_argument("--batch_size", type=int, default=32)
-    parser.add_argument("--is_test", type=bool, default=False)
+    parser.add_argument(
+        "-m",
+        "--model_name",
+        type=str,
+        default="resnet50",
+        choices=available_models.keys(),
+        required=True,
+    )
+    parser.add_argument(
+        "-d",
+        "--dataset_name",
+        type=str,
+        default="mnist",
+        choices=ImageClassificationModel.DATASETS.keys(),
+        required=True,
+    )
+    parser.add_argument("-e", "--epochs", type=int, default=3)
+    parser.add_argument("-b", "--batch_size", type=int, default=32)
+    parser.add_argument("-t", "--is_test", action="store_true")
     args = parser.parse_args()
 
     train(args.model_name, args.dataset_name, args.epochs, args.batch_size, args.is_test)
