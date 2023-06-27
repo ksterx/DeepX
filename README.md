@@ -24,9 +24,16 @@ pip install -e .
 ./up.sh
 ```
 
+### Examples
 - Classifications with ResNet18:
 
 ```bash
 cd vision/nn/classification
 python train.py --model resnet18 --dataset cifar10 --batch_size 128 --epochs 200 --test True
+tensorboard --logdir experiments
+```
+or
+```python
+from vision.nn.classification import train
+train("resnet18", "cifar10", batch_size=128, epochs=200, is_test=True)
 ```
