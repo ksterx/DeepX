@@ -1,3 +1,5 @@
+import pathlib
+
 import lightning as L
 import torch
 from lightning.pytorch.callbacks import EarlyStopping, ModelSummary
@@ -11,24 +13,30 @@ from vision.nn import available_models
 
 
 class ImageClassificationModel(L.LightningModule):
-    DATA_DIR = "../../../data/"
-    TRAIN_RATIO = 0.9
     DATASETS = {
         "mnist": {"class": MNIST, "num_classes": 10, "num_channels": 1},
         "cifar10": {"class": CIFAR10, "num_classes": 10, "num_channels": 3},
         "cifar100": {"class": CIFAR100, "num_classes": 100, "num_channels": 3},
     }
-    MODELS = available_models
 
-    def __init__(self, model_name: str, dataset_name: str, batch_size: int = 32):
+    def __init__(
+        self,
+        model_name: str,
+        dataset_name: str,
+        data_dir: str | pathlib.Path,
+        batch_size: int = 32,
+        train_ratio: float = 0.9,
+    ):
         super().__init__()
         self.dataset = self.DATASETS[dataset_name]
-        self.model = self.MODELS[model_name](
+        self.model = available_models[model_name](
             num_classes=self.dataset["num_classes"],
             in_channels=self.dataset["num_channels"],
         )
         self.dataset_name = dataset_name
+        self.data_dir = data_dir
         self.batch_size = batch_size
+        self.train_ratio = train_ratio
 
         self.transform = transforms.Compose(
             [
@@ -82,19 +90,19 @@ class ImageClassificationModel(L.LightningModule):
 
     def prepare_data(self):
         # download
-        self.dataset["class"](self.DATA_DIR, train=True, download=True)
-        self.dataset["class"](self.DATA_DIR, train=False, download=True)
+        self.dataset["class"](self.data_dir, train=True, download=True)
+        self.dataset["class"](self.data_dir, train=False, download=True)
 
     def setup(self, stage=None):
         if stage == "fit" or stage is None:
-            data_full = self.dataset["class"](self.DATA_DIR, train=True, transform=self.transform)
-            len_train = int(len(data_full) * self.TRAIN_RATIO)
+            data_full = self.dataset["class"](self.data_dir, train=True, transform=self.transform)
+            len_train = int(len(data_full) * self.train_ratio)
             len_val = len(data_full) - len_train
             self.data_train, self.data_val = random_split(data_full, [len_train, len_val])
 
         if stage == "test" or stage is None:
             self.data_test = self.dataset["class"](
-                self.DATA_DIR, train=False, transform=self.transform
+                self.data_dir, train=False, transform=self.transform
             )
 
     def train_dataloader(self):
@@ -110,18 +118,23 @@ class ImageClassificationModel(L.LightningModule):
 def train(
     model_name: str,
     dataset_name: str,
-    epochs: int = 3,
+    root_dir: str | pathlib.Path,
+    epochs: int = 2,
     batch_size: int = 32,
     is_test: bool = False,
 ) -> None:
+
+    root_dir = pathlib.Path(root_dir)
+    data_dir = root_dir / "data"
+    print(f"Root directory: {root_dir.resolve()}")
     model = ImageClassificationModel(
-        model_name=model_name, dataset_name=dataset_name, batch_size=batch_size
+        model_name=model_name, dataset_name=dataset_name, data_dir=data_dir, batch_size=batch_size
     )
 
     if is_test:
-        log_dir = f"../../../experiments/tests/{dataset_name}"
+        log_dir = root_dir / f"experiments/tests/{dataset_name}"
     else:
-        log_dir = f"../../../experiments/{dataset_name}"
+        log_dir = root_dir / f"experiments/{dataset_name}"
 
     trainer = L.Trainer(
         max_epochs=epochs,
@@ -161,7 +174,14 @@ if __name__ == "__main__":
     parser.add_argument("-t", "--is_test", action="store_true")
     args = parser.parse_args()
 
-    train(args.model_name, args.dataset_name, args.epochs, args.batch_size, args.is_test)
+    train(
+        model_name=args.model_name,
+        dataset_name=args.dataset_name,
+        root_dir="../../..",
+        epochs=args.epochs,
+        batch_size=args.batch_size,
+        is_test=args.is_test,
+    )
 
     # model_names = available_models.keys()
     # for model_name in model_names:

@@ -1,0 +1,26 @@
+version: "3"
+services:
+  vision:
+    container_name: vision
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+      - "8080:8080"
+      - "8888:8888"
+    volumes:
+      - ../:/workspace
+      # Uncomment the following line to enable X11 forwarding
+      # - /tmp/.X11-unix:/tmp/.X11-unix
+    environment:
+      - DISPLAY=host.docker.internal:0
+    restart: always
+    tty: true
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [ gpu ]
+              count: 1
