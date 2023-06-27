@@ -2,7 +2,27 @@
 
 Reimplemetation of computer vision algorithms in Pytorch and Lightning.
 
-## Usage example
+## Installation
+
+- Docker installation:
+
+```bash
+./build.sh
+```
+
+- PyPI installation:
+
+```bash
+pip install -e .
+```
+
+## Usage
+
+- Starting a container:
+
+```bash
+./up.sh
+```
 
 - Classifications with ResNet18:
 
