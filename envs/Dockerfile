@@ -13,20 +13,20 @@ RUN apt-get update \
     build-essential \
     curl \
     ffmpeg \
+    zsh \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Set timezone as $TZ
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
-    && echo ${TZ} > /etc/timezone
-
-# Install dependencies
 COPY requirements.txt /tmp/requirements.txt
-RUN pip install --upgrade pip \
-    && pip install -r /tmp/requirements.txt
 
-RUN echo "set completion-ignore-case on" >> ${HOME}/.inputrc \
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
+    && echo ${TZ} > /etc/timezone \
+    && chsh -s $(which zsh) \
+    && sh -c "$(wget -O- https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" \
+    && git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions \
+    && sed -i -e 's/plugins=(git)/plugins=(git zsh-autosuggestions)/g' ~/.zshrc \
+    && pip install --upgrade pip \
+    && pip install -r /tmp/requirements.txt \
+    && echo "set completion-ignore-case on" >> ${HOME}/.inputrc \
     && git config --global user.email ${email} \
     && git config --global user.name ${user}
-
-CMD ["/bin/bash"]
