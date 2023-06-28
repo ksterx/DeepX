@@ -86,16 +86,16 @@ class DeepLearningApp:
                 model_name=self.model_name,
                 data_dir="",
             ).to("cuda")
-            img = self.image.resize((32, 32))
+            img = self.image.resize(model.dataset["size"])
             img = np.array(img)
             img = torch.from_numpy(img).permute(2, 0, 1).unsqueeze(0).float().to("cuda")
 
             model.eval()
             with torch.no_grad():
                 result = model.predict_step(img, None)
-            result = result[0].item()
+            result = model.dataset["labels"][result[0].item()]
 
-            self.result_label.configure(text="Predicted as " + str(result))  # TODO
+            self.result_label.configure(text="Prediction: " + result)
         else:
             print("Model file or image file not selected.")
 

@@ -11,15 +11,10 @@ from torchvision import transforms
 from torchvision.datasets import CIFAR10, CIFAR100, MNIST
 
 from vision.nn import available_models
+from vision.tasks import available_datasets
 
 
 class ClassificationTask(LightningModule):
-    DATASETS = {
-        "mnist": {"class": MNIST, "num_classes": 10, "num_channels": 1},
-        "cifar10": {"class": CIFAR10, "num_classes": 10, "num_channels": 3},
-        "cifar100": {"class": CIFAR100, "num_classes": 100, "num_channels": 3},
-    }
-
     def __init__(
         self,
         model_name: str,
@@ -29,7 +24,7 @@ class ClassificationTask(LightningModule):
         train_ratio: float = 0.9,
     ):
         super().__init__()
-        self.dataset = self.DATASETS[dataset_name]
+        self.dataset = available_datasets[dataset_name]
         self.model = available_models[model_name](
             num_classes=self.dataset["num_classes"],
             in_channels=self.dataset["num_channels"],
@@ -173,7 +168,7 @@ if __name__ == "__main__":
         "--dataset_name",
         type=str,
         default="mnist",
-        choices=ClassificationTask.DATASETS.keys(),
+        choices=available_datasets.keys(),
         required=True,
     )
     parser.add_argument("-e", "--epochs", type=int, default=3)
