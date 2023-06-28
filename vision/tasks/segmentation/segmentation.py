@@ -1,7 +1,7 @@
-from .. import BaseModel
+import lightning as L
 
 
-class SegmentationModel(BaseModel):
+class SegmentationModel(L.LightningModule):
     def __init__(self):
         super().__init__()
 

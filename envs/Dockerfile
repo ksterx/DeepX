@@ -13,6 +13,7 @@ RUN apt-get update \
     build-essential \
     curl \
     ffmpeg \
+    python3-tk \
     zsh \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*

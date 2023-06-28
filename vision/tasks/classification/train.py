@@ -1,7 +1,8 @@
 import pathlib
+from typing import Any
 
-import lightning as L
 import torch
+from lightning import LightningModule, Trainer
 from lightning.pytorch.callbacks import EarlyStopping, ModelSummary
 from lightning.pytorch.loggers import TensorBoardLogger
 from torch.utils.data import DataLoader, random_split
@@ -12,7 +13,7 @@ from torchvision.datasets import CIFAR10, CIFAR100, MNIST
 from vision.nn import available_models
 
 
-class ImageClassificationModel(L.LightningModule):
+class ClassificationTask(LightningModule):
     DATASETS = {
         "mnist": {"class": MNIST, "num_classes": 10, "num_channels": 1},
         "cifar10": {"class": CIFAR10, "num_classes": 10, "num_channels": 3},
@@ -75,6 +76,12 @@ class ImageClassificationModel(L.LightningModule):
         self.log("val_loss", loss, prog_bar=True)
         self.log("val_acc", self.val_accuracy, prog_bar=True)
 
+    def predict_step(self, batch: Any, batch_idx: int, dataloader_idx: int = 0) -> Any:
+        x = batch
+        logits = self(x)
+        preds = torch.argmax(logits, dim=1)
+        return preds
+
     def test_step(self, batch, batch_idx):
         x, y = batch
         logits = self(x)
@@ -123,11 +130,10 @@ def train(
     batch_size: int = 32,
     is_test: bool = False,
 ) -> None:
-
     root_dir = pathlib.Path(root_dir)
     data_dir = root_dir / "data"
     print(f"Root directory: {root_dir.resolve()}")
-    model = ImageClassificationModel(
+    model = ClassificationTask(
         model_name=model_name, dataset_name=dataset_name, data_dir=data_dir, batch_size=batch_size
     )
 
@@ -136,11 +142,12 @@ def train(
     else:
         log_dir = root_dir / f"experiments/{dataset_name}"
 
-    trainer = L.Trainer(
+    trainer = Trainer(
         max_epochs=epochs,
         accelerator="auto",
         devices=1,
         logger=TensorBoardLogger(log_dir, name=model_name),
+        enable_checkpointing=True,
         callbacks=[EarlyStopping(monitor="val_loss", patience=5), ModelSummary(max_depth=1)],
     )
 
@@ -166,7 +173,7 @@ if __name__ == "__main__":
         "--dataset_name",
         type=str,
         default="mnist",
-        choices=ImageClassificationModel.DATASETS.keys(),
+        choices=ClassificationTask.DATASETS.keys(),
         required=True,
     )
     parser.add_argument("-e", "--epochs", type=int, default=3)

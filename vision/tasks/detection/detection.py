@@ -1,7 +1,7 @@
-from .. import BaseModel
+import lightning as L
 
 
-class DetectionModel(BaseModel):
+class DetectionTask(L.LightningModule):
     def __init__(self):
         super().__init__()
 
