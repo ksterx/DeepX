@@ -220,12 +220,13 @@ if __name__ == "__main__":
     parser.add_argument("-w", "--num_workers", type=int, default=2)
     parser.add_argument("-l", "--lr", type=float, default=1e-3)
     parser.add_argument("-p", "--stopping_patience", type=int, default=5)
+    parser.add_argument("-r", "--root_dir", type=str, default="/workspace")
     args = parser.parse_args()
 
     train(
         model_name=args.model_name,
         dataset_name=args.dataset_name,
-        root_dir="/workspace",
+        root_dir=args.root_dir,
         epochs=args.epochs,
         batch_size=args.batch_size,
         is_test=args.is_test,
