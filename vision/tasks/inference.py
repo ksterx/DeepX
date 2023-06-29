@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import filedialog
 
-import numpy as np
 import torch
 from PIL import Image, ImageTk
 
@@ -18,7 +17,6 @@ class DeepLearningApp:
         self.ckpt_path = ""
         self.image_path = ""
 
-        # モデル名とデータセット名のラベル
         self.model_name_label = tk.Label(window, text="Model:", font=("Helvetica", 12, "bold"))
         self.model_name_label.grid(row=0, column=0, sticky="w", padx=10, pady=10)
 
@@ -36,7 +34,6 @@ class DeepLearningApp:
         )
         self.result_label.grid(row=3, column=0, columnspan=2, pady=10)
 
-        # ボタンの配置
         ckpt_button = tk.Button(
             window, text="Select checkpoint", command=self.select_ckpt_path, font=("Helvetica", 12)
         )
@@ -79,6 +76,7 @@ class DeepLearningApp:
             self.image_label.image = photo
 
     def run_inference(self):
+        print("Running inference...")
         if self.ckpt_path and self.image_path:
             model = ClassificationTask.load_from_checkpoint(
                 checkpoint_path=self.ckpt_path,
@@ -86,17 +84,21 @@ class DeepLearningApp:
                 model_name=self.model_name,
                 data_dir="",
             ).to("cuda")
-            img = self.image.resize(model.dataset["size"])
-            img = np.array(img)
-            img = torch.from_numpy(img).permute(2, 0, 1).unsqueeze(0).float().to("cuda")
+            # img = self.image.resize(model.dataset["size"])
+            # img = np.array(img)
+            # img = torch.from_numpy(img).permute(2, 0, 1).unsqueeze(0).float().to("cuda")
+            img = model.dataset["transform"](self.image).unsqueeze(0).to("cuda")
+            # print(img.shape)
 
             model.eval()
             with torch.no_grad():
                 result = model.predict_step(img, None)
-            result = model.dataset["labels"][result[0].item()]
+            result = model.dataset["classes"][result[0].item()]
 
             self.result_label.configure(text="Prediction: " + result)
         else:
+            print(self.ckpt_path)
+            print(self.image_path)
             print("Model file or image file not selected.")
 
     def get_model_dataset_name(self, ckpt_path):

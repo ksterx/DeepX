@@ -9,6 +9,7 @@ services:
       - "5000:5000"
       - "8080:8080"
       - "8888:8888"
+      - "6006:6006"
     volumes:
       - ../:/workspace
       # Uncomment the following line to enable X11 forwarding
