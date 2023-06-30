@@ -2,41 +2,31 @@ import pathlib
 from typing import Any
 
 import torch
-from lightning import LightningDataModule, LightningModule, Trainer
+from lightning import Trainer
 from lightning.pytorch.callbacks import EarlyStopping, ModelSummary
 from lightning.pytorch.loggers import TensorBoardLogger
-from torch.utils.data import DataLoader, random_split
+from torch import nn
 from torchmetrics import Accuracy
 
-from vision.nn import available_models
-from vision.tasks import available_datasets
+from vision.tasks import DataModule, Task
 
 
-class ClassificationTask(LightningModule):
+class ClassificationTask(Task):
+    TASK_TYPE = "classification"
+
     def __init__(
         self,
-        model_name: str,
+        model: str | nn.Module,
         dataset_name: str,
         lr: float = 1e-3,
     ):
-        super().__init__()
-
-        self.lr = lr
-
-        self.dataset = available_datasets[dataset_name]
-        self.model = available_models[model_name](
-            num_classes=self.dataset["num_classes"],
-            in_channels=self.dataset["num_channels"],
-        )
+        super().__init__(model=model, dataset_name=dataset_name, lr=lr)
 
         self.loss_fn = torch.nn.CrossEntropyLoss()
 
         self.train_accuracy = Accuracy(task="multiclass", num_classes=self.dataset["num_classes"])
         self.val_accuracy = Accuracy(task="multiclass", num_classes=self.dataset["num_classes"])
         self.test_accuracy = Accuracy(task="multiclass", num_classes=self.dataset["num_classes"])
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.model(x)
 
     def training_step(self, batch, batch_idx):
         x, y = batch
@@ -79,79 +69,12 @@ class ClassificationTask(LightningModule):
         return torch.optim.Adam(self.parameters(), lr=self.lr)
 
 
-class ClassificationDataset(LightningDataModule):
-    def __init__(
-        self,
-        dataset_name: str,
-        data_dir: str | pathlib.Path,
-        batch_size: int = 32,
-        train_ratio: float = 0.9,
-        num_workers: int = 2,
-    ):
-        super().__init__()
-        self.data_dir = data_dir
-        self.batch_size = batch_size
-        self.train_ratio = train_ratio
-        self.num_workers = num_workers
-
-        self.dataset = available_datasets[dataset_name]
-        self.transform = self.dataset["transform"]
-
-    def prepare_data(self):
-        try:
-            self.dataset["class"](self.data_dir, split="train", download=True)
-            self.dataset["class"](self.data_dir, split="val", download=True)
-            self.dataset["class"](self.data_dir, split="test", download=True)
-        except TypeError:
-            self.dataset["class"](self.data_dir, train=True, download=True)
-            self.dataset["class"](self.data_dir, train=False, download=True)
-        except ValueError:
-            raise ValueError("Dataset not found.")
-
-    def setup(self, stage: str):
-        if stage == "fit" or stage is None:
-            try:
-                self.data_train = self.dataset["class"](
-                    self.data_dir, split="train", transform=self.transform
-                )
-                self.data_val = self.dataset["class"](
-                    self.data_dir, split="val", transform=self.transform
-                )
-            except TypeError:
-                self.data_full = self.dataset["class"](
-                    self.data_dir, train=True, transform=self.transform
-                )
-                len_train = int(len(self.data_full) * self.train_ratio)
-                len_val = len(self.data_full) - len_train
-                self.data_train, self.data_val = random_split(self.data_full, [len_train, len_val])
-
-        if stage == "test" or stage is None:
-            try:
-                self.data_test = self.dataset["class"](
-                    self.data_dir, split="test", transform=self.transform
-                )
-            except TypeError:
-                self.data_test = self.dataset["class"](
-                    self.data_dir, train=False, transform=self.transform
-                )
-
-    def train_dataloader(self):
-        return DataLoader(
-            self.data_train, batch_size=self.batch_size, num_workers=self.num_workers, shuffle=True
-        )
-
-    def val_dataloader(self):
-        return DataLoader(self.data_val, batch_size=self.batch_size, num_workers=self.num_workers)
-
-    def test_dataloader(self):
-        return DataLoader(self.data_test, batch_size=self.batch_size, num_workers=self.num_workers)
-
-    def predict_dataloader(self):
-        return DataLoader(self.data_test, batch_size=self.batch_size, num_workers=self.num_workers)
+class ClassificationDataset(DataModule):
+    TASK_TYPE = "classification"
 
 
 def train(
-    model_name: str,
+    model: str | nn.Module,
     dataset_name: str,
     root_dir: str | pathlib.Path,
     epochs: int = 2,
@@ -160,16 +83,25 @@ def train(
     num_workers: int = 2,
     lr: float = 1e-3,
     stopping_patience: int = 5,
+    max_depth: int = 1,
+    download: bool = False,
 ) -> None:
     root_dir = pathlib.Path(root_dir)
     data_dir = root_dir / "data"
+    if isinstance(model, str):
+        model_name = model
+    else:
+        model_name = model.__class__.__name__
+
     print(f"Root directory: {root_dir.resolve()}")
-    model = ClassificationTask(model_name=model_name, dataset_name=dataset_name, lr=lr)
-    dataset = ClassificationDataset(
+
+    model = ClassificationTask(model=model, dataset_name=dataset_name, lr=lr)
+    datamodule = ClassificationDataset(
         dataset_name=dataset_name,
         data_dir=data_dir,
         batch_size=batch_size,
         num_workers=num_workers,
+        download=download,
     )
 
     if is_test:
@@ -185,22 +117,25 @@ def train(
         enable_checkpointing=True,
         callbacks=[
             EarlyStopping(monitor="val_loss", patience=stopping_patience),
-            ModelSummary(max_depth=1),
+            ModelSummary(max_depth=max_depth),
         ],
     )
 
-    trainer.fit(model, dataset)
-    trainer.test(ckpt_path="best", datamodule=dataset)
+    trainer.fit(model, datamodule=datamodule)
+    trainer.test(ckpt_path="best", datamodule=datamodule)
 
 
 if __name__ == "__main__":
     import argparse
 
+    from vision.nn import available_models
+    from vision.tasks import available_datasets
+
     # Argument parsing
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-m",
-        "--model_name",
+        "--model",
         type=str,
         default="resnet50",
         choices=available_models.keys(),
@@ -211,7 +146,7 @@ if __name__ == "__main__":
         "--dataset_name",
         type=str,
         default="mnist",
-        choices=available_datasets.keys(),
+        choices=available_datasets["classification"].keys(),
         required=True,
     )
     parser.add_argument("-e", "--epochs", type=int, default=2)
@@ -221,10 +156,11 @@ if __name__ == "__main__":
     parser.add_argument("-l", "--lr", type=float, default=1e-3)
     parser.add_argument("-p", "--stopping_patience", type=int, default=5)
     parser.add_argument("-r", "--root_dir", type=str, default="/workspace")
+    parser.add_argument("--download", action="store_true")
     args = parser.parse_args()
 
     train(
-        model_name=args.model_name,
+        model=args.model,
         dataset_name=args.dataset_name,
         root_dir=args.root_dir,
         epochs=args.epochs,
@@ -233,4 +169,5 @@ if __name__ == "__main__":
         num_workers=args.num_workers,
         lr=args.lr,
         stopping_patience=args.stopping_patience,
+        download=args.download,
     )

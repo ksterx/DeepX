@@ -39,8 +39,11 @@ tensorboard --logdir experiments
 or
 
 ```python
-from vision.nn.classification import train
-train("resnet18", "cifar10", batch_size=128, epochs=200, is_test=True)
+from vision.tasks.classification import train
+from vision.nn import MLP
+model = MLP([64, 128, 10])
+train(model, "cifar10", batch_size=128, epochs=200, is_test=True)
+# train("resnet18", "cifar10", batch_size=128, epochs=200, is_test=True)
 ```
 
 #### Inference
