@@ -1,6 +1,6 @@
-from .core import MLP
-from .resnet import ResNet, ResNet18, ResNet34, ResNet50, ResNet101, ResNet152
-from .unet import UNet
+from vision.nn.core import MLP
+from vision.nn.resnet import ResNet, ResNet18, ResNet34, ResNet50, ResNet101, ResNet152
+from vision.nn.unet import UNet
 
 available_models = {
     "resnet18": ResNet18,

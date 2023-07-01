@@ -2,3 +2,4 @@ lightning
 black
 flake8
 mypy
+torch-tb-profiler

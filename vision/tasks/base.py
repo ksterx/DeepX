@@ -22,7 +22,7 @@ class Task(LightningModule):
 
         self.lr = lr
 
-        self.dataset = tasks.available_datasets[self.TASK_TYPE][dataset_name]
+        self.dataset = tasks.available_datasets[dataset_name]
         if isinstance(model, str):
             self.model = available_models[model](
                 num_classes=self.dataset["num_classes"],
@@ -56,7 +56,7 @@ class DataModule(LightningDataModule):
         self.num_workers = num_workers
         self.download = download
 
-        self.dataset = tasks.available_datasets[self.TASK_TYPE][dataset_name]
+        self.dataset = tasks.available_datasets[dataset_name]
         self.transform = self.dataset["transform"]
 
     def prepare_data(self):
