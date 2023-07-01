@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools", "setuptools_scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vision"
+description = "Reimplementation of vision models"
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+    "torch",
+    "torchvision",
+    "lightning",
+]
+dynamic = ["version"]
+
+[tool.setuptools.packages.find]
+exclude = ["build", "tests", "conf", "data", "docs", "envs", "expriments"]
+
+[tool.setuptools_scm]
+write_to = "vision/_version.py"
+
+[tool.black]
+line-length = 100
+
+[tool.isort]
+profile = "black"
+
+[tools.flake8]
+max-line-length = 100

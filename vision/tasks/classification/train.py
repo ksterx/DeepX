@@ -1,10 +1,4 @@
-import pathlib
-from typing import Any
-
 import torch
-from lightning import Trainer
-from lightning.pytorch.callbacks import EarlyStopping, ModelSummary
-from lightning.pytorch.loggers import TensorBoardLogger
 from torch import nn
 from torchmetrics import Accuracy
 
@@ -49,7 +43,7 @@ class ClassificationTask(Task):
         self.log("val_loss", loss, prog_bar=True)
         self.log("val_acc", self.val_accuracy, prog_bar=True)
 
-    def predict_step(self, batch: Any, batch_idx: int, dataloader_idx: int = 0) -> Any:
+    def predict_step(self, batch, batch_idx, dataloader_idx):
         x = batch
         logits = self(x)
         preds = torch.argmax(logits, dim=1)

@@ -28,22 +28,43 @@ pip install -e .
 
 #### Training
 
-- Classifications with ResNet18:
+- Classification
+
+Terminal
 
 ```bash
-cd vision/nn/classification
-python train.py --model resnet18 --dataset cifar10 --batch_size 128 --epochs 200 --test True
+cd vision/tasks
+python train.py --task classification --model resnet18 --dataset cifar10 --batch_size 128 --epochs 200 --debug
 tensorboard --logdir experiments
 ```
 
-or
+Python
 
 ```python
-from vision.tasks.classification import train
+from vision.tasks import train
 from vision.nn import MLP
+
 model = MLP([64, 128, 10])
-train(model, "cifar10", batch_size=128, epochs=200, is_test=True)
-# train("resnet18", "cifar10", batch_size=128, epochs=200, is_test=True)
+
+train("classification", model, "cifar10", batch_size=128, epochs=200, debug=True)
+# train("classification", "resnet18", "cifar10", batch_size=128, epochs=200, is_test=True,)
+```
+
+- Segmetation
+
+Terminal
+
+```bash
+cd vision/tasks
+python train.py --task segmentation --model unet --dataset voc --batch_size 128 --epochs 200 --debug
+```
+
+Python
+
+```python
+from vision.tasks import train
+
+train("segmentation", "unet", "voc", batch_size=128, epochs=200, debug=True)
 ```
 
 #### Inference

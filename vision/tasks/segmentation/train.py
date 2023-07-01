@@ -1,13 +1,8 @@
 import pathlib
 
 import torch
-from lightning import LightningModule, Trainer
-from lightning.pytorch.callbacks import EarlyStopping, ModelSummary
-from lightning.pytorch.loggers import TensorBoardLogger
-from torch import nn
-from torch.utils.data import DataLoader
+from lightning import LightningModule
 from torchmetrics import Dice, JaccardIndex, MetricCollection
-from torchvision import transforms
 from torchvision.datasets import VOCSegmentation
 
 from vision.tasks import DataModule, Task

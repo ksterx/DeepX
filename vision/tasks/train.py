@@ -46,12 +46,12 @@ def train(
     }
 
     if task == "classification":
-        model = ClassificationTask(**task_kwargs)
-        datamodule = ClassificationDataset(**dataset_kwargs)
+        model = ClassificationTask(**task_kwargs)  # type: ignore
+        datamodule = ClassificationDataset(**dataset_kwargs)  # type: ignore
 
     elif task == "segmentation":
-        model = SegmentationTask(**task_kwargs)
-        datamodule = SegmentationDataset(**dataset_kwargs)
+        model = SegmentationTask(**task_kwargs)  # type: ignore
+        datamodule = SegmentationDataset(**dataset_kwargs)  # type: ignore
 
     if debug:
         log_dir = root_dir / f"experiments/tests/{dataset_name}"

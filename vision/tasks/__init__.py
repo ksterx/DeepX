@@ -5,6 +5,15 @@ from vision.tasks.base import DataModule, Task
 from vision.tasks.classification import ClassificationDataset, ClassificationTask
 from vision.tasks.segmentation import SegmentationDataset, SegmentationTask
 
+__all__ = [
+    "DataModule",
+    "Task",
+    "ClassificationDataset",
+    "ClassificationTask",
+    "SegmentationDataset",
+    "SegmentationTask",
+]
+
 
 def transform(size):
     return transforms.Compose(

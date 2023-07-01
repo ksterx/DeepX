@@ -101,7 +101,8 @@ class Conv3x3BNReLU(nn.Module):
         channels_in_layers: list[int],
         kernel_size: int = 3,
         stride: int = 1,
-        padding: int = "same",
+        # padding: int = "same",
+        padding: int = 1,
     ):
         super().__init__()
         self.layers = nn.ModuleList()
