@@ -1,12 +1,14 @@
 FROM nvcr.io/nvidia/pytorch:23.05-py3
 
-ARG user="ksterx"
-ARG email="kostonerx@gmail.com"
+ARG user="ksterx" \
+    email="kostonerx@gmail.com"
 
 LABEL maintainer="${user} <${email}>"
 
-ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
-ENV TZ=Asia/Tokyo
+ENV TZ=Asia/Tokyo \
+    LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8 \
+    DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \

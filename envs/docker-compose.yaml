@@ -2,14 +2,16 @@ version: "3"
 services:
   vision:
     container_name: vision
-    build:
-      context: .
-      dockerfile: Dockerfile
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
+    image: ksterx/ai:win-0.1
     ports:
       - "5000:5000"
       - "8080:8080"
       - "8888:8888"
       - "6006:6006"
+      - "2525:2525"
     volumes:
       - ../:/workspace
       # Uncomment the following line to enable X11 forwarding
