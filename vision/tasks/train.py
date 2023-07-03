@@ -27,6 +27,7 @@ def train(
     lr: float = 1e-3,
     stopping_patience: int = 5,
     max_depth: int = 1,
+    ckpt_path: str = "",
     download: bool = False,
 ) -> None:
     root_dir = pathlib.Path(root_dir)
@@ -81,7 +82,7 @@ def train(
     )
 
     torch.compile(model)
-    trainer.fit(model, datamodule=datamodule)
+    trainer.fit(model, datamodule=datamodule, ckpt_path=ckpt_path)
     if not debug:
         trainer.test(ckpt_path="best", datamodule=datamodule)
 
@@ -119,6 +120,7 @@ if __name__ == "__main__":
     parser.add_argument("-p", "--stopping_patience", type=int, default=5)
     parser.add_argument("-r", "--root_dir", type=str, default="/workspace")
     parser.add_argument("-bm", "--benchmark", action="store_true")
+    parser.add_argument("--ckpt_path", type=str, default="")
     parser.add_argument("--download", action="store_true")
     args = parser.parse_args()
 
@@ -134,5 +136,6 @@ if __name__ == "__main__":
         num_workers=args.num_workers,
         lr=args.lr,
         stopping_patience=args.stopping_patience,
+        ckpt_path=args.ckpt_path,
         download=args.download,
     )
