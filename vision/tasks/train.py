@@ -39,7 +39,18 @@ def train(
 
     print(f"Root directory: {root_dir.resolve()}")
 
-    task_kwargs = {"model": model, "dataset_name": dataset_name, "lr": lr}
+    task_kwargs = {
+        "model": model,
+        "dataset_name": dataset_name,
+        "lr": lr,
+        "task": task,
+        "root_dir": root_dir,
+        "epochs": epochs,
+        "batch_size": batch_size,
+        "learning_rate": lr,
+        "ckpt_path": ckpt_path,
+    }
+
     dataset_kwargs = {
         "dataset_name": dataset_name,
         "data_dir": data_dir,
@@ -48,30 +59,34 @@ def train(
         "download": download,
     }
 
+    # Task and dataset
     if task == "classification":
         model = ClassificationTask(**task_kwargs)  # type: ignore
         datamodule = ClassificationDataset(**dataset_kwargs)  # type: ignore
-
     elif task == "segmentation":
         model = SegmentationTask(**task_kwargs)  # type: ignore
         datamodule = SegmentationDataset(**dataset_kwargs)  # type: ignore
     else:
         raise ValueError(f"Task {task} is not found in available tasks.")
 
+    # Logging directory
     if debug:
         log_dir = root_dir / "experiments/tests"
     else:
         log_dir = root_dir / "experiments"
 
+    mlf_logger = MLFlowLogger(
+        experiment_name=dataset_name,
+        tags={"model": model_name},
+        tracking_uri=f"file://{log_dir}",
+    )
+    mlf_logger.log_hyperparams(task_kwargs)
+
     trainer = Trainer(
         max_epochs=epochs,
         accelerator="auto",
         devices=1,
-        logger=MLFlowLogger(
-            experiment_name=dataset_name,
-            tags={"model": model_name},
-            tracking_uri=f"file://{log_dir}",
-        ),
+        logger=mlf_logger,
         enable_checkpointing=True,
         callbacks=[
             EarlyStopping(monitor="val_loss", patience=stopping_patience),
@@ -120,7 +135,7 @@ if __name__ == "__main__":
     parser.add_argument("-p", "--stopping_patience", type=int, default=5)
     parser.add_argument("-r", "--root_dir", type=str, default="/workspace")
     parser.add_argument("-bm", "--benchmark", action="store_true")
-    parser.add_argument("--ckpt_path", type=str, default="")
+    parser.add_argument("--ckpt_path", default=None)
     parser.add_argument("--download", action="store_true")
     args = parser.parse_args()
 

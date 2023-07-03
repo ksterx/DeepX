@@ -13,6 +13,7 @@ class ClassificationTask(Task):
         model: str | nn.Module,
         dataset_name: str,
         lr: float = 1e-3,
+        **kwargs,
     ):
         super().__init__(model=model, dataset_name=dataset_name, lr=lr)
 

@@ -8,10 +8,10 @@ from vision.nn import available_models
 from vision.tasks.classification import ClassificationTask
 
 
-class DeepLearningApp:
+class ClassificationApp:
     def __init__(self, window):
         self.window = window
-        self.window.title("Deep Learning Inference App")
+        self.window.title("Classifier Inference")
         self.window.geometry("400x400")
 
         self.ckpt_path = ""
@@ -116,5 +116,5 @@ class DeepLearningApp:
 
 if __name__ == "__main__":
     window = tk.Tk()
-    app = DeepLearningApp(window)
+    app = ClassificationApp(window)
     window.mainloop()

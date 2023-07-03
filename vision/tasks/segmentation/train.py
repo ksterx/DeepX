@@ -16,6 +16,7 @@ class SegmentationTask(Task):
         model: str | LightningModule,
         dataset_name: str,
         lr: float = 1e-3,
+        **kwargs,
     ):
         super().__init__(model=model, dataset_name=dataset_name, lr=lr)
 
@@ -66,8 +67,9 @@ class SegmentationTask(Task):
         self.log("test_loss", loss)
 
     def predict_step(self, batch, batch_idx):
-        x, _ = batch
+        x = batch
         logits = self(x)
+        print(f"{logits.shape=}", f"{logits=}")
         return torch.argmax(logits, dim=1)
 
     def configure_optimizers(self):
