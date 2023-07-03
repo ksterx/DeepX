@@ -1,5 +1,12 @@
 from torchvision import transforms
-from torchvision.datasets import CIFAR10, CIFAR100, MNIST, FashionMNIST, Flowers102, VOCSegmentation
+from torchvision.datasets import (
+    CIFAR10,
+    CIFAR100,
+    MNIST,
+    FashionMNIST,
+    Flowers102,
+    VOCSegmentation,
+)
 
 from vision.tasks.base import DataModule, Task
 from vision.tasks.classification import ClassificationDataset, ClassificationTask
@@ -285,14 +292,18 @@ available_datasets = {
         "transform": transforms.Compose(
             [
                 transforms.ToTensor(),
-                transforms.Resize((224, 224), antialias=True),
+                transforms.Resize(
+                    (224, 224), interpolation=transforms.InterpolationMode.NEAREST_EXACT
+                ),
                 transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
             ]
         ),
         "target_transform": transforms.Compose(
             [
                 transforms.PILToTensor(),
-                transforms.Resize((224, 224), antialias=False),
+                transforms.Resize(
+                    (224, 224), interpolation=transforms.InterpolationMode.NEAREST_EXACT
+                ),
             ]
         ),
     },

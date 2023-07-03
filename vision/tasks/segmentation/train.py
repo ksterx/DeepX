@@ -2,7 +2,7 @@ import pathlib
 
 import torch
 from lightning import LightningModule
-from torchmetrics import Dice, JaccardIndex, MetricCollection
+from torchmetrics.classification import MulticlassJaccardIndex
 from torchvision.datasets import VOCSegmentation
 
 from vision.tasks import DataModule, Task
@@ -19,43 +19,51 @@ class SegmentationTask(Task):
     ):
         super().__init__(model=model, dataset_name=dataset_name, lr=lr)
 
-        self.loss_fn = torch.nn.CrossEntropyLoss()
+        self.loss_fn = torch.nn.CrossEntropyLoss(ignore_index=255)
 
-        self.train_metrics = MetricCollection(
-            [
-                JaccardIndex(task="multiclass", num_classes=self.dataset["num_classes"]),
-                Dice(task="multiclass", num_classes=self.dataset["num_classes"]),
-            ],
-            prefix="train_",
+        self.train_iou = MulticlassJaccardIndex(
+            num_classes=self.dataset["num_classes"],
+            ignore_index=255,
         )
-        self.train_iou = JaccardIndex(task="multiclass", num_classes=self.dataset["num_classes"])
-        self.val_iou = JaccardIndex(task="multiclass", num_classes=self.dataset["num_classes"])
-        self.test_iou = JaccardIndex(task="multiclass", num_classes=self.dataset["num_classes"])
+        self.val_iou = MulticlassJaccardIndex(
+            num_classes=self.dataset["num_classes"],
+            ignore_index=255,
+        )
+        self.test_iou = MulticlassJaccardIndex(
+            num_classes=self.dataset["num_classes"],
+            ignore_index=255,
+        )
 
     def training_step(self, batch, batch_idx):
         x, y = batch
         logits = self(x)
-        y = y.squeeze(1)  # (B, 1, H, W) -> (B, H, W)
+        y = y.squeeze(1).long()  # (B, 1, H, W) -> (B, H, W)
         loss = self.loss_fn(logits, y)
-        self.train_metrics(logits, y)
         self.train_iou(logits, y)
-        self.log_dict(self.train_metrics, on_step=False, on_epoch=True, logger=True, prog_bar=True)
+
         self.log("train_iou", self.train_iou)
+        self.log("train_loss", loss)
         return loss
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
         logits = self(x)
-        y = y.squeeze(1)
+        y = y.squeeze(1).long()
         loss = self.loss_fn(logits, y)
+        self.val_iou(logits, y)
+
+        self.log("val_iou", self.val_iou, prog_bar=True)
         self.log("val_loss", loss, prog_bar=True)
 
     def test_step(self, batch, batch_idx):
         x, y = batch
         logits = self(x)
-        y = y.squeeze(1)
+        y = y.squeeze(1).long()
         loss = self.loss_fn(logits, y)
-        self.log("test_loss", loss, prog_bar=True)
+        self.test_iou(logits, y)
+
+        self.log("test_iou", self.test_iou)
+        self.log("test_loss", loss)
 
     def predict_step(self, batch, batch_idx):
         x, _ = batch

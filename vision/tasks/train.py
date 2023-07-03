@@ -1,8 +1,9 @@
 import pathlib
 
+import torch
 from lightning import Trainer
 from lightning.pytorch.callbacks import EarlyStopping, ModelSummary
-from lightning.pytorch.loggers import TensorBoardLogger
+from lightning.pytorch.loggers import MLFlowLogger
 from torch import nn
 
 from vision.tasks import (
@@ -21,6 +22,7 @@ def train(
     epochs: int = 2,
     batch_size: int = 32,
     debug: bool = False,
+    benchmark: bool = False,
     num_workers: int = 2,
     lr: float = 1e-3,
     stopping_patience: int = 5,
@@ -52,27 +54,36 @@ def train(
     elif task == "segmentation":
         model = SegmentationTask(**task_kwargs)  # type: ignore
         datamodule = SegmentationDataset(**dataset_kwargs)  # type: ignore
+    else:
+        raise ValueError(f"Task {task} is not found in available tasks.")
 
     if debug:
-        log_dir = root_dir / f"experiments/tests/{dataset_name}"
+        log_dir = root_dir / "experiments/tests"
     else:
-        log_dir = root_dir / f"experiments/{dataset_name}"
+        log_dir = root_dir / "experiments"
 
     trainer = Trainer(
         max_epochs=epochs,
         accelerator="auto",
         devices=1,
-        logger=TensorBoardLogger(log_dir, name=model_name),
+        logger=MLFlowLogger(
+            experiment_name=dataset_name,
+            tags={"model": model_name},
+            tracking_uri=f"file://{log_dir}",
+        ),
         enable_checkpointing=True,
         callbacks=[
             EarlyStopping(monitor="val_loss", patience=stopping_patience),
             ModelSummary(max_depth=max_depth),
         ],
+        benchmark=benchmark,
         fast_dev_run=debug,
     )
 
+    torch.compile(model)
     trainer.fit(model, datamodule=datamodule)
-    trainer.test(ckpt_path="best", datamodule=datamodule)
+    if not debug:
+        trainer.test(ckpt_path="best", datamodule=datamodule)
 
 
 if __name__ == "__main__":
@@ -103,10 +114,11 @@ if __name__ == "__main__":
     parser.add_argument("-e", "--epochs", type=int, default=2)
     parser.add_argument("-b", "--batch_size", type=int, default=32)
     parser.add_argument("-d", "--debug", action="store_true")
-    parser.add_argument("-w", "--num_workers", type=int, default=2)
+    parser.add_argument("-w", "--num_workers", type=int, default=1)
     parser.add_argument("-l", "--lr", type=float, default=1e-3)
     parser.add_argument("-p", "--stopping_patience", type=int, default=5)
     parser.add_argument("-r", "--root_dir", type=str, default="/workspace")
+    parser.add_argument("-bm", "--benchmark", action="store_true")
     parser.add_argument("--download", action="store_true")
     args = parser.parse_args()
 
@@ -117,6 +129,7 @@ if __name__ == "__main__":
         root_dir=args.root_dir,
         epochs=args.epochs,
         batch_size=args.batch_size,
+        benchmark=args.benchmark,
         debug=args.debug,
         num_workers=args.num_workers,
         lr=args.lr,
