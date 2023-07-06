@@ -10,12 +10,17 @@
 
   - [x] ResNet
   - [ ] Vision Transformer
+  - [ ] Transformer
 
 - Tasks
-  - Classification
-  - Segmentation
-    - [x] UNet
-  - Object Detection
+  - Vision
+    - Classification
+    - Segmentation
+      - [x] UNet
+    - Object Detection
+  - Language
+    - [ ] Language Model
+    - [ ] Text Classification
 
 ## Installation
 
