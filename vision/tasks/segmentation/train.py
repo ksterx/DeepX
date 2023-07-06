@@ -1,7 +1,10 @@
 import pathlib
 
+import numpy as np
 import torch
 from lightning import LightningModule
+from PIL import Image
+from torch import nn
 from torchmetrics.classification import MulticlassJaccardIndex
 from torchvision.datasets import VOCSegmentation
 
@@ -16,9 +19,10 @@ class SegmentationTask(Task):
         model: str | LightningModule,
         dataset_name: str,
         lr: float = 1e-3,
+        loss_fn: nn.Module | str = nn.CrossEntropyLoss(),
         **kwargs,
     ):
-        super().__init__(model=model, dataset_name=dataset_name, lr=lr)
+        super().__init__(model=model, dataset_name=dataset_name, lr=lr, loss_fn=loss_fn)
 
         self.loss_fn = torch.nn.CrossEntropyLoss(ignore_index=255)
 
@@ -56,6 +60,13 @@ class SegmentationTask(Task):
         self.log("val_iou", self.val_iou, prog_bar=True)
         self.log("val_loss", loss, prog_bar=True)
 
+    def on_validation_epoch_end(self):
+        car_img = Image.open("/workspace/data/images/car.jpg")
+        car_img = self.dataset["transform"](car_img)
+        car_img = car_img.unsqueeze(0).to(self.device)
+        car_pred = self.predict_step(car_img, 0).squeeze().cpu().numpy()
+        np.save("/workspace/data/images/car_pred.npy", car_pred)
+
     def test_step(self, batch, batch_idx):
         x, y = batch
         logits = self(x)
@@ -69,7 +80,6 @@ class SegmentationTask(Task):
     def predict_step(self, batch, batch_idx):
         x = batch
         logits = self(x)
-        print(f"{logits.shape=}", f"{logits=}")
         return torch.argmax(logits, dim=1)
 
     def configure_optimizers(self):

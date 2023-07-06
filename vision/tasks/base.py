@@ -6,7 +6,7 @@ from torch import nn
 from torch.utils.data import DataLoader, random_split
 
 from vision import tasks
-from vision.nn import available_models
+from vision.nn import available_losses, available_models
 
 
 class Task(LightningModule):
@@ -17,12 +17,15 @@ class Task(LightningModule):
         model: str | nn.Module,
         dataset_name: str,
         lr: float = 1e-3,
+        loss_fn: nn.Module | str = nn.CrossEntropyLoss(),
     ):
         super().__init__()
 
         self.lr = lr
 
         self.dataset = tasks.available_datasets[dataset_name]
+
+        # Model
         if isinstance(model, str):
             self.model = available_models[model](
                 num_classes=self.dataset["num_classes"],
@@ -32,6 +35,14 @@ class Task(LightningModule):
             self.model = model
         else:
             raise ValueError(f"Model {model} is not found in available models or is not nn.Module.")
+
+        # Loss function
+        if isinstance(loss_fn, str):
+            self.loss_fn = available_losses[loss_fn]()
+        elif isinstance(loss_fn, nn.Module):
+            self.loss_fn = loss_fn
+        else:
+            raise ValueError(f"Invalid loss function: {loss_fn}")
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.model(x)

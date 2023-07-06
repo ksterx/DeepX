@@ -25,6 +25,7 @@ def train(
     benchmark: bool = False,
     num_workers: int = 2,
     lr: float = 1e-3,
+    loss_fn: nn.Module | str = nn.CrossEntropyLoss(),
     stopping_patience: int = 5,
     max_depth: int = 1,
     ckpt_path: str = "",
@@ -43,6 +44,7 @@ def train(
         "model": model,
         "dataset_name": dataset_name,
         "lr": lr,
+        "loss_fn": loss_fn,
         "task": task,
         "root_dir": root_dir,
         "epochs": epochs,
@@ -132,6 +134,7 @@ if __name__ == "__main__":
     parser.add_argument("-d", "--debug", action="store_true")
     parser.add_argument("-w", "--num_workers", type=int, default=1)
     parser.add_argument("-l", "--lr", type=float, default=1e-3)
+    parser.add_argument("-lf", "--loss_fn", type=str, default="cross_entropy")
     parser.add_argument("-p", "--stopping_patience", type=int, default=5)
     parser.add_argument("-r", "--root_dir", type=str, default="/workspace")
     parser.add_argument("-bm", "--benchmark", action="store_true")

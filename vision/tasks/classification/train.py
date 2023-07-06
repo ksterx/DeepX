@@ -13,11 +13,10 @@ class ClassificationTask(Task):
         model: str | nn.Module,
         dataset_name: str,
         lr: float = 1e-3,
+        loss_fn: nn.Module | str = nn.CrossEntropyLoss(),
         **kwargs,
     ):
-        super().__init__(model=model, dataset_name=dataset_name, lr=lr)
-
-        self.loss_fn = torch.nn.CrossEntropyLoss()
+        super().__init__(model=model, dataset_name=dataset_name, lr=lr, loss_fn=loss_fn)
 
         self.train_accuracy = Accuracy(task="multiclass", num_classes=self.dataset["num_classes"])
         self.val_accuracy = Accuracy(task="multiclass", num_classes=self.dataset["num_classes"])
