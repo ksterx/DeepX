@@ -1,6 +1,7 @@
-lightning
 black
 flake8
+lightning
+mlflow
 mypy
 torch-tb-profiler
-mlflow
+transformers

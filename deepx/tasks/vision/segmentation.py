@@ -44,7 +44,7 @@ class SegmentationTask(Task):
         logits = self(x)
         y = y.squeeze(1).long()  # (B, 1, H, W) -> (B, H, W)
         loss = self.loss_fn(logits, y)
-        self.train_iou(logits, y)
+        self.train_iou.update(logits, y)
 
         self.log("train_iou", self.train_iou)
         self.log("train_loss", loss)
@@ -55,7 +55,7 @@ class SegmentationTask(Task):
         logits = self(x)
         y = y.squeeze(1).long()
         loss = self.loss_fn(logits, y)
-        self.val_iou(logits, y)
+        self.val_iou.update(logits, y)
 
         self.log("val_iou", self.val_iou, prog_bar=True)
         self.log("val_loss", loss, prog_bar=True)
@@ -72,7 +72,7 @@ class SegmentationTask(Task):
         logits = self(x)
         y = y.squeeze(1).long()
         loss = self.loss_fn(logits, y)
-        self.test_iou(logits, y)
+        self.test_iou.update(logits, y)
 
         self.log("test_iou", self.test_iou)
         self.log("test_loss", loss)
