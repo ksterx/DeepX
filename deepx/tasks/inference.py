@@ -4,8 +4,8 @@ from tkinter import filedialog
 import torch
 from PIL import Image, ImageTk
 
-from vision.nn import available_models
-from vision.tasks.classification import ClassificationTask
+from deepx.nn import available_models
+from deepx.tasks.classification import ClassificationTask
 
 
 class ClassificationApp:

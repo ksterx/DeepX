@@ -1,6 +1,21 @@
-# Vision
+# DeepX
 
-Reimplemetation of computer vision algorithms in Pytorch and Lightning.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+Deep learning algorithms implemented with PyTorch and Lightning
+
+## Features
+
+- Backbone
+
+  - [x] ResNet
+  - [ ] Vision Transformer
+
+- Tasks
+  - Classification
+  - Segmentation
+    - [x] UNet
+  - Object Detection
 
 ## Installation
 
@@ -33,7 +48,7 @@ pip install -e .
 Terminal
 
 ```bash
-cd vision/tasks
+cd /tasks
 python train.py --task classification --model resnet18 --dataset cifar10 --batch_size 128 --epochs 200 --debug
 tensorboard --logdir experiments
 ```
@@ -41,8 +56,8 @@ tensorboard --logdir experiments
 Python
 
 ```python
-from vision.tasks import train
-from vision.nn import MLP
+from deepx.tasks import train
+from deepx.nn import MLP
 
 model = MLP([64, 128, 10])
 
@@ -55,14 +70,14 @@ train("classification", model, "cifar10", batch_size=128, epochs=200, debug=True
 Terminal
 
 ```bash
-cd vision/tasks
+cd deepx/tasks
 python train.py --task segmentation --model unet --dataset voc --batch_size 128 --epochs 200 --debug
 ```
 
 Python
 
 ```python
-from vision.tasks import train
+from deepx.tasks import train
 
 train("segmentation", "unet", "voc", batch_size=128, epochs=200, debug=True)
 ```
@@ -70,8 +85,16 @@ train("segmentation", "unet", "voc", batch_size=128, epochs=200, debug=True)
 #### Inference
 
 ```bash
-cd vision/tasks
+cd deepx/tasks
 python inference.py
 ```
 
 ![inference](./docs/app.png)
+
+## Development
+
+- Profiling
+
+```bash
+python -m cProfile -o profile.prof train.py --task classification --model resnet18 --dataset cifar10 --batch_size 128 --epochs 200
+```

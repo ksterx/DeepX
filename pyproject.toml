@@ -3,8 +3,8 @@ requires = ["setuptools", "setuptools_scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "vision"
-description = "Reimplementation of vision models"
+name = "deepx"
+description = "Reimplementation of deep learning algorithms"
 readme = "README.md"
 requires-python = ">=3.10"
 classifiers = [
@@ -21,7 +21,7 @@ dynamic = ["version"]
 exclude = ["build", "tests", "conf", "data", "docs", "envs", "expriments"]
 
 [tool.setuptools_scm]
-write_to = "vision/_version.py"
+write_to = "deepx/_version.py"
 
 [tool.black]
 line-length = 100
