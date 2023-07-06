@@ -1,51 +1,119 @@
 import math
 
 import torch
-from torch import nn
+from torch import Tensor, nn
+from torch.nn import functional as F
 
 from deepx.nn.core import MLP
 
 
 class Attention(nn.Module):
-    def __init__(self, embed_dim: int, dropout: float = 0.1):
+    def __init__(self, embed_dim: int, num_heads: int = 1, dropout: float = 0.1):
         super().__init__()
         self.dropout = nn.Dropout(p=dropout)
         self.scale = math.sqrt(embed_dim)
-        self.softmax = nn.Softmax(dim=-1)
-        self.w_q = nn.Linear(embed_dim, embed_dim)
-        self.w_k = nn.Linear(embed_dim, embed_dim)
-        self.w_v = nn.Linear(embed_dim, embed_dim)
+        head_dim = embed_dim // num_heads
+        assert head_dim * num_heads == embed_dim, "embed_dim must be divisible by num_heads"
+        self.w_q = nn.Linear(embed_dim, head_dim, bias=False)
+        self.w_k = nn.Linear(embed_dim, head_dim, bias=False)
+        self.w_v = nn.Linear(embed_dim, head_dim, bias=False)
 
-    def forward(self, query: torch.Tensor, key: torch.Tensor, value: torch.Tensor) -> torch.Tensor:
-        query = self.w_q(query)
-        key = self.w_k(key)
-        value = self.w_v(value)
-        scores = query @ key.transpose(-2, -1) / self.scale
-        scores = self.softmax(scores)
-        scores = self.dropout(scores)
-        return scores @ value
+    def forward(
+        self,
+        query: Tensor,
+        key: Tensor,
+        value: Tensor,
+        mask: Tensor | None = None,
+    ) -> tuple[Tensor, Tensor]:
+        """Computes the attention scores.
+
+        Args:
+            query: (batch_size, seq_len, embed_dim)
+            key: (batch_size, seq_len, embed_dim)
+            value: (batch_size, seq_len, embed_dim)
+            mask: (batch_size, seq_len, seq_len)
+
+        Returns:
+            attention and similarity: (batch_size, seq_len, embed_dim)
+        """
+        q = self.w_q(query)  # (batch_size, seq_len, embed_dim)
+        k = self.w_k(key)  # (batch_size, seq_len, embed_dim)
+        v = self.w_v(value)  # (batch_size, seq_len, embed_dim)
+        sim = self.scaled_dot_product(q, k, mask)  # (batch_size, seq_len, seq_len)
+        out = self.dropout(sim)  # (batch_size, seq_len, seq_len)
+        score = out @ v  # (batch_size, seq_len, embed_dim)
+        return score, sim
+
+    @staticmethod
+    def scaled_dot_product(
+        query: Tensor,
+        key: Tensor,
+        mask: Tensor | None = None,
+    ) -> Tensor:
+        """Computes the similarity between the query and key.
+
+        Returns:
+            similarity: (batch_size, seq_len, embed_dim)
+        """
+        num_channels = query.shape[-1]
+        assert query.shape == key.shape, "query and key must have the same shape"
+
+        similarity = query @ key.transpose(-2, -1) / num_channels  # (batch_size, seq_len, seq_len)
+        if mask is not None:
+            similarity = similarity.masked_fill(mask == 0, float("-inf"))
+        similarity = F.softmax(similarity, dim=-1)  # (batch_size, seq_len, seq_len)
+        return similarity
 
 
 class SelfAttention(Attention):
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return super().forward(x, x, x)
+    def forward(self, x: Tensor, mask: Tensor | None = None) -> tuple[Tensor, Tensor]:
+        return super().forward(x, x, x, mask)
 
 
 class MultiHeadAttention(nn.Module):
     def __init__(self, embed_dim: int, num_heads: int, dropout: float = 0.1):
         super().__init__()
+
+        self.head_dim = embed_dim // num_heads
+        assert self.head_dim * num_heads == embed_dim, "embed_dim must be divisible by num_heads"
+
         self.dropout = nn.Dropout(p=dropout)
-        self.heads = nn.ModuleList([SelfAttention(embed_dim, dropout) for _ in range(num_heads)])
-        self.w = nn.Linear(embed_dim * num_heads, embed_dim)
+        self.heads = nn.ModuleList(
+            [Attention(embed_dim, self.head_dim, dropout) for _ in range(num_heads)]
+        )
+        self.fc = nn.Linear(embed_dim * num_heads, embed_dim)
+        self.relu = nn.ReLU()
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = self._concat_heads(x)
-        x = self.w(x)
+    def forward(
+        self, query: Tensor, key: Tensor, value: Tensor, mask: Tensor | None = None
+    ) -> tuple[Tensor, Tensor]:
+        """Computes the multi-head attention scores.
+
+        Args:
+            query (Tensor): (batch_size, seq_len, embed_dim)
+            key (Tensor): (batch_size, seq_len, embed_dim)
+            value (Tensor): (batch_size, seq_len, embed_dim)
+            mask (Tensor): (batch_size, seq_len, seq_len)
+
+        Returns:
+            attention (Tensor): (batch_size, seq_len, embed_dim)
+        """
+        x, sim = self._concat_heads(query, key, value, mask)
         x = self.dropout(x)
-        return x
+        x = self.fc(x)
+        x = self.relu(x)
+        return x, sim
 
-    def _concat_heads(self, x: torch.Tensor) -> torch.Tensor:
-        return torch.cat([head(x) for head in self.heads], dim=1)
+    def _concat_heads(self, query, key, value, mask) -> tuple[Tensor, Tensor]:
+        out = [head(query, key, value, mask) for head in self.heads]
+        score = torch.cat([x[0] for x in out], dim=-1)
+        sim = torch.cat([x[1] for x in out], dim=-1)
+        return score, sim
+
+
+class MultiHeadSelfAttention(MultiHeadAttention):
+    def forward(self, x: Tensor, mask: Tensor | None = None) -> tuple[Tensor, Tensor]:
+        return super().forward(x, x, x, mask)
 
 
 class PositionalEncoding(nn.Module):
@@ -76,19 +144,20 @@ class TransformerEncoderBlock(nn.Module):
         dropout: float = 0.1,
     ):
         super().__init__()
-        self.attention = MultiHeadAttention(embed_dim, num_heads, dropout)
+        self.attention = MultiHeadSelfAttention(embed_dim, num_heads, dropout)
         self.dropout = nn.Dropout(p=dropout)
         self.norm1 = nn.LayerNorm(embed_dim)
         self.fc = MLP(channels, dropout=dropout, activation=nn.GELU())
         self.norm2 = nn.LayerNorm(embed_dim)
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = x + self.attention(x)
+    def forward(self, x: Tensor, mask: Tensor | None = None) -> tuple[Tensor, Tensor]:
+        score, sim = self.attention(x, mask)
+        x = x + score
         x = self.dropout(x)
         x = self.norm1(x)
         x = x + self.fc(x)
         x = self.norm2(x)
-        return x
+        return x, sim
 
 
 class TransformerDecoderBlock(nn.Module):
@@ -100,7 +169,7 @@ class TransformerDecoderBlock(nn.Module):
         dropout: float = 0.1,
     ):
         super().__init__()
-        self.masked_attention = MultiHeadAttention(embed_dim, num_heads, dropout)
+        self.masked_attention = MultiHeadSelfAttention(embed_dim, num_heads, dropout)
         self.dropout = nn.Dropout(p=dropout)
         self.norm1 = nn.LayerNorm(embed_dim)
         self.attention = MultiHeadAttention(embed_dim, num_heads, dropout)
@@ -108,11 +177,11 @@ class TransformerDecoderBlock(nn.Module):
         self.fc = MLP(channels, dropout=dropout, activation=nn.GELU())
         self.norm3 = nn.LayerNorm(embed_dim)
 
-    def forward(self, x: torch.Tensor, enc_out: torch.Tensor) -> torch.Tensor:
-        x = x + self.masked_attention(x)
+    def forward(self, x: Tensor, enc_out: Tensor, tgt_mask: Tensor | None = None) -> Tensor:
+        x = x + self.masked_attention(x, mask=tgt_mask)
         x = self.dropout(x)
         x = self.norm1(x)
-        x = x + self.attention(x, enc_out)
+        x = x + self.attention(query=x, key=enc_out, value=enc_out, mask=None)
         x = self.dropout(x)
         x = self.norm2(x)
         x = x + self.fc(x)
@@ -127,7 +196,7 @@ class TransformerEncoder(nn.Module):
         embed_dim: int,
         num_heads: int,
         channels: list[int],
-        num_layers: int = 4,
+        num_layers: int = 6,
         dropout: float = 0.0,
     ):
         super().__init__()
@@ -140,9 +209,11 @@ class TransformerEncoder(nn.Module):
             ]
         )
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: Tensor, mask: Tensor | None = None) -> Tensor:
+        x = self.embed(x)
+        x = self.pe(x)
         for layer in self.layers:
-            x = layer(x)
+            x, sim = layer(x, mask)
         return x
 
 
@@ -153,7 +224,7 @@ class TransformerDecoder(nn.Module):
         embed_dim: int,
         num_heads: int,
         channels: list[int],
-        num_layers: int = 4,
+        num_layers: int = 6,
         dropout: float = 0.0,
     ):
         super().__init__()
@@ -166,11 +237,11 @@ class TransformerDecoder(nn.Module):
             ]
         )
 
-    def forward(self, x: torch.Tensor, enc_out: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: Tensor, enc_out: Tensor, mask: Tensor | None = None) -> Tensor:
         x = self.embed(x)
         x = self.pe(x)
         for layer in self.layers:
-            x = layer(x, enc_out)
+            x = layer(x, enc_out, mask)
         return x
 
 
@@ -182,8 +253,9 @@ class Transformer(nn.Module):
         embed_dim: int,
         num_heads: int,
         channels: list[int],
-        num_layers: int,
-        dropout: float,
+        num_enc_layers: int = 6,
+        num_dec_layers: int = 6,
+        dropout: float = 0.0,
         head: nn.Module | None = None,
     ):
         super().__init__()
@@ -191,19 +263,24 @@ class Transformer(nn.Module):
         self.dec_vocab_size = dec_vocab_size
 
         self.encoder = TransformerEncoder(
-            enc_vocab_size, embed_dim, num_heads, channels, num_layers, dropout
+            enc_vocab_size, embed_dim, num_heads, channels, num_enc_layers, dropout
         )
         self.decoder = TransformerDecoder(
-            dec_vocab_size, embed_dim, num_heads, channels, num_layers, dropout
+            dec_vocab_size, embed_dim, num_heads, channels, num_dec_layers, dropout
         )
         if head is None:
             self.head = self._make_head()
 
-    def forward(self, x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
-        enc_out = self.encoder(x)
-        dec_out = self.decoder(y, enc_out)
-        out = self.head(dec_out)
-        return out
+    def forward(
+        self,
+        src: Tensor,
+        tgt: Tensor,
+        src_mask: Tensor | None = None,
+        tgt_mask: Tensor | None = None,
+    ) -> Tensor:
+        enc_out = self.encoder(src, mask=src_mask)
+        dec_out = self.decoder(tgt, enc_out, mask=tgt_mask)
+        return self.head(dec_out)
 
     def _make_head(self):
         raise NotImplementedError
@@ -216,7 +293,8 @@ class LangModelTransformer(Transformer):
         embed_dim: int,
         num_heads: int,
         channels: list[int],
-        num_layers: int,
+        num_enc_layers: int,
+        num_dec_layers: int,
         dropout: float,
     ):
         super().__init__(
@@ -225,7 +303,8 @@ class LangModelTransformer(Transformer):
             embed_dim,
             num_heads,
             channels,
-            num_layers,
+            num_enc_layers,
+            num_dec_layers,
             dropout,
             head=nn.Linear(embed_dim, vocab_size),
         )
@@ -245,7 +324,8 @@ class ClassificationTransformer(Transformer):
         embed_dim: int,
         num_heads: int,
         channels: list[int],
-        num_layers: int,
+        num_enc_layers: int,
+        num_dec_layers: int,
         dropout: float,
     ):
         super().__init__(
@@ -254,7 +334,8 @@ class ClassificationTransformer(Transformer):
             embed_dim,
             num_heads,
             channels,
-            num_layers,
+            num_enc_layers,
+            num_dec_layers,
             dropout,
             head=nn.Linear(embed_dim, dec_vocab_size),
         )
@@ -265,7 +346,7 @@ class ClassificationTransformer(Transformer):
         return nn.Linear(self.embed_dim, self.num_classes)
 
 
-def visualize_attention(x: torch.Tensor, y: torch.Tensor):
+def visualize_attention(x: Tensor, y: Tensor):
     import matplotlib.pyplot as plt
 
     plt.figure(figsize=(16, 16))

@@ -5,6 +5,7 @@ import torch
 from lightning import LightningModule
 from torch import nn
 from torch.utils.data import DataLoader, Dataset
+from torchmetrics.classification import MulticlassJaccardIndex
 from torchtext.datasets import WikiText103
 from transformers import AutoTokenizer
 
@@ -25,11 +26,16 @@ class LangModelTask(Task):
         super().__init__(model=model, dataset_name=dataset_name, lr=lr, loss_fn=loss_fn)
 
         self.tokenizer = AutoTokenizer.from_pretrained(tokenizer)
+        self.vocab_size = self.tokenizer.vocab_size
+        self.
 
     def training_step(self, batch, batch_idx):
         x = self.tokenizer.encode(batch, return_tensors="pt")
-        logits = self(x)
+
+        logits = self(x, mask=mask)
         loss = self.loss_fn(logits, x)
+        self.log("train_loss", loss)
+        return loss
 
 
 class WikiText103Dataset(DataModule):
