@@ -1,8 +1,9 @@
 # DeepX
 
+*Deep learning algorithms implemented with PyTorch and Lightning.*
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Deep learning algorithms implemented with PyTorch and Lightning
 
 ## Features
 
@@ -33,19 +34,17 @@ pip install -e .
 
 ## Usage
 
-- Starting a container:
+### Starting a container
 
 ```bash
 ./up.sh
 ```
 
-### Examples
+### Training
 
-#### Training
+#### Classification
 
-- Classification
-
-Terminal
+- Terminal
 
 ```bash
 cd /tasks
@@ -53,7 +52,7 @@ python train.py --task classification --model resnet18 --dataset cifar10 --batch
 tensorboard --logdir experiments
 ```
 
-Python
+- Python
 
 ```python
 from deepx.tasks import train
@@ -65,16 +64,16 @@ train("classification", model, "cifar10", batch_size=128, epochs=200, debug=True
 # train("classification", "resnet18", "cifar10", batch_size=128, epochs=200, is_test=True,)
 ```
 
-- Segmetation
+#### Segmetation
 
-Terminal
+- Terminal
 
 ```bash
 cd deepx/tasks
 python train.py --task segmentation --model unet --dataset voc --batch_size 128 --epochs 200 --debug
 ```
 
-Python
+- Python
 
 ```python
 from deepx.tasks import train
@@ -82,7 +81,7 @@ from deepx.tasks import train
 train("segmentation", "unet", "voc", batch_size=128, epochs=200, debug=True)
 ```
 
-#### Inference
+### Inference
 
 ```bash
 cd deepx/tasks
@@ -93,8 +92,8 @@ python inference.py
 
 ## Development
 
-- Profiling
+### Profiling
 
 ```bash
-python -m cProfile -o profile.prof train.py --task classification --model resnet18 --dataset cifar10 --batch_size 128 --epochs 200
+python -m cProfile -o profile.prof train.py <args>
 ```
