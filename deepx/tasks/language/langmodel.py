@@ -1,3 +1,4 @@
+import dataclasses as dc
 import pathlib
 
 import numpy as np
@@ -13,11 +14,21 @@ from deepx.nn import LangModelTransformer
 from deepx.tasks import DataModuleX, TaskX
 
 
+@dc.dataclass
+class LangModelConfig:
+    tokenizer: str = "bert-base-uncased"
+    max_length: int = 128
+    embed_dim: int = 512
+    num_heads: int = 8
+    hidden_dim: int = 2048
+    num_blocks: int = 6
+    dropout: float = 0.0
+
+
 class LangModelTask(TaskX):
     def __init__(
         self,
         model: str | LightningModule,
-        dataset_name: str,
         lr: float = 0.001,
         loss_fn: nn.Module | str = nn.CrossEntropyLoss(),
         tokenizer: str = "bert-base-uncased",
@@ -29,7 +40,7 @@ class LangModelTask(TaskX):
         dropout: float = 0.0,
         **kwargs,
     ):
-        super().__init__(model=model, dataset_name=dataset_name, lr=lr, loss_fn=loss_fn)
+        super().__init__(lr=lr, loss_fn=loss_fn)
 
         self.tokenizer = AutoTokenizer.from_pretrained(tokenizer)
         self.vocab_size = self.tokenizer.vocab_size
@@ -64,9 +75,3 @@ class WikiText103Dataset(DataModuleX):
         self.train_data, self.valid_data, self.test_data = WikiText103(
             self.data_dir, split=("train", "valid", "test")
         )
-
-
-if __name__ == "__main__":
-    from lightning import Trainer
-
-    task = LangModelTask(model="resnet18", dataset_name="mnist")

@@ -19,29 +19,28 @@ class TaskX(LightningModule):
 
     def __init__(
         self,
-        model: str | nn.Module,
-        dataset_name: str,
         lr: float = 1e-3,
         loss_fn: nn.Module | str = nn.CrossEntropyLoss(),
         optimizer: str | torch.optim.Optimizer = "adam",
     ):
         super().__init__()
 
+        self.model = lambda x: x
         self.lr = lr
         self.optimizer = optimizer
 
-        self.dataset = registered_datasets[dataset_name]
+        # self.dataset = registered_datasets[dataset_name]
 
-        # Model
-        if isinstance(model, str):
-            self.model = registered_models[model](
-                num_classes=self.dataset["num_classes"],
-                in_channels=self.dataset["num_channels"],
-            )
-        elif issubclass(type(model), nn.Module):
-            self.model = model  # ko
-        else:
-            raise ValueError(f"Model {model} is not found in available models or is not nn.Module.")
+        # # Model
+        # if isinstance(model, str):
+        #     self.model = registered_models[model](
+        #         num_classes=self.dataset["num_classes"],
+        #         in_channels=self.dataset["num_channels"],
+        #     )
+        # elif issubclass(type(model), nn.Module):
+        #     self.model = model  # ko
+        # else:
+        #     raise ValueError(f"Model {model} is not found in available models or is not nn.Module.")
 
         # Loss function
         if isinstance(loss_fn, str):
