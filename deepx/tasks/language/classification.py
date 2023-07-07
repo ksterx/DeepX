@@ -10,10 +10,10 @@ from torchtext.datasets import IMDB
 from transformers import AutoTokenizer
 
 from deepx.nn import Transformer
-from deepx.tasks import DataModule, Task
+from deepx.tasks import DataModuleX, TaskX
 
 
-class LangModelTask(Task):
+class LangModelTask(TaskX):
     def __init__(
         self,
         model: str | LightningModule,
@@ -38,7 +38,7 @@ class LangModelTask(Task):
         return loss
 
 
-class IMDBDataset(DataModule):
+class IMDBDataset(DataModuleX):
     def setup(self, stage: str):
         self.train_data = IMDB(root=self.data_dir, split="train")
         self.val_data, self.test_data = random_split(

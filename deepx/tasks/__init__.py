@@ -8,8 +8,8 @@ from torchvision.datasets import (
     VOCSegmentation,
 )
 
-from deepx.tasks.base import DataModule, Task
-from deepx.tasks.language import LangModelTask
+from deepx.tasks.base import DataModuleX, TaskX
+from deepx.tasks.language import LangModelTask, WikiText103Dataset
 from deepx.tasks.vision import (
     ClassificationDataset,
     ClassificationTask,
@@ -18,14 +18,39 @@ from deepx.tasks.vision import (
 )
 
 __all__ = [
-    "DataModule",
-    "Task",
+    "DataModuleX",
+    "TaskX",
     "ClassificationDataset",
     "ClassificationTask",
     "SegmentationDataset",
     "SegmentationTask",
     "LangModelTask",
 ]
+
+registered_tasks = {
+    "classification": {
+        "task": ClassificationTask,
+        "dataset": [ClassificationDataset],
+    },
+    "segmentation": {
+        "task": SegmentationTask,
+        "dataset": [SegmentationDataset],
+    },
+    "langmodel": {
+        "task": LangModelTask,
+        "dataset": [
+            WikiText103Dataset,
+            # WikiText2Dataset,
+        ],
+    },
+    # "translation": {
+    #     "task": TranslationTask,
+    #     "dataset": [
+    #         Multi30kDataset,
+    #         IWSLTDataset,
+    #     ],
+    # },
+}
 
 
 def transform(size):
@@ -38,7 +63,7 @@ def transform(size):
     )
 
 
-available_datasets = {
+registered_datasets = {
     "mnist": {
         "class": MNIST,
         "num_classes": len(MNIST.classes),

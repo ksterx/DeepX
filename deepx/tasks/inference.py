@@ -4,7 +4,7 @@ from tkinter import filedialog
 import torch
 from PIL import Image, ImageTk
 
-from deepx.nn import available_models
+from deepx.nn import registered_models
 from deepx.tasks.classification import ClassificationTask
 
 
@@ -103,7 +103,7 @@ class ClassificationApp:
 
     def get_model_dataset_name(self, ckpt_path):
         model = None
-        for m in available_models:
+        for m in registered_models:
             if m in ckpt_path:
                 model = m
                 break

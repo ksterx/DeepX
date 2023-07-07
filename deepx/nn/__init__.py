@@ -1,3 +1,5 @@
+from torchvision import transforms
+
 from deepx.nn.core import MLP
 from deepx.nn.losses import DiceLoss, FocalLoss
 from deepx.nn.resnet import ResNet, ResNet18, ResNet34, ResNet50, ResNet101, ResNet152
@@ -8,7 +10,8 @@ from deepx.nn.transformer import (
 )
 from deepx.nn.unet import UNet
 
-available_models = {
+registered_models = {
+    "resnet": ResNet,
     "resnet18": ResNet18,
     "resnet34": ResNet34,
     "resnet50": ResNet50,
@@ -19,7 +22,11 @@ available_models = {
     "lang": LangModelTransformer,
 }
 
-available_losses = {
+registered_losses = {
     "dice": DiceLoss,
     "focal": FocalLoss,
 }
+
+
+def register_model(name: str, model):
+    registered_models[name] = model

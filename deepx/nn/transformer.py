@@ -52,6 +52,9 @@ class Attention(nn.Module):
     ) -> Tensor:
         """Computes the similarity between the query and key.
 
+        Args:
+            mask: -inf for masked values, 0 otherwise
+
         Returns:
             similarity: (batch_size, seq_len, embed_dim)
         """
@@ -60,7 +63,7 @@ class Attention(nn.Module):
 
         similarity = query @ key.transpose(-2, -1) / num_channels  # (batch_size, seq_len, seq_len)
         if mask is not None:
-            similarity = similarity.masked_fill(mask == 0, float("-inf"))
+            similarity = similarity + mask
         similarity = F.softmax(similarity, dim=-1)  # (batch_size, seq_len, seq_len)
         return similarity
 
@@ -140,14 +143,14 @@ class TransformerEncoderBlock(nn.Module):
         self,
         embed_dim: int,
         num_heads: int,
-        channels: list[int],
+        hidden_dim: int,
         dropout: float = 0.1,
     ):
         super().__init__()
         self.attention = MultiHeadSelfAttention(embed_dim, num_heads, dropout)
         self.dropout = nn.Dropout(p=dropout)
         self.norm1 = nn.LayerNorm(embed_dim)
-        self.fc = MLP(channels, dropout=dropout, activation=nn.GELU())
+        self.fc = MLP([embed_dim, hidden_dim, embed_dim], dropout=dropout, activation=nn.GELU())
         self.norm2 = nn.LayerNorm(embed_dim)
 
     def forward(self, x: Tensor, mask: Tensor | None = None) -> tuple[Tensor, Tensor]:
@@ -165,7 +168,7 @@ class TransformerDecoderBlock(nn.Module):
         self,
         embed_dim: int,
         num_heads: int,
-        channels: list[int],
+        hidden_dim: int,
         dropout: float = 0.1,
     ):
         super().__init__()
@@ -174,7 +177,7 @@ class TransformerDecoderBlock(nn.Module):
         self.norm1 = nn.LayerNorm(embed_dim)
         self.attention = MultiHeadAttention(embed_dim, num_heads, dropout)
         self.norm2 = nn.LayerNorm(embed_dim)
-        self.fc = MLP(channels, dropout=dropout, activation=nn.GELU())
+        self.fc = MLP([embed_dim, hidden_dim, embed_dim], dropout=dropout, activation=nn.GELU())
         self.norm3 = nn.LayerNorm(embed_dim)
 
     def forward(
@@ -198,7 +201,7 @@ class TransformerEncoder(nn.Module):
         vocab_size: int,
         embed_dim: int,
         num_heads: int,
-        channels: list[int],
+        hidden_dim: int,
         num_blocks: int = 6,
         dropout: float = 0.0,
     ):
@@ -207,7 +210,7 @@ class TransformerEncoder(nn.Module):
         self.pe = PositionalEncoding(embed_dim, dropout)
         self.blocks = nn.ModuleList(
             [
-                TransformerEncoderBlock(embed_dim, num_heads, channels, dropout)
+                TransformerEncoderBlock(embed_dim, num_heads, hidden_dim, dropout)
                 for _ in range(num_blocks)
             ]
         )
@@ -228,7 +231,7 @@ class TransformerDecoder(nn.Module):
         vocab_size: int,
         embed_dim: int,
         num_heads: int,
-        channels: list[int],
+        hidden_dim: int,
         num_blocks: int = 6,
         dropout: float = 0.0,
     ):
@@ -237,7 +240,7 @@ class TransformerDecoder(nn.Module):
         self.pe = PositionalEncoding(embed_dim, dropout)
         self.blocks = nn.ModuleList(
             [
-                TransformerDecoderBlock(embed_dim, num_heads, channels, dropout)
+                TransformerDecoderBlock(embed_dim, num_heads, hidden_dim, dropout)
                 for _ in range(num_blocks)
             ]
         )
@@ -261,7 +264,7 @@ class Transformer(nn.Module):
         dec_vocab_size: int,
         embed_dim: int,
         num_heads: int,
-        channels: list[int],
+        hidden_dim: int,
         num_enc_blocks: int = 6,
         num_dec_blocks: int = 6,
         dropout: float = 0.0,
@@ -272,10 +275,10 @@ class Transformer(nn.Module):
         self.dec_vocab_size = dec_vocab_size
 
         self.encoder = TransformerEncoder(
-            enc_vocab_size, embed_dim, num_heads, channels, num_enc_blocks, dropout
+            enc_vocab_size, embed_dim, num_heads, hidden_dim, num_enc_blocks, dropout
         )
         self.decoder = TransformerDecoder(
-            dec_vocab_size, embed_dim, num_heads, channels, num_dec_blocks, dropout
+            dec_vocab_size, embed_dim, num_heads, hidden_dim, num_dec_blocks, dropout
         )
         if head is None:
             self.head = self._make_head()
@@ -301,7 +304,7 @@ class LangModelTransformer(TransformerEncoder):
         vocab_size: int,
         embed_dim: int,
         num_heads: int,
-        channels: list[int],
+        hidden_dim: int,
         num_blocks: int = 6,
         dropout: float = 0.0,
     ):
@@ -309,7 +312,7 @@ class LangModelTransformer(TransformerEncoder):
             vocab_size,
             embed_dim,
             num_heads,
-            channels,
+            hidden_dim,
             num_blocks,
             dropout,
         )
@@ -334,7 +337,7 @@ class ClassificationTransformer(Transformer):
         num_classes: int,
         embed_dim: int,
         num_heads: int,
-        channels: list[int],
+        hidden_dim: int,
         num_enc_blocks: int,
         num_dec_blocks: int,
         dropout: float,
@@ -344,7 +347,7 @@ class ClassificationTransformer(Transformer):
             dec_vocab_size,
             embed_dim,
             num_heads,
-            channels,
+            hidden_dim,
             num_enc_blocks,
             num_dec_blocks,
             dropout,
@@ -364,7 +367,7 @@ class TranslationTransformer(Transformer):
         dec_vocab_size: int,
         embed_dim: int,
         num_heads: int,
-        channels: list[int],
+        hidden_dim: int,
         num_enc_blocks: int,
         num_dec_blocks: int,
         dropout: float,
@@ -374,7 +377,7 @@ class TranslationTransformer(Transformer):
             dec_vocab_size,
             embed_dim,
             num_heads,
-            channels,
+            hidden_dim,
             num_enc_blocks,
             num_dec_blocks,
             dropout,

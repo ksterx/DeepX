@@ -8,10 +8,10 @@ from torch import nn
 from torchmetrics.classification import MulticlassJaccardIndex
 from torchvision.datasets import VOCSegmentation
 
-from deepx.tasks import DataModule, Task
+from deepx.tasks import DataModuleX, TaskX
 
 
-class SegmentationTask(Task):
+class SegmentationTask(TaskX):
     TASK_TYPE = "segmentation"
 
     def __init__(
@@ -82,11 +82,8 @@ class SegmentationTask(Task):
         logits = self(x)
         return torch.argmax(logits, dim=1)
 
-    def configure_optimizers(self):
-        return torch.optim.Adam(self.parameters(), lr=self.lr)
 
-
-class SegmentationDataset(DataModule):
+class SegmentationDataset(DataModuleX):
     TASK_TYPE = "segmentation"
 
     def __init__(

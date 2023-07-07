@@ -2,10 +2,10 @@ import torch
 from torch import nn
 from torchmetrics import Accuracy
 
-from deepx.tasks import DataModule, Task
+from deepx.tasks import DataModuleX, TaskX
 
 
-class ClassificationTask(Task):
+class ClassificationTask(TaskX):
     TASK_TYPE = "classification"
 
     def __init__(
@@ -63,5 +63,5 @@ class ClassificationTask(Task):
         return torch.optim.Adam(self.parameters(), lr=self.lr)
 
 
-class ClassificationDataset(DataModule):
+class ClassificationDataset(DataModuleX):
     TASK_TYPE = "classification"
