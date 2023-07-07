@@ -4,9 +4,9 @@ import numpy as np
 import torch
 from lightning import LightningModule
 from torch import nn
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader, Dataset, random_split
 from torchmetrics.classification import MulticlassJaccardIndex
-from torchtext.datasets import WikiText103
+from torchtext.datasets import IMDB
 from transformers import AutoTokenizer
 
 from deepx.nn import Transformer
@@ -38,16 +38,9 @@ class LangModelTask(Task):
         return loss
 
 
-class WikiText103Dataset(Dataset):
-    def __init__(self, root):
-        self.train_data, self.val_data, self.test_data = WikiText103(
-            root=root, split=("train", "valid", "test")
+class IMDBDataset(DataModule):
+    def setup(self, stage: str):
+        self.train_data = IMDB(root=self.data_dir, split="train")
+        self.val_data, self.test_data = random_split(
+            IMDB(root=self.data_dir, split="test"), [5000, 20000]
         )
-        self.tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
-
-    def __len__(self):
-        return len(self.train_data)
-
-    def __getitem__(self, idx):
-        encoded = self.tokenizer(self.train_data[idx])
-        next_token_

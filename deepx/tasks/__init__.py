@@ -9,8 +9,13 @@ from torchvision.datasets import (
 )
 
 from deepx.tasks.base import DataModule, Task
-from deepx.tasks.classification import ClassificationDataset, ClassificationTask
-from deepx.tasks.segmentation import SegmentationDataset, SegmentationTask
+from deepx.tasks.language import LangModelTask
+from deepx.tasks.vision import (
+    ClassificationDataset,
+    ClassificationTask,
+    SegmentationDataset,
+    SegmentationTask,
+)
 
 __all__ = [
     "DataModule",
@@ -19,6 +24,7 @@ __all__ = [
     "ClassificationTask",
     "SegmentationDataset",
     "SegmentationTask",
+    "LangModelTask",
 ]
 
 

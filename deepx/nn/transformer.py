@@ -177,8 +177,11 @@ class TransformerDecoderBlock(nn.Module):
         self.fc = MLP(channels, dropout=dropout, activation=nn.GELU())
         self.norm3 = nn.LayerNorm(embed_dim)
 
-    def forward(self, x: Tensor, enc_out: Tensor, tgt_mask: Tensor | None = None) -> Tensor:
-        x = x + self.masked_attention(x, mask=tgt_mask)
+    def forward(
+        self, x: Tensor, enc_out: Tensor, tgt_mask: Tensor | None = None
+    ) -> tuple[Tensor, Tensor]:
+        score, sim = self.masked_attention(x, mask=tgt_mask)
+        x = x + score
         x = self.dropout(x)
         x = self.norm1(x)
         x = x + self.attention(query=x, key=enc_out, value=enc_out, mask=None)
@@ -186,7 +189,7 @@ class TransformerDecoderBlock(nn.Module):
         x = self.norm2(x)
         x = x + self.fc(x)
         x = self.norm3(x)
-        return x
+        return x, sim
 
 
 class TransformerEncoder(nn.Module):
@@ -196,25 +199,27 @@ class TransformerEncoder(nn.Module):
         embed_dim: int,
         num_heads: int,
         channels: list[int],
-        num_layers: int = 6,
+        num_blocks: int = 6,
         dropout: float = 0.0,
     ):
         super().__init__()
         self.embed = nn.Embedding(vocab_size, embed_dim)
         self.pe = PositionalEncoding(embed_dim, dropout)
-        self.layers = nn.ModuleList(
+        self.blocks = nn.ModuleList(
             [
                 TransformerEncoderBlock(embed_dim, num_heads, channels, dropout)
-                for _ in range(num_layers)
+                for _ in range(num_blocks)
             ]
         )
 
-    def forward(self, x: Tensor, mask: Tensor | None = None) -> Tensor:
+    def forward(self, x: Tensor, mask: Tensor | None = None) -> tuple[Tensor, list[Tensor]]:
         x = self.embed(x)
         x = self.pe(x)
-        for layer in self.layers:
-            x, sim = layer(x, mask)
-        return x
+        sims = []
+        for block in self.blocks:
+            x, sim = block(x, mask)
+            sims.append(sim)
+        return x, sims
 
 
 class TransformerDecoder(nn.Module):
@@ -224,25 +229,29 @@ class TransformerDecoder(nn.Module):
         embed_dim: int,
         num_heads: int,
         channels: list[int],
-        num_layers: int = 6,
+        num_blocks: int = 6,
         dropout: float = 0.0,
     ):
         super().__init__()
         self.embed = nn.Embedding(vocab_size, embed_dim)
         self.pe = PositionalEncoding(embed_dim, dropout)
-        self.layers = nn.ModuleList(
+        self.blocks = nn.ModuleList(
             [
                 TransformerDecoderBlock(embed_dim, num_heads, channels, dropout)
-                for _ in range(num_layers)
+                for _ in range(num_blocks)
             ]
         )
 
-    def forward(self, x: Tensor, enc_out: Tensor, mask: Tensor | None = None) -> Tensor:
+    def forward(
+        self, x: Tensor, enc_out: Tensor, mask: Tensor | None = None
+    ) -> tuple[Tensor, list[Tensor]]:
         x = self.embed(x)
         x = self.pe(x)
-        for layer in self.layers:
-            x = layer(x, enc_out, mask)
-        return x
+        sims = []
+        for block in self.blocks:
+            x, sim = block(x, enc_out, mask)
+            sims.append(sim)
+        return x, sims
 
 
 class Transformer(nn.Module):
@@ -253,8 +262,8 @@ class Transformer(nn.Module):
         embed_dim: int,
         num_heads: int,
         channels: list[int],
-        num_enc_layers: int = 6,
-        num_dec_layers: int = 6,
+        num_enc_blocks: int = 6,
+        num_dec_blocks: int = 6,
         dropout: float = 0.0,
         head: nn.Module | None = None,
     ):
@@ -263,10 +272,10 @@ class Transformer(nn.Module):
         self.dec_vocab_size = dec_vocab_size
 
         self.encoder = TransformerEncoder(
-            enc_vocab_size, embed_dim, num_heads, channels, num_enc_layers, dropout
+            enc_vocab_size, embed_dim, num_heads, channels, num_enc_blocks, dropout
         )
         self.decoder = TransformerDecoder(
-            dec_vocab_size, embed_dim, num_heads, channels, num_dec_layers, dropout
+            dec_vocab_size, embed_dim, num_heads, channels, num_dec_blocks, dropout
         )
         if head is None:
             self.head = self._make_head()
@@ -278,41 +287,43 @@ class Transformer(nn.Module):
         src_mask: Tensor | None = None,
         tgt_mask: Tensor | None = None,
     ) -> Tensor:
-        enc_out = self.encoder(src, mask=src_mask)
-        dec_out = self.decoder(tgt, enc_out, mask=tgt_mask)
+        enc_out, enc_sims = self.encoder(src, mask=src_mask)
+        dec_out, dec_sims = self.decoder(tgt, enc_out, mask=tgt_mask)
         return self.head(dec_out)
 
     def _make_head(self):
         raise NotImplementedError
 
 
-class LangModelTransformer(Transformer):
+class LangModelTransformer(TransformerEncoder):
     def __init__(
         self,
         vocab_size: int,
         embed_dim: int,
         num_heads: int,
         channels: list[int],
-        num_enc_layers: int,
-        num_dec_layers: int,
-        dropout: float,
+        num_blocks: int = 6,
+        dropout: float = 0.0,
     ):
         super().__init__(
-            vocab_size,
             vocab_size,
             embed_dim,
             num_heads,
             channels,
-            num_enc_layers,
-            num_dec_layers,
+            num_blocks,
             dropout,
-            head=nn.Linear(embed_dim, vocab_size),
         )
         self.vocab_size = vocab_size
+        self.head = nn.Linear(embed_dim, vocab_size)
 
-    def _make_head(self):
-        """Returns a probability distribution over the vocabulary."""
-        return nn.Linear(self.embed_dim, self.vocab_size)
+    def forward(self, x: Tensor, mask: Tensor | None = None) -> tuple[Tensor, list[Tensor]]:
+        x = self.embed(x)
+        x = self.pe(x)
+        sims = []
+        for block in self.blocks:
+            x, sim = block(x, mask)
+            sims.append(sim)
+        return self.head(x), sims
 
 
 class ClassificationTransformer(Transformer):
@@ -324,8 +335,8 @@ class ClassificationTransformer(Transformer):
         embed_dim: int,
         num_heads: int,
         channels: list[int],
-        num_enc_layers: int,
-        num_dec_layers: int,
+        num_enc_blocks: int,
+        num_dec_blocks: int,
         dropout: float,
     ):
         super().__init__(
@@ -334,8 +345,8 @@ class ClassificationTransformer(Transformer):
             embed_dim,
             num_heads,
             channels,
-            num_enc_layers,
-            num_dec_layers,
+            num_enc_blocks,
+            num_dec_blocks,
             dropout,
             head=nn.Linear(embed_dim, dec_vocab_size),
         )
@@ -344,6 +355,35 @@ class ClassificationTransformer(Transformer):
     def _make_head(self):
         """Returns a probability distribution over the vocabulary."""
         return nn.Linear(self.embed_dim, self.num_classes)
+
+
+class TranslationTransformer(Transformer):
+    def __init__(
+        self,
+        enc_vocab_size: int,
+        dec_vocab_size: int,
+        embed_dim: int,
+        num_heads: int,
+        channels: list[int],
+        num_enc_blocks: int,
+        num_dec_blocks: int,
+        dropout: float,
+    ):
+        super().__init__(
+            enc_vocab_size,
+            dec_vocab_size,
+            embed_dim,
+            num_heads,
+            channels,
+            num_enc_blocks,
+            num_dec_blocks,
+            dropout,
+            head=nn.Linear(embed_dim, dec_vocab_size),
+        )
+
+    def _make_head(self):
+        """Returns a probability distribution over the vocabulary."""
+        return nn.Linear(self.embed_dim, self.dec_vocab_size)
 
 
 def visualize_attention(x: Tensor, y: Tensor):
