@@ -7,12 +7,13 @@
 ## Features
 
 - Backbone
-
+  
   - [x] ResNet
   - [ ] Vision Transformer
-  - [ ] Transformer
+  - [x] Transformer
 
 - Tasks
+  
   - Vision
     - Classification
     - Segmentation
@@ -59,16 +60,35 @@ tensorboard --logdir experiments
 - Python
 
 ```python
-from deepx.tasks import train
+
+# Using default config
+from deepx.tasks import TrainerX
+
+trainer = TrainerX(
+    task="classification",
+    model="resnet18",
+    datamodule="mnist",
+)
+trainer.train()
+```
+
+```python
+# Using custom model
+from deepx.tasks import TrainerX
 from deepx.nn import MLP
 
 model = MLP([64, 128, 10])
 
-train("classification", model, "cifar10", batch_size=128, epochs=200, debug=True)
-# train("classification", "resnet18", "cifar10", batch_size=128, epochs=200, is_test=True,)
+trainer = TrainerX(
+    task="classification",
+    model=model,
+    datamodule="mnist"
+)
+
+trainer.train(epochs=100, batch_size=128)
 ```
 
-#### Segmetation
+#### Segmentation
 
 - Terminal
 

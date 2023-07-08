@@ -7,12 +7,12 @@ from lightning.pytorch.loggers import MLFlowLogger
 from torch import nn
 
 from deepx.tasks import (
-    ClassificationDataset,
-    ClassificationTask,
-    LangModelTask,
-    SegmentationDataset,
-    SegmentationTask,
-    WikiText103Dataset,
+    Classification,
+    ClassificationDM,
+    LangModeling,
+    Segmentation,
+    SegmentationDM,
+    WikiText103DM,
 )
 
 
@@ -65,14 +65,14 @@ def train(
 
     # Task and dataset
     if task == "cls" or task == "classification":
-        model = ClassificationTask(**task_kwargs)  # type: ignore
-        datamodule = ClassificationDataset(**dataset_kwargs)  # type: ignore
+        model = Classification(**task_kwargs)  # type: ignore
+        datamodule = ClassificationDM(**dataset_kwargs)  # type: ignore
     elif task == "seg" or task == "segmentation":
-        model = SegmentationTask(**task_kwargs)  # type: ignore
-        datamodule = SegmentationDataset(**dataset_kwargs)  # type: ignore
+        model = Segmentation(**task_kwargs)  # type: ignore
+        datamodule = SegmentationDM(**dataset_kwargs)  # type: ignore
     elif task == "lm" or task == "langmodel":
-        model = LangModelTask(**task_kwargs)  # type: ignore
-        datamodule = WikiText103Dataset(**dataset_kwargs)  # type: ignore
+        model = LangModeling(**task_kwargs)  # type: ignore
+        datamodule = WikiText103DM(**dataset_kwargs)  # type: ignore
     else:
         raise ValueError(f"Task {task} is not found in available tasks.")
 

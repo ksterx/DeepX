@@ -11,7 +11,7 @@ from torchvision.datasets import VOCSegmentation
 from deepx.tasks import DataModuleX, TaskX
 
 
-class SegmentationTask(TaskX):
+class Segmentation(TaskX):
     TASK_TYPE = "segmentation"
 
     def __init__(
@@ -83,7 +83,7 @@ class SegmentationTask(TaskX):
         return torch.argmax(logits, dim=1)
 
 
-class SegmentationDataset(DataModuleX):
+class SegmentationDM(DataModuleX):
     TASK_TYPE = "segmentation"
 
     def __init__(

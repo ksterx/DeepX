@@ -279,3 +279,4 @@ data/*
 experiments/*
 !experiments/README.md
 flagged/
+*.prof

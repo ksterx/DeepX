@@ -1,3 +1,3 @@
-from deepx.tasks.language.langmodel import LangModelTask, WikiText103Dataset
+from deepx.tasks.language.langmodel import LangModeling, WikiText103DM
 
-__all__ = ["LangModelTask", "WikiText103Dataset"]
+__all__ = ["LangModeling", "WikiText103DM"]

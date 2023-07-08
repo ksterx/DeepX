@@ -25,7 +25,7 @@ class LangModelConfig:
     dropout: float = 0.0
 
 
-class LangModelTask(TaskX):
+class LangModeling(TaskX):
     def __init__(
         self,
         model: str | LightningModule,
@@ -70,7 +70,7 @@ class LangModelTask(TaskX):
         self.log(f"{mode}_loss", loss)
 
 
-class WikiText103Dataset(DataModuleX):
+class WikiText103DM(DataModuleX):
     def setup(self, stage=None):
         self.train_data, self.valid_data, self.test_data = WikiText103(
             self.data_dir, split=("train", "valid", "test")
