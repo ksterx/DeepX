@@ -1,4 +1,3 @@
-from torch.utils.data import random_split
 from torchvision.datasets import CIFAR100
 
 from ..classification import ClassificationDM
@@ -136,11 +135,7 @@ class CIFAR100DM(ClassificationDM):
     def setup(self, stage=None):
         if stage == "fit":
             data = CIFAR100(self.data_dir, train=True, transform=self._train_transform)
-            num_data = len(data)
-            self.train_data, self.val_data = random_split(
-                dataset=data,
-                lengths=[num_data * self.train_ratio, num_data * (1 - self.train_ratio)],
-            )
+            self.train_data, self.val_data = self._random_split(data)
 
             self.test_data = CIFAR100(self.data_dir, train=False, transform=self._transform)
 

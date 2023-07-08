@@ -1,8 +1,6 @@
-from torchvision import transforms
-from torchvision.datasets import VOCSegmentation
-
 from deepx.tasks.base import DataModuleX, TaskX
 from deepx.tasks.language import LangModeling, WikiText103DM
+from deepx.tasks.trainers.trainer import TrainerX
 from deepx.tasks.vision import (
     CIFAR10DM,
     CIFAR100DM,
@@ -15,8 +13,6 @@ from deepx.tasks.vision import (
     SegmentationDM,
 )
 
-from .trainers.trainer import TrainerX
-
 __all__ = [
     "DataModuleX",
     "TaskX",
@@ -25,6 +21,8 @@ __all__ = [
     "SegmentationDM",
     "Segmentation",
     "LangModeling",
+    "WikiText103DM",
+    "TrainerX",
 ]
 
 registered_tasks = {
@@ -56,30 +54,4 @@ registered_tasks = {
     #         IWSLTDataset,
     #     ],
     # },
-}
-
-
-registered_datasets = {
-    "voc": {
-        "class": VOCSegmentation,
-        "num_classes": 21,
-        "num_channels": 3,
-        "transform": transforms.Compose(
-            [
-                transforms.ToTensor(),
-                transforms.Resize(
-                    (224, 224), interpolation=transforms.InterpolationMode.NEAREST_EXACT
-                ),
-                transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
-            ]
-        ),
-        "target_transform": transforms.Compose(
-            [
-                transforms.PILToTensor(),
-                transforms.Resize(
-                    (224, 224), interpolation=transforms.InterpolationMode.NEAREST_EXACT
-                ),
-            ]
-        ),
-    },
 }

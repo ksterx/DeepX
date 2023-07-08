@@ -2,7 +2,8 @@ from lightning import LightningDataModule, LightningModule, Trainer
 from lightning.pytorch.callbacks import EarlyStopping, ModelSummary
 from lightning.pytorch.loggers import MLFlowLogger
 
-from deepx import registered_models, registered_tasks
+from deepx import tasks
+from deepx.nn import registered_models
 
 
 class TrainerX:
@@ -12,14 +13,18 @@ class TrainerX:
         self,
         model: str | LightningModule,
         datamodule: str | LightningDataModule,
-        data_dir: str = "/workspace",
+        root_dir: str = "/workspace",
+        data_dir: str = "/workspace/data",
+        log_dir: str = "/workspace/experiments",
         batch_size: int = 32,
         train_ratio: float = 0.8,
         num_workers: int = 2,
         download: bool = False,
         **kwargs,
     ):
+        self.root_dir = root_dir
         self.data_dir = data_dir
+        self.log_dir = log_dir
         self.batch_size = batch_size
         self.train_ratio = train_ratio
         self.num_workers = num_workers
@@ -27,7 +32,7 @@ class TrainerX:
 
         # Set up datamodule
         if isinstance(datamodule, str):
-            self.datamodule = registered_tasks[self.TASK_TYPE]["datamodule"][datamodule](
+            self.datamodule = tasks.registered_tasks[self.TASK_TYPE]["datamodule"][datamodule](
                 data_dir=data_dir,
                 batch_size=batch_size,
                 train_ratio=train_ratio,
@@ -46,7 +51,7 @@ class TrainerX:
 
     def get_task(self, task, **kwargs):
         if isinstance(task, str):
-            task_cls = registered_tasks[task]["task"]
+            task_cls = tasks.registered_tasks[task]["task"]
             return task_cls(**kwargs)
         else:
             return task
@@ -59,6 +64,7 @@ class TrainerX:
         max_depth: int = 1,
         benchmark: bool = False,
         debug: bool = False,
+        **kwargs,
     ):
         self.set(
             epochs=epochs,
@@ -67,6 +73,7 @@ class TrainerX:
             benchmark=benchmark,
             debug=debug,
             logging=True,
+            **kwargs,
         )
         self.trainer.fit(self.task, datamodule=self.datamodule, ckpt_path=ckpt_path)
         if not debug:
@@ -87,14 +94,15 @@ class TrainerX:
         benchmark: bool = False,
         debug: bool = False,
         logging: bool = True,
+        **kwargs,
     ):
         if logging:
             logger = MLFlowLogger(
                 experiment_name=self.datamodule.name,
                 tags={"model": self.model.name},
-                tracking_uri=f"file://{log_dir}",
+                tracking_uri=f"file://{self.log_dir}",
             )
-            logger.log_hyperparams(task_kwargs)
+            # logger.log_hyperparams(task_kwargs)
         else:
             logger = None
 
@@ -110,6 +118,7 @@ class TrainerX:
             ],
             benchmark=benchmark,
             fast_dev_run=debug,
+            **kwargs,
         )
 
     def summary(self):

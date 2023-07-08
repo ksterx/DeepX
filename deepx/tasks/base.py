@@ -1,18 +1,12 @@
-import dataclasses
 import pathlib
 from abc import ABC, abstractmethod
 
 import torch
-from lightning import LightningDataModule, LightningModule, Trainer
+from lightning import LightningDataModule, LightningModule
 from torch import nn
 from torch.utils.data import DataLoader, random_split
 
-from deepx import (
-    registered_datasets,
-    registered_losses,
-    registered_models,
-    registered_tasks,
-)
+from deepx.nn import registered_losses
 
 
 class TaskX(LightningModule, ABC):
@@ -137,3 +131,9 @@ class DataModuleX(LightningDataModule, ABC):
     @abstractmethod
     def name(self):
         return "None"
+
+    def _random_split(self, data):
+        num_data = len(data)
+        len_train = int(num_data * self.train_ratio)
+        len_val = num_data - len_train
+        return random_split(dataset=data, lengths=[len_train, len_val])

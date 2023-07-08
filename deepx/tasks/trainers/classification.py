@@ -1,9 +1,5 @@
-from lightning import LightningDataModule, LightningModule, Trainer
-from lightning.pytorch.callbacks import EarlyStopping, ModelSummary
-from lightning.pytorch.loggers import MLFlowLogger
+from lightning import LightningDataModule, LightningModule
 from torch import nn
-
-from deepx import registered_losses, registered_models, registered_tasks
 
 from .trainer import TrainerX
 
@@ -15,7 +11,9 @@ class ClassificationTrainer(TrainerX):
         self,
         model: str | LightningModule,
         datamodule: str | LightningDataModule,
-        data_dir: str = "/workspace",
+        root_dir: str = "/workspace",
+        data_dir: str = "/workspace/data",
+        log_dir: str = "/workspace/experiments",
         batch_size: int = 32,
         train_ratio: float = 0.8,
         num_workers: int = 2,
@@ -45,4 +43,7 @@ class ClassificationTrainer(TrainerX):
             self.TASK_TYPE, model=self.model, num_classes=num_classes, lr=lr, loss_fn=loss_fn
         )
 
-        self.summary()
+
+if __name__ == "__main__":
+    trainer = ClassificationTrainer(model="resnet18", datamodule="mnist")
+    trainer.train(debug=True)

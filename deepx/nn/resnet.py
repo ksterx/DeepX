@@ -204,24 +204,32 @@ class ResNet(nn.Module):
 
 
 class ResNet18(ResNet):
+    name = "resnet18"
+
     def __init__(self, num_classes, in_channels: int = 3):
         super().__init__(in_channels, num_classes, ResidualBlock)
         self.layers = self._make_layers([2, 2, 2, 2], p_dropout=0.3)
 
 
 class ResNet34(ResNet):
+    name = "resnet34"
+
     def __init__(self, num_classes, in_channels: int = 3):
         super().__init__(in_channels, num_classes, ResidualBlock)
         self.layers = self._make_layers([3, 4, 6, 3], p_dropout=0.3)
 
 
 class ResNet50(ResNet):
+    name = "resnet50"
+
     def __init__(self, num_classes, in_channels: int = 3):
         super().__init__(in_channels, num_classes, BottleneckBlock)
         self.layers = self._make_layers([3, 4, 6, 3], p_dropout=0.3)
 
 
 class ResNet101(ResNet):
+    name = "resnet101"
+
     def __init__(self, num_classes, in_channels: int = 3):
         super().__init__(in_channels, num_classes, BottleneckBlock)
         self.layers = self._make_layers([3, 4, 23, 3], p_dropout=0.3)

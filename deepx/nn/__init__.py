@@ -1,14 +1,10 @@
 from torchvision import transforms
 
-from deepx.nn.core import MLP
-from deepx.nn.losses import DiceLoss, FocalLoss
-from deepx.nn.resnet import ResNet, ResNet18, ResNet34, ResNet50, ResNet101, ResNet152
-from deepx.nn.transformer import (
-    ClassificationTransformer,
-    LangModelTransformer,
-    Transformer,
-)
-from deepx.nn.unet import UNet
+from .core import MLP
+from .losses import DiceLoss, FocalLoss
+from .resnet import ResNet, ResNet18, ResNet34, ResNet50, ResNet101, ResNet152
+from .transformer import ClassificationTransformer, LangModelTransformer, Transformer
+from .unet import UNet
 
 registered_models = {
     "resnet": ResNet,
