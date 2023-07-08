@@ -152,3 +152,8 @@ class TrainerX:
             fast_dev_run=debug,
             **kwargs,
         )
+
+        self.task_summary()
+
+    def task_summary(self):
+        print(self.hparams)

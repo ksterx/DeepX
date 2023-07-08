@@ -22,9 +22,9 @@ class Classification(TaskX):
     ):
         super().__init__(model=model, lr=lr, loss_fn=loss_fn, optimizer=optimizer, **kwargs)
 
-        self.train_accuracy = Accuracy(task="multiclass", num_classes=num_classes)
-        self.val_accuracy = Accuracy(task="multiclass", num_classes=num_classes)
-        self.test_accuracy = Accuracy(task="multiclass", num_classes=num_classes)
+        self.train_acc = Accuracy(task="multiclass", num_classes=num_classes)
+        self.val_acc = Accuracy(task="multiclass", num_classes=num_classes)
+        self.test_acc = Accuracy(task="multiclass", num_classes=num_classes)
 
     def predict_step(self, batch, batch_idx, dataloader_idx):
         x = batch
@@ -38,9 +38,9 @@ class Classification(TaskX):
         loss = self.loss_fn(logits, y)
         preds = torch.argmax(logits, dim=1)
 
-        exec(f"self.{mode}_accuracy.update(preds, y)")
+        exec(f"self.{mode}_acc.update(preds, y)")
+        self.log(f"{mode}_acc", eval(f"self.{mode}_acc"), prog_bar=True)
         self.log(f"{mode}_loss", loss, prog_bar=True)
-        self.log(f"{mode}_acc", eval(f"self.{mode}_accuracy"), prog_bar=True)
 
         return loss
 

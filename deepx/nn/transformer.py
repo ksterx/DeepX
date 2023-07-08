@@ -120,7 +120,7 @@ class MultiHeadSelfAttention(MultiHeadAttention):
 
 
 class PositionalEncoding(nn.Module):
-    def __init__(self, embed_dim: int, dropout: float = 0.1, max_len: int = 5000):
+    def __init__(self, embed_dim: int, dropout: float = 0.0, max_len: int = 5000):
         super().__init__()
         self.dropout = nn.Dropout(p=dropout)
         pe = torch.zeros(max_len, embed_dim)
@@ -144,7 +144,7 @@ class TransformerEncoderBlock(nn.Module):
         embed_dim: int,
         num_heads: int,
         hidden_dim: int,
-        dropout: float = 0.1,
+        dropout: float = 0.0,
     ):
         super().__init__()
         self.attention = MultiHeadSelfAttention(embed_dim, num_heads, dropout)
@@ -171,7 +171,7 @@ class TransformerDecoderBlock(nn.Module):
         embed_dim: int,
         num_heads: int,
         hidden_dim: int,
-        dropout: float = 0.1,
+        dropout: float = 0.0,
     ):
         super().__init__()
         self.masked_attention = MultiHeadSelfAttention(embed_dim, num_heads, dropout)

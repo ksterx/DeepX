@@ -5,6 +5,7 @@ import torch
 from lightning import LightningModule
 from torch import nn
 from torch.utils.data import DataLoader
+from torchmetrics import Accuracy
 from transformers import AutoTokenizer
 
 from deepx.tasks import DataModuleX, TaskX
@@ -31,23 +32,30 @@ class LangModel(TaskX):
             self.tokenizer = tokenizer
         self.max_length = max_length
 
+        self.train_acc = Accuracy(task="multiclass", num_classes=self.tokenizer.vocab_size)
+        self.val_acc = Accuracy(task="multiclass", num_classes=self.tokenizer.vocab_size)
+        self.test_acc = Accuracy(task="multiclass", num_classes=self.tokenizer.vocab_size)
+
     def _mode_step(self, batch, batch_idx, mode: str):
         x = batch[:, :-1]
         y = batch[:, 1:]
+        y = y.contiguous().view(-1)
         logits, sim = self(x)
+
+        # for debugging
+        # text = self.tokenizer.decode(x[0])
+        # print(f"Text: {text}")
+        # pred = self.tokenizer.decode(logits[0].argmax(dim=-1))
+        # print(f"Prediction: {pred}")
+
+        logits = logits.view(-1, logits.size(-1))
         loss = self.loss_fn(logits, y)
+
+        exec(f"self.{mode}_acc.update(logits, y)")
+        self.log(f"{mode}_acc", eval(f"self.{mode}_acc"), prog_bar=True)
         self.log(f"{mode}_loss", loss)
 
         return loss
-
-    def tokenize(self, text: str | list[str]):
-        return self.tokenizer(
-            text,
-            return_tensors="pt",
-            padding="max_length",
-            max_length=self.max_length + 1,
-            truncation=True,
-        )
 
 
 class LangModelDM(DataModuleX):

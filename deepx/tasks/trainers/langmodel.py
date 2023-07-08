@@ -48,8 +48,6 @@ class LangModelTrainer(TrainerX):
             **kwargs,
         )
 
-        self.hparams.update({})
-
         tokenizer = AutoTokenizer.from_pretrained(tokenizer)
 
         self.dm_cfg.update({"tokenizer": tokenizer, "max_length": max_length})
@@ -75,3 +73,7 @@ class LangModelTrainer(TrainerX):
             }
         )
         self.task = self.get_task(task=self.TASK_TYPE, **self.task_cfg)
+
+        self.hparams.update(self.dm_cfg)
+        self.hparams.update(self.model_cfg)
+        self.hparams.update(self.task_cfg)
