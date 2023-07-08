@@ -1,9 +1,7 @@
-from torchvision import transforms
-
 from .core import MLP
 from .losses import DiceLoss, FocalLoss
 from .resnet import ResNet, ResNet18, ResNet34, ResNet50, ResNet101, ResNet152
-from .transformer import ClassificationTransformer, LangModelTransformer, Transformer
+from .transformer import LangModelTransformer
 from .unet import UNet
 
 registered_models = {

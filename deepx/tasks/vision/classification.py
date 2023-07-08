@@ -1,11 +1,9 @@
-from abc import ABC, abstractmethod
-
 import torch
 from torch import nn
 from torchmetrics import Accuracy
 from torchvision import transforms
 
-from deepx.tasks import DataModuleX, TaskX
+from ..core import DataModuleX, TaskX
 
 
 class Classification(TaskX):
@@ -45,7 +43,7 @@ class Classification(TaskX):
         return loss
 
 
-class ClassificationDM(DataModuleX, ABC):
+class ClassificationDM(DataModuleX):
     def __init__(
         self,
         data_dir: str,

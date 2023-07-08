@@ -156,4 +156,5 @@ class TrainerX:
         self.task_summary()
 
     def task_summary(self):
-        print(self.hparams)
+        for k, v in self.hparams.items():
+            print(f"{k}: {v}")

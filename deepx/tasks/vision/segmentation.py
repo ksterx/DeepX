@@ -6,7 +6,7 @@ from torch import nn
 from torchmetrics.classification import MulticlassJaccardIndex
 from torchvision import transforms
 
-from deepx.tasks import DataModuleX, TaskX
+from ..core import DataModuleX, TaskX
 
 
 class Segmentation(TaskX):

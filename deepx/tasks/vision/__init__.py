@@ -1,5 +1,5 @@
-from deepx.tasks.vision.classification import Classification, ClassificationDM
-from deepx.tasks.vision.datamodules import (
+from .classification import Classification, ClassificationDM
+from .datamodules import (
     CIFAR10DM,
     CIFAR100DM,
     MNISTDM,
@@ -7,4 +7,4 @@ from deepx.tasks.vision.datamodules import (
     Flowers102DM,
     VOCSegDM,
 )
-from deepx.tasks.vision.segmentation import Segmentation, SegmentationDM
+from .segmentation import Segmentation, SegmentationDM

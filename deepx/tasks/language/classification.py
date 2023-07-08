@@ -10,7 +10,8 @@ from torchtext.datasets import IMDB
 from transformers import AutoTokenizer
 
 from deepx.nn import Transformer
-from deepx.tasks import DataModuleX, TaskX
+
+from ..core import DataModuleX, TaskX
 
 
 class LangModelTask(TaskX):

@@ -1,7 +1,7 @@
-from deepx.tasks.core import DataModuleX, TaskX
-from deepx.tasks.language import LangModel, PennTreebankDM, WikiText103DM
-from deepx.tasks.trainers.trainer import TrainerX
-from deepx.tasks.vision import (
+from .core import DataModuleX, TaskX
+from .language import LangModel, PennTreebankDM, WikiText103DM
+from .trainers.trainer import TrainerX
+from .vision import (
     CIFAR10DM,
     CIFAR100DM,
     MNISTDM,

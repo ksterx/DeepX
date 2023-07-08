@@ -6,7 +6,7 @@ from lightning import LightningDataModule, LightningModule
 from torch import nn
 from torch.utils.data import DataLoader, random_split
 
-from deepx.nn import registered_losses
+from ..nn import registered_losses
 
 
 class TaskX(LightningModule, ABC):

@@ -7,21 +7,23 @@
 ## Features
 
 - Backbone
-  
+
   - [x] ResNet
   - [ ] Vision Transformer
   - [x] Transformer
 
 - Tasks
-  
+
   - Vision
     - Classification
+      -  [x] ResNet
     - Segmentation
       - [x] UNet
     - Object Detection
   - Language
-    - [ ] Language Model
+    - [x] Language Model
     - [ ] Text Classification
+    - [ ] Translation
 
 ## Installation
 

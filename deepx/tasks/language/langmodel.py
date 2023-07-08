@@ -8,7 +8,7 @@ from torch.utils.data import DataLoader
 from torchmetrics import Accuracy
 from transformers import AutoTokenizer
 
-from deepx.tasks import DataModuleX, TaskX
+from ..core import DataModuleX, TaskX
 
 
 class LangModel(TaskX):
