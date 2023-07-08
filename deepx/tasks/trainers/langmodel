@@ -5,8 +5,8 @@ from torch import nn
 from .trainer import TrainerX
 
 
-class SegmentationTrainer(TrainerX):
-    TASK_TYPE = "segmentation"
+class LangModelTrainer(TrainerX):
+    TASK_TYPE = "langmodel"
 
     def __init__(
         self,
@@ -22,6 +22,13 @@ class SegmentationTrainer(TrainerX):
         root_dir: str = "/workspace",
         data_dir: str = "/workspace/data",
         log_dir: str = "/workspace/experiments",
+        tokenizer: str = "bert-base-uncased",
+        max_length: int = 512,
+        embed_dim: int = 512,
+        num_heads: int = 8,
+        hidden_dim: int = 2048,
+        num_blocks: int = 6,
+        dropout: float = 0.0,
         **kwargs,
     ):
         super().__init__(
@@ -40,10 +47,12 @@ class SegmentationTrainer(TrainerX):
             **kwargs,
         )
 
+        self.hparams.update({"lr": lr, "loss_fn": loss_fn, "optimizer": optimizer})
+
         # Set up model
-        num_classes = self.datamodule.NUM_CLASSES
-        in_channels = self.datamodule.NUM_CHANNELS
-        self.model = self.get_model(model, num_classes=num_classes, in_channels=in_channels)
+        self.model = self.get_model(
+            model=model,
+        )
 
         # Set up task
         self.task = self.get_task(

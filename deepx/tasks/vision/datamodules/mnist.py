@@ -4,6 +4,7 @@ from ..classification import ClassificationDM
 
 
 class MNISTDM(ClassificationDM):
+    NAME = "mnist"
     NUM_CLASSES = 10
     NUM_CHANNELS = 1
 
@@ -40,7 +41,3 @@ class MNISTDM(ClassificationDM):
 
         if stage == "predict":
             self.predict_data = MNIST(self.data_dir, train=False, transform=self._transform)
-
-    @property
-    def name(self):
-        return "mnist"

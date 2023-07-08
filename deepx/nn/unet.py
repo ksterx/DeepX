@@ -3,6 +3,8 @@ from torch import nn
 
 
 class UNet(nn.Module):
+    NAME = "unet"
+
     def __init__(self, in_channels: int = 3, num_classes: int = 1):
         """
         enc1 ------------------------------- dec1

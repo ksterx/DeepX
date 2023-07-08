@@ -4,6 +4,7 @@ from ..classification import ClassificationDM
 
 
 class FashionMNISTDM(ClassificationDM):
+    NAME = "fashionmnist"
     NUM_CLASSES = FashionMNIST.classes
     NUM_CHANNELS = 1
 
@@ -39,7 +40,3 @@ class FashionMNISTDM(ClassificationDM):
 
         if stage == "predict":
             self.predict_data = FashionMNIST(self.data_dir, train=False, transform=self._transform)
-
-    @property
-    def name(self):
-        return "fashionmnist"

@@ -2,7 +2,7 @@ from torch import nn
 
 
 class MLP(nn.Module):
-    name = "mlp"
+    NAME = "mlp"
 
     def __init__(
         self,

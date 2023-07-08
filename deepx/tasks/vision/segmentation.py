@@ -12,6 +12,8 @@ from deepx.tasks import DataModuleX, TaskX
 
 
 class Segmentation(TaskX):
+    NAME = "segmentation"
+
     def __init__(
         self,
         model: str | LightningModule,
@@ -78,8 +80,6 @@ class SegmentationDM(DataModuleX):
             num_workers=num_workers,
             download=download,
         )
-
-        self.target_transform = self.dataset["target_transform"]
 
     def transform(
         self,

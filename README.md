@@ -60,27 +60,25 @@ tensorboard --logdir experiments
 - Python
 
 ```python
-
 # Using default config
-from deepx.tasks import TrainerX
+from deepx.tasks import ClassificationTrainer
 
-trainer = TrainerX(
-    task="classification",
+trainer = ClassificationTrainer(
     model="resnet18",
     datamodule="mnist",
 )
+
 trainer.train()
 ```
 
 ```python
 # Using custom model
-from deepx.tasks import TrainerX
+from deepx.tasks import ClassificationTrainer
 from deepx.nn import MLP
 
 model = MLP([64, 128, 10])
 
-trainer = TrainerX(
-    task="classification",
+trainer = ClassificationTrainer(
     model=model,
     datamodule="mnist"
 )
@@ -100,9 +98,11 @@ python train.py --task segmentation --model unet --dataset voc --batch_size 128 
 - Python
 
 ```python
-from deepx.tasks import train
+from deepx.tasks import SegmentationTrainer
 
-train("segmentation", "unet", "voc", batch_size=128, epochs=200, debug=True)
+trainer = SegmentationTrainer(model="unet", datamodule="vocseg")
+
+trainer.train()
 ```
 
 ### Inference

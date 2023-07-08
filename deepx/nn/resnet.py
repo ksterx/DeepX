@@ -204,7 +204,7 @@ class ResNet(nn.Module):
 
 
 class ResNet18(ResNet):
-    name = "resnet18"
+    NAME = "resnet18"
 
     def __init__(self, num_classes, in_channels: int = 3):
         super().__init__(in_channels, num_classes, ResidualBlock)
@@ -212,7 +212,7 @@ class ResNet18(ResNet):
 
 
 class ResNet34(ResNet):
-    name = "resnet34"
+    NAME = "resnet34"
 
     def __init__(self, num_classes, in_channels: int = 3):
         super().__init__(in_channels, num_classes, ResidualBlock)
@@ -220,7 +220,7 @@ class ResNet34(ResNet):
 
 
 class ResNet50(ResNet):
-    name = "resnet50"
+    NAME = "resnet50"
 
     def __init__(self, num_classes, in_channels: int = 3):
         super().__init__(in_channels, num_classes, BottleneckBlock)
@@ -228,7 +228,7 @@ class ResNet50(ResNet):
 
 
 class ResNet101(ResNet):
-    name = "resnet101"
+    NAME = "resnet101"
 
     def __init__(self, num_classes, in_channels: int = 3):
         super().__init__(in_channels, num_classes, BottleneckBlock)

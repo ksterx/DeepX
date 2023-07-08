@@ -1,4 +1,4 @@
-from deepx.tasks.base import DataModuleX, TaskX
+from deepx.tasks.core import DataModuleX, TaskX
 from deepx.tasks.language import LangModeling, WikiText103DM
 from deepx.tasks.trainers.trainer import TrainerX
 from deepx.tasks.vision import (
@@ -11,7 +11,7 @@ from deepx.tasks.vision import (
     Flowers102DM,
     Segmentation,
     SegmentationDM,
-    VocSegDM,
+    VOCSegDM,
 )
 
 __all__ = [
@@ -40,7 +40,7 @@ registered_tasks = {
     "segmentation": {
         "task": Segmentation,
         "datamodule": {
-            "voc": VocSegDM,
+            "vocseg": VOCSegDM,
         },
     },
     "langmodel": {

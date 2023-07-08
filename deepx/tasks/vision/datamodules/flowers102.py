@@ -5,6 +5,7 @@ from ..classification import ClassificationDM
 
 
 class Flowers102DM(ClassificationDM):
+    NAME = "flowers102"
     NUM_CLASSES = 102
     NUM_CHANNELS = 3
     CLASSES = [
@@ -149,7 +150,3 @@ class Flowers102DM(ClassificationDM):
 
         if stage == "predict" or None:
             self.predict_data = Flowers102(self.data_dir, split="test", transform=self._transform)
-
-    @property
-    def name(self):
-        return "flowers102"

@@ -31,6 +31,7 @@ class LangModeling(TaskX):
         model: str | LightningModule,
         lr: float = 0.001,
         loss_fn: nn.Module | str = nn.CrossEntropyLoss(),
+        optimizer: str | torch.optim.Optimizer = "adam",
         tokenizer: str = "bert-base-uncased",
         max_length: int = 128,
         embed_dim: int = 512,
@@ -40,7 +41,7 @@ class LangModeling(TaskX):
         dropout: float = 0.0,
         **kwargs,
     ):
-        super().__init__(lr=lr, loss_fn=loss_fn)
+        super().__init__(model=model, lr=lr, loss_fn=loss_fn, optimizer=optimizer, **kwargs)
 
         self.tokenizer = AutoTokenizer.from_pretrained(tokenizer)
         self.vocab_size = self.tokenizer.vocab_size

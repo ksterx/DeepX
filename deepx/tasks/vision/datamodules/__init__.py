@@ -5,10 +5,4 @@ from .flowers102 import Flowers102DM
 from .mnist import MNISTDM
 from .vocseg import VOCSegDM
 
-__all__ = [
-    "CIFAR10DM",
-    "CIFAR100DM",
-    "FashionMNISTDM",
-    "Flowers102DM",
-    "MNISTDM",
-]
+__all__ = ["CIFAR10DM", "CIFAR100DM", "FashionMNISTDM", "Flowers102DM", "MNISTDM", "VOCSegDM"]

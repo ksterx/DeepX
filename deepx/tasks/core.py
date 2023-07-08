@@ -10,6 +10,8 @@ from deepx.nn import registered_losses
 
 
 class TaskX(LightningModule, ABC):
+    NAME = ""
+
     def __init__(
         self,
         model,
@@ -59,15 +61,8 @@ class TaskX(LightningModule, ABC):
         else:
             return self.optimizer(self.parameters(), lr=self.lr)
 
-    @property
-    @abstractmethod
-    def name(self):
-        return "None"
-
 
 class DataModuleX(LightningDataModule, ABC):
-    TASK_TYPE = "None"
-
     def __init__(
         self,
         data_dir: str | pathlib.Path,
@@ -127,11 +122,6 @@ class DataModuleX(LightningDataModule, ABC):
             num_workers=self.num_workers,
             pin_memory=True,
         )
-
-    @property
-    @abstractmethod
-    def name(self):
-        return "None"
 
     def _random_split(self, data):
         num_data = len(data)

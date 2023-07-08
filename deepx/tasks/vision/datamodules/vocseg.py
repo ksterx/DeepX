@@ -4,20 +4,9 @@ from ..segmentation import SegmentationDM
 
 
 class VOCSegDM(SegmentationDM):
-    NUM_CLASSES = 10
+    NAME = "vocseg"
+    NUM_CLASSES = 21
     NUM_CHANNELS = 3
-    CLASSES = [
-        "plane",
-        "car",
-        "bird",
-        "cat",
-        "deer",
-        "dog",
-        "frog",
-        "horse",
-        "ship",
-        "truck",
-    ]
     SIZE = (224, 224)
 
     def __init__(
@@ -73,7 +62,3 @@ class VOCSegDM(SegmentationDM):
                 transform=self._transform,
                 target_transform=self._target_transform,
             )
-
-    @property
-    def name(self):
-        return "cifar10"

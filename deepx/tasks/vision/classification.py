@@ -9,6 +9,8 @@ from deepx.tasks import DataModuleX, TaskX
 
 
 class Classification(TaskX):
+    NAME = "classification"
+
     def __init__(
         self,
         model: str | nn.Module,
@@ -41,10 +43,6 @@ class Classification(TaskX):
         self.log(f"{mode}_acc", eval(f"self.{mode}_accuracy"), prog_bar=True)
 
         return loss
-
-    @property
-    def name(self):
-        return "classification"
 
 
 class ClassificationDM(DataModuleX, ABC):
@@ -84,8 +82,3 @@ class ClassificationDM(DataModuleX, ABC):
                 transforms.Normalize(mean, std),
             ]
         )
-
-    @property
-    @abstractmethod
-    def name(self):
-        return "None"

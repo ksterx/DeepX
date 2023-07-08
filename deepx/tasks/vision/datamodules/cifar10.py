@@ -4,6 +4,7 @@ from ..classification import ClassificationDM
 
 
 class CIFAR10DM(ClassificationDM):
+    NAME = "cifar10"
     NUM_CLASSES = 10
     NUM_CHANNELS = 3
     CLASSES = [
@@ -51,7 +52,3 @@ class CIFAR10DM(ClassificationDM):
 
         if stage == "predict":
             self.predict_data = CIFAR10(self.data_dir, train=False, transform=self._transform)
-
-    @property
-    def name(self):
-        return "cifar10"

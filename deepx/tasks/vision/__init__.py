@@ -5,6 +5,6 @@ from deepx.tasks.vision.datamodules import (
     MNISTDM,
     FashionMNISTDM,
     Flowers102DM,
-    VocSegDM,
+    VOCSegDM,
 )
 from deepx.tasks.vision.segmentation import Segmentation, SegmentationDM

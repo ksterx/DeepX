@@ -119,8 +119,8 @@ class TrainerX:
     ):
         if logging:
             logger = MLFlowLogger(
-                experiment_name=self.datamodule.name,
-                tags={"model": self.model.name},
+                experiment_name=self.datamodule.NAME,
+                tags={"model": self.model.NAME},
                 tracking_uri=f"file://{self.log_dir}",
             )
             logger.log_hyperparams(self.hparams)
@@ -141,23 +141,3 @@ class TrainerX:
             fast_dev_run=debug,
             **kwargs,
         )
-
-    def summary(self):
-        print("Task")
-        for k, v in vars(self.task).items():
-            print(f"{k}: {v}")
-        print("\nDataModule")
-        for k, v in vars(self.datamodule).items():
-            print(f"{k}: {v}")
-        print("\nTrainer")
-        for k, v in vars(self.trainer).items():
-            print(f"{k}: {v}")
-
-
-def overwrite_config(a: dict | None, b: dict) -> dict:
-    if a is None:
-        return b
-    else:
-        merged = a.copy()
-        merged.update(b)
-        return merged
