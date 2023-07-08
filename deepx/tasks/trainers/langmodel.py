@@ -52,22 +52,26 @@ class LangModelTrainer(TrainerX):
 
         tokenizer = AutoTokenizer.from_pretrained(tokenizer)
 
-        self.model = self.get_model(
-            model=model,
-            vocab_size=tokenizer.vocab_size,
-            embed_dim=embed_dim,
-            num_heads=num_heads,
-            hidden_dim=hidden_dim,
-            num_blocks=num_blocks,
-            dropout=dropout,
-        )
+        self.dm_cfg.update({"tokenizer": tokenizer, "max_length": max_length})
+        self.datamodule = self.get_datamodule(datamodule=datamodule, **self.dm_cfg)
 
-        self.task = self.get_task(
-            self.TASK_TYPE,
-            model=self.model,
-            lr=lr,
-            loss_fn=loss_fn,
-            optimizer=optimizer,
-            tokenizer=tokenizer,
-            max_length=max_length,
+        self.model_cfg.update(
+            {
+                "vocab_size": tokenizer.vocab_size,
+                "embed_dim": embed_dim,
+                "num_heads": num_heads,
+                "hidden_dim": hidden_dim,
+                "num_blocks": num_blocks,
+                "dropout": dropout,
+            }
         )
+        self.model = self.get_model(model, **self.model_cfg)
+
+        self.task_cfg.update(
+            {
+                "model": self.model,
+                "tokenizer": tokenizer,
+                "max_length": max_length,
+            }
+        )
+        self.task = self.get_task(task=self.TASK_TYPE, **self.task_cfg)

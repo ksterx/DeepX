@@ -47,17 +47,28 @@ class TrainerX:
         self.num_workers = num_workers
         self.download = download
 
-        # Set up datamodule
+        self.dm_cfg = {
+            "data_dir": data_dir,
+            "batch_size": batch_size,
+            "train_ratio": train_ratio,
+            "num_workers": num_workers,
+            "download": download,
+        }
+
+        self.model_cfg = {}
+
+        self.task_cfg = {
+            "lr": lr,
+            "loss_fn": loss_fn,
+            "optimizer": optimizer,
+        }
+
+    def get_datamodule(self, datamodule, **kwargs):
         if isinstance(datamodule, str):
-            self.datamodule = tasks.registered_tasks[self.TASK_TYPE]["datamodule"][datamodule](
-                data_dir=data_dir,
-                batch_size=batch_size,
-                train_ratio=train_ratio,
-                num_workers=num_workers,
-                download=download,
-            )
+            dm_cls = tasks.registered_tasks[self.TASK_TYPE]["datamodule"][datamodule]
+            return dm_cls(**kwargs)
         else:
-            self.datamodule = datamodule
+            return datamodule
 
     def get_model(self, model, **kwargs):
         if isinstance(model, str):
@@ -129,7 +140,7 @@ class TrainerX:
 
         self.trainer = Trainer(
             max_epochs=epochs,
-            accelerator="auto",
+            accelerator="gpu",
             devices=1,
             logger=logger,
             enable_checkpointing=True,

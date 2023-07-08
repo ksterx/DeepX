@@ -1,5 +1,5 @@
 from deepx.tasks.core import DataModuleX, TaskX
-from deepx.tasks.language import LangModel, WikiText103DM
+from deepx.tasks.language import LangModel, PennTreebankDM, WikiText103DM
 from deepx.tasks.trainers.trainer import TrainerX
 from deepx.tasks.vision import (
     CIFAR10DM,
@@ -45,10 +45,11 @@ registered_tasks = {
     },
     "langmodel": {
         "task": LangModel,
-        "datamodule": [
-            WikiText103DM,
+        "datamodule": {
+            "wiki103": WikiText103DM,
+            "penn": PennTreebankDM,
             # WikiText2Dataset,
-        ],
+        },
     },
     # "translation": {
     #     "task": TranslationTask,

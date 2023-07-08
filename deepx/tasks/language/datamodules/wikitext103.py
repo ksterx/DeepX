@@ -4,9 +4,9 @@ from ..langmodel import LangModelDM
 
 
 class WikiText103DM(LangModelDM):
-    NAME = "wikitext103"
+    NAME = "wiki103"
 
     def setup(self, stage=None):
-        self.train_data, self.valid_data, self.test_data = WikiText103(
+        self.train_data, self.val_data, self.test_data = WikiText103(
             self.data_dir, split=("train", "valid", "test")
         )
