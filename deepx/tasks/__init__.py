@@ -1,5 +1,5 @@
 from deepx.tasks.core import DataModuleX, TaskX
-from deepx.tasks.language import LangModeling, WikiText103DM
+from deepx.tasks.language import LangModel, WikiText103DM
 from deepx.tasks.trainers.trainer import TrainerX
 from deepx.tasks.vision import (
     CIFAR10DM,
@@ -21,7 +21,7 @@ __all__ = [
     "Classification",
     "SegmentationDM",
     "Segmentation",
-    "LangModeling",
+    "LangModel",
     "WikiText103DM",
     "TrainerX",
 ]
@@ -44,7 +44,7 @@ registered_tasks = {
         },
     },
     "langmodel": {
-        "task": LangModeling,
+        "task": LangModel,
         "datamodule": [
             WikiText103DM,
             # WikiText2Dataset,

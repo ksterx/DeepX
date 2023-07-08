@@ -18,9 +18,9 @@ def create_manager(task, dataset, **kwargs):
         task = Segmentation(dataset_name=dataset, **kwargs)
 
     elif task == "langmodel":
-        from deepx.tasks.language.langmodel import LangModeling
+        from deepx.tasks.language.langmodel import LangModel
 
-        task = LangModeling(dataset_name=dataset, **kwargs)
+        task = LangModel(dataset_name=dataset, **kwargs)
 
 
 def change_radio(choice):

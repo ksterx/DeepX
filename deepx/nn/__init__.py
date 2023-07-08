@@ -15,7 +15,7 @@ registered_models = {
     "resnet152": ResNet152,
     "unet": UNet,
     "mlp": MLP,
-    "lang": LangModelTransformer,
+    "lmtransformer": LangModelTransformer,
 }
 
 registered_losses = {

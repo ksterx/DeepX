@@ -9,7 +9,7 @@ from torch import nn
 from deepx.tasks import (
     Classification,
     ClassificationDM,
-    LangModeling,
+    LangModel,
     Segmentation,
     SegmentationDM,
     WikiText103DM,
@@ -71,7 +71,7 @@ def train(
         model = Segmentation(**task_kwargs)  # type: ignore
         datamodule = SegmentationDM(**dataset_kwargs)  # type: ignore
     elif task == "lm" or task == "langmodel":
-        model = LangModeling(**task_kwargs)  # type: ignore
+        model = LangModel(**task_kwargs)  # type: ignore
         datamodule = WikiText103DM(**dataset_kwargs)  # type: ignore
     else:
         raise ValueError(f"Task {task} is not found in available tasks.")

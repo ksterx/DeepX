@@ -1,60 +1,33 @@
-import dataclasses as dc
-import pathlib
+from typing import Any
 
-import numpy as np
 import torch
 from lightning import LightningModule
 from torch import nn
-from torch.utils.data import DataLoader, Dataset
-from torchmetrics.classification import MulticlassJaccardIndex
-from torchtext.datasets import WikiText103
 from transformers import AutoTokenizer
 
-from deepx.nn import LangModelTransformer
 from deepx.tasks import DataModuleX, TaskX
 
 
-@dc.dataclass
-class LangModelConfig:
-    tokenizer: str = "bert-base-uncased"
-    max_length: int = 128
-    embed_dim: int = 512
-    num_heads: int = 8
-    hidden_dim: int = 2048
-    num_blocks: int = 6
-    dropout: float = 0.0
+class LangModel(TaskX):
+    NAME = "langmodel"
 
-
-class LangModeling(TaskX):
     def __init__(
         self,
         model: str | LightningModule,
         lr: float = 0.001,
         loss_fn: nn.Module | str = nn.CrossEntropyLoss(),
         optimizer: str | torch.optim.Optimizer = "adam",
-        tokenizer: str = "bert-base-uncased",
+        tokenizer: str | Any = "bert-base-uncased",
         max_length: int = 128,
-        embed_dim: int = 512,
-        num_heads: int = 8,
-        hidden_dim: int = 2048,
-        num_blocks: int = 6,
-        dropout: float = 0.0,
         **kwargs,
     ):
         super().__init__(model=model, lr=lr, loss_fn=loss_fn, optimizer=optimizer, **kwargs)
 
-        self.tokenizer = AutoTokenizer.from_pretrained(tokenizer)
-        self.vocab_size = self.tokenizer.vocab_size
+        if isinstance(tokenizer, str):
+            self.tokenizer = AutoTokenizer.from_pretrained(tokenizer)
+        else:
+            self.tokenizer = tokenizer
         self.max_length = max_length
-
-        self.model = LangModelTransformer(
-            vocab_size=self.vocab_size,
-            embed_dim=embed_dim,
-            num_heads=num_heads,
-            hidden_dim=hidden_dim,
-            num_blocks=num_blocks,
-            dropout=dropout,
-        )
 
     def _mode_step(self, batch, mode: str):
         src = self.tokenizer.encode(
@@ -71,8 +44,5 @@ class LangModeling(TaskX):
         self.log(f"{mode}_loss", loss)
 
 
-class WikiText103DM(DataModuleX):
-    def setup(self, stage=None):
-        self.train_data, self.valid_data, self.test_data = WikiText103(
-            self.data_dir, split=("train", "valid", "test")
-        )
+class LangModelDM(DataModuleX):
+    pass

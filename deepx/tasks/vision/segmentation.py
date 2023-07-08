@@ -1,5 +1,3 @@
-import pathlib
-
 import numpy as np
 import torch
 from lightning import LightningModule
@@ -64,23 +62,6 @@ class Segmentation(TaskX):
 
 
 class SegmentationDM(DataModuleX):
-    def __init__(
-        self,
-        data_dir: str | pathlib.Path,
-        batch_size: int = 32,
-        train_ratio: float = 0.9,
-        num_workers: int = 2,
-        download: bool = False,
-        **kwargs,
-    ):
-        super().__init__(
-            data_dir=data_dir,
-            batch_size=batch_size,
-            train_ratio=train_ratio,
-            num_workers=num_workers,
-            download=download,
-        )
-
     def transform(
         self,
         size,

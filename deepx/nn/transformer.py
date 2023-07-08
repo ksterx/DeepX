@@ -299,12 +299,14 @@ class Transformer(nn.Module):
 
 
 class LangModelTransformer(TransformerEncoder):
+    NAME = "lmtransformer"
+
     def __init__(
         self,
         vocab_size: int,
         embed_dim: int,
-        num_heads: int,
-        hidden_dim: int,
+        num_heads: int = 8,
+        hidden_dim: int = 2048,
         num_blocks: int = 6,
         dropout: float = 0.0,
     ):
