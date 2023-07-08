@@ -15,9 +15,10 @@ class Classification(TaskX):
         num_classes: int,
         lr: float = 1e-3,
         loss_fn: nn.Module | str = nn.CrossEntropyLoss(),
+        optimizer: str | torch.optim.Optimizer = "adam",
         **kwargs,
     ):
-        super().__init__(model=model, lr=lr, loss_fn=loss_fn)
+        super().__init__(model=model, lr=lr, loss_fn=loss_fn, optimizer=optimizer, **kwargs)
 
         self.train_accuracy = Accuracy(task="multiclass", num_classes=num_classes)
         self.val_accuracy = Accuracy(task="multiclass", num_classes=num_classes)
@@ -38,6 +39,8 @@ class Classification(TaskX):
         exec(f"self.{mode}_accuracy.update(preds, y)")
         self.log(f"{mode}_loss", loss, prog_bar=True)
         self.log(f"{mode}_acc", eval(f"self.{mode}_accuracy"), prog_bar=True)
+
+        return loss
 
     @property
     def name(self):

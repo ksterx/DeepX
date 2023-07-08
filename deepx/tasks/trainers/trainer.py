@@ -1,6 +1,7 @@
 from lightning import LightningDataModule, LightningModule, Trainer
 from lightning.pytorch.callbacks import EarlyStopping, ModelSummary
 from lightning.pytorch.loggers import MLFlowLogger
+from torch import nn, optim
 
 from deepx import tasks
 from deepx.nn import registered_models
@@ -13,15 +14,31 @@ class TrainerX:
         self,
         model: str | LightningModule,
         datamodule: str | LightningDataModule,
-        root_dir: str = "/workspace",
-        data_dir: str = "/workspace/data",
-        log_dir: str = "/workspace/experiments",
-        batch_size: int = 32,
-        train_ratio: float = 0.8,
-        num_workers: int = 2,
-        download: bool = False,
+        batch_size: int,
+        train_ratio: float,
+        num_workers: int,
+        download: bool,
+        lr: float,
+        loss_fn: str | nn.Module,
+        optimizer: str | optim.Optimizer,
+        root_dir: str,
+        data_dir: str,
+        log_dir: str,
         **kwargs,
     ):
+        self.hparams = kwargs
+        self.hparams.update(
+            {
+                "model": model,
+                "datamodule": datamodule,
+                "batch_size": batch_size,
+                "train_ratio": train_ratio,
+                "lr": lr,
+                "loss_fn": loss_fn,
+                "optimizer": optimizer,
+            }
+        )
+
         self.root_dir = root_dir
         self.data_dir = data_dir
         self.log_dir = log_dir
@@ -66,6 +83,10 @@ class TrainerX:
         debug: bool = False,
         **kwargs,
     ):
+        self.hparams.update(kwargs)
+        self.hparams.update(
+            {"epochs": epochs, "stopping_patience": stopping_patience, "ckpt_path": ckpt_path}
+        )
         self.set(
             epochs=epochs,
             stopping_patience=stopping_patience,
@@ -102,7 +123,7 @@ class TrainerX:
                 tags={"model": self.model.name},
                 tracking_uri=f"file://{self.log_dir}",
             )
-            # logger.log_hyperparams(task_kwargs)
+            logger.log_hyperparams(self.hparams)
         else:
             logger = None
 

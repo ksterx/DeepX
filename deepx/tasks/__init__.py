@@ -11,6 +11,7 @@ from deepx.tasks.vision import (
     Flowers102DM,
     Segmentation,
     SegmentationDM,
+    VocSegDM,
 )
 
 __all__ = [
@@ -38,7 +39,9 @@ registered_tasks = {
     },
     "segmentation": {
         "task": Segmentation,
-        "datamodule": [SegmentationDM],
+        "datamodule": {
+            "voc": VocSegDM,
+        },
     },
     "langmodel": {
         "task": LangModeling,

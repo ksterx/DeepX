@@ -1,10 +1,11 @@
+import torch
 from lightning import LightningDataModule, LightningModule
-from torch import nn, optim
+from torch import nn
 
 from .trainer import TrainerX
 
 
-class ClassificationTrainer(TrainerX):
+class SegmentationTrainer(TrainerX):
     TASK_TYPE = "classification"
 
     def __init__(
@@ -17,7 +18,7 @@ class ClassificationTrainer(TrainerX):
         download: bool = False,
         lr: float = 1e-3,
         loss_fn: str | nn.Module = nn.CrossEntropyLoss(),
-        optimizer: str | optim.Optimizer = "adam",
+        optimizer: str | torch.optim.Optimizer = "adam",
         root_dir: str = "/workspace",
         data_dir: str = "/workspace/data",
         log_dir: str = "/workspace/experiments",
@@ -39,7 +40,7 @@ class ClassificationTrainer(TrainerX):
             **kwargs,
         )
 
-        self.hparams.update({"lr": lr, "loss_fn": loss_fn})
+        self.hparams.update({"lr": lr, "loss_fn": loss_fn, "optimizer": optimizer})
 
         # Set up model
         num_classes = self.datamodule.NUM_CLASSES
@@ -48,5 +49,10 @@ class ClassificationTrainer(TrainerX):
 
         # Set up task
         self.task = self.get_task(
-            self.TASK_TYPE, model=self.model, num_classes=num_classes, lr=lr, loss_fn=loss_fn
+            self.TASK_TYPE,
+            model=self.model,
+            num_classes=num_classes,
+            lr=lr,
+            loss_fn=loss_fn,
+            optimizer=optimizer,
         )

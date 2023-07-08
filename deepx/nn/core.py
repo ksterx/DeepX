@@ -2,6 +2,8 @@ from torch import nn
 
 
 class MLP(nn.Module):
+    name = "mlp"
+
     def __init__(
         self,
         channels_in_layers: list[int],

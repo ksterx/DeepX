@@ -13,9 +13,10 @@ class TaskX(LightningModule, ABC):
     def __init__(
         self,
         model,
-        lr: float = 1e-3,
-        loss_fn: nn.Module | str = nn.CrossEntropyLoss(),
-        optimizer: str | torch.optim.Optimizer = "adam",
+        lr: float,
+        loss_fn: nn.Module | str,
+        optimizer: str | torch.optim.Optimizer,
+        **kwargs,
     ):
         LightningModule.__init__(self)
         ABC.__init__(self)
