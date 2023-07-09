@@ -4,6 +4,8 @@ from .dm import DataModuleX
 
 
 class SegmentationDM(DataModuleX):
+    SIZE: tuple[int, int]
+
     def transform(
         self,
         size,

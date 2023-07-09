@@ -51,19 +51,9 @@ pip install -e .
 
 #### Classification
 
-- Terminal
-
-```bash
-cd /tasks
-python train.py --task classification --model resnet18 --dataset cifar10 --batch_size 128 --epochs 200 --debug
-tensorboard --logdir experiments
-```
-
-- Python
-
 ```python
 # Using default config
-from deepx.tasks import ClassificationTrainer
+from deepx.trainers import ClassificationTrainer
 
 trainer = ClassificationTrainer(
     model="resnet18",
@@ -75,7 +65,7 @@ trainer.train()
 
 ```python
 # Using custom model
-from deepx.tasks import ClassificationTrainer
+from deepx.trainers import ClassificationTrainer
 from deepx.nn import MLP
 
 model = MLP([64, 128, 10])
@@ -90,17 +80,8 @@ trainer.train(epochs=100, batch_size=128)
 
 #### Segmentation
 
-- Terminal
-
-```bash
-cd deepx/tasks
-python train.py --task segmentation --model unet --dataset voc --batch_size 128 --epochs 200 --debug
-```
-
-- Python
-
 ```python
-from deepx.tasks import SegmentationTrainer
+from deepx.trainers import SegmentationTrainer
 
 trainer = SegmentationTrainer(model="unet", datamodule="vocseg")
 
@@ -110,7 +91,7 @@ trainer.train()
 ### Inference
 
 ```bash
-cd deepx/tasks
+cd apps
 python inference.py
 ```
 

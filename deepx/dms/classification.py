@@ -4,6 +4,11 @@ from .dm import DataModuleX
 
 
 class ClassificationDM(DataModuleX):
+    NAME: str
+    NUM_CLASSES: int
+    NUM_CHANNELS: int
+    SIZE: tuple[int, int]
+
     def __init__(
         self,
         data_dir: str,
@@ -21,7 +26,8 @@ class ClassificationDM(DataModuleX):
             download=download,
         )
 
-    def transform(self, size, antialias=True, mean=(0.1307,), std=(0.3081,)):
+    @classmethod
+    def _transform(cls, size, antialias=True, mean=(0.1307,), std=(0.3081,)):
         return transforms.Compose(
             [
                 transforms.ToTensor(),
@@ -30,7 +36,8 @@ class ClassificationDM(DataModuleX):
             ]
         )
 
-    def train_transform(self, size, antialias=True, mean=(0.1307,), std=(0.3081,)):
+    @classmethod
+    def _train_transform(cls, size, antialias=True, mean=(0.1307,), std=(0.3081,)):
         return transforms.Compose(
             [
                 transforms.RandomCrop(size, padding=4),

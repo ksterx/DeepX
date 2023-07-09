@@ -7,6 +7,7 @@ class MNISTDM(ClassificationDM):
     NAME = "mnist"
     NUM_CLASSES = 10
     NUM_CHANNELS = 1
+    SIZE = (8, 8)
 
     def __init__(
         self,
@@ -26,18 +27,20 @@ class MNISTDM(ClassificationDM):
             **kwargs,
         )
 
-        self._transform = self.transform((8, 8))
-
     def prepare_data(self):
         MNIST(self.data_dir, train=True, download=self.download)
         MNIST(self.data_dir, train=False, download=self.download)
 
     def setup(self, stage=None):
         if stage == "fit":
-            data = MNIST(self.data_dir, train=True, transform=self._transform)
+            data = MNIST(self.data_dir, train=True, transform=self.transform())
             self.train_data, self.val_data = self._random_split(data)
 
-            self.test_data = MNIST(self.data_dir, train=False, transform=self._transform)
+            self.test_data = MNIST(self.data_dir, train=False, transform=self.transform())
 
         if stage == "predict":
-            self.predict_data = MNIST(self.data_dir, train=False, transform=self._transform)
+            self.predict_data = MNIST(self.data_dir, train=False, transform=self.transform())
+
+    @classmethod
+    def transform(cls):
+        return cls._transform(cls.SIZE)

@@ -7,6 +7,7 @@ class FashionMNISTDM(ClassificationDM):
     NAME = "fashionmnist"
     NUM_CLASSES = FashionMNIST.classes
     NUM_CHANNELS = 1
+    SIZE = (8, 8)
 
     def __init__(
         self,
@@ -24,19 +25,24 @@ class FashionMNISTDM(ClassificationDM):
             download=download,
         )
 
-        self._transform = self.transform((8, 8))
-        self._train_transform = self.train_transform((8, 8))
-
     def prepare_data(self):
         FashionMNIST(self.data_dir, train=True, download=self.download)
         FashionMNIST(self.data_dir, train=False, download=self.download)
 
     def setup(self, stage=None):
         if stage == "fit":
-            data = FashionMNIST(self.data_dir, train=True, transform=self._train_transform)
+            data = FashionMNIST(self.data_dir, train=True, transform=self.train_transform())
             self.train_data, self.val_data = self._random_split(data)
 
-            self.test_data = FashionMNIST(self.data_dir, train=False, transform=self._transform)
+            self.test_data = FashionMNIST(self.data_dir, train=False, transform=self.transform())
 
         if stage == "predict":
-            self.predict_data = FashionMNIST(self.data_dir, train=False, transform=self._transform)
+            self.predict_data = FashionMNIST(self.data_dir, train=False, transform=self.transform())
+
+    @classmethod
+    def transform(cls):
+        return cls._transform()
+
+    @classmethod
+    def train_transform(cls):
+        return cls._train_transform()

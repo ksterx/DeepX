@@ -7,6 +7,7 @@ class CIFAR100DM(ClassificationDM):
     NAME = "cifar100"
     NUM_CLASSES = 100
     NUM_CHANNELS = 3
+    SIZE = (32, 32)
     CLASSES = [
         "apple",
         "aquarium_fish",
@@ -126,19 +127,24 @@ class CIFAR100DM(ClassificationDM):
             download=download,
         )
 
-        self._transform = self.transform((32, 32))
-        self._train_transform = self.train_transform((32, 32))
-
     def prepare_data(self):
         CIFAR100(self.data_dir, train=True, download=self.download)
         CIFAR100(self.data_dir, train=False, download=self.download)
 
     def setup(self, stage=None):
         if stage == "fit":
-            data = CIFAR100(self.data_dir, train=True, transform=self._train_transform)
+            data = CIFAR100(self.data_dir, train=True, transform=self.train_transform())
             self.train_data, self.val_data = self._random_split(data)
 
-            self.test_data = CIFAR100(self.data_dir, train=False, transform=self._transform)
+            self.test_data = CIFAR100(self.data_dir, train=False, transform=self.transform())
 
         if stage == "predict":
-            self.predict_data = CIFAR100(self.data_dir, train=False, transform=self._transform)
+            self.predict_data = CIFAR100(self.data_dir, train=False, transform=self.transform())
+
+    @classmethod
+    def transform(cls):
+        return cls._transform()
+
+    @classmethod
+    def train_transform(cls):
+        return cls._train_transform((32, 32))

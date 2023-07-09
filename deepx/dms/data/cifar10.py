@@ -19,6 +19,7 @@ class CIFAR10DM(ClassificationDM):
         "ship",
         "truck",
     ]
+    SIZE = (32, 32)
 
     def __init__(
         self,
@@ -36,19 +37,24 @@ class CIFAR10DM(ClassificationDM):
             download=download,
         )
 
-        self._transform = self.transform((32, 32))
-        self._train_transform = self.train_transform((32, 32))
-
     def prepare_data(self):
         CIFAR10(self.data_dir, train=True, download=self.download)
         CIFAR10(self.data_dir, train=False, download=self.download)
 
     def setup(self, stage=None):
         if stage == "fit":
-            data = CIFAR10(self.data_dir, train=True, transform=self._train_transform)
+            data = CIFAR10(self.data_dir, train=True, transform=self.train_transform())
             self.train_data, self.val_data = self._random_split(data)
 
-            self.test_data = CIFAR10(self.data_dir, train=False, transform=self._transform)
+            self.test_data = CIFAR10(self.data_dir, train=False, transform=self.transform())
 
         if stage == "predict":
-            self.predict_data = CIFAR10(self.data_dir, train=False, transform=self._transform)
+            self.predict_data = CIFAR10(self.data_dir, train=False, transform=self.transform())
+
+    @classmethod
+    def transform(cls):
+        return cls._transform(cls.SIZE)
+
+    @classmethod
+    def train_transform(cls):
+        return cls._train_transform(cls.SIZE)
