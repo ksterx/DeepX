@@ -5,7 +5,7 @@ import torch
 from PIL import Image, ImageTk
 
 from deepx.nn import registered_models
-from deepx.tasks.classification import ClassificationTask
+from deepx.tasks import Classification
 
 
 class ClassificationApp:
@@ -78,7 +78,7 @@ class ClassificationApp:
     def run_inference(self):
         print("Running inference...")
         if self.ckpt_path and self.image_path:
-            model = ClassificationTask.load_from_checkpoint(
+            model = Classification.load_from_checkpoint(
                 checkpoint_path=self.ckpt_path,
                 dataset_name=self.dataset_name,
                 model_name=self.model_name,

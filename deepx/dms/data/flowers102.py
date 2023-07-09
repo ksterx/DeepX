@@ -1,4 +1,3 @@
-from torch.utils.data import random_split
 from torchvision.datasets import Flowers102
 
 from ..classification import ClassificationDM
@@ -8,6 +7,7 @@ class Flowers102DM(ClassificationDM):
     NAME = "flowers102"
     NUM_CLASSES = 102
     NUM_CHANNELS = 3
+    SIZE = (224, 224)
     CLASSES = [
         "pink primrose",
         "hard-leaved pocket orchid",
@@ -129,10 +129,6 @@ class Flowers102DM(ClassificationDM):
             download=download,
         )
 
-        size = (224, 224)
-        self._transform = self.transform(size)
-        self._train_transform = self.train_transform(size)
-
     def prepare_data(self):
         Flowers102(self.data_dir, split="train", download=self.download)
         Flowers102(self.data_dir, split="val", download=self.download)
@@ -141,12 +137,20 @@ class Flowers102DM(ClassificationDM):
     def setup(self, stage=None):
         if stage == "fit" or None:
             self.train_data = Flowers102(
-                self.data_dir, split="train", transform=self._train_transform
+                self.data_dir, split="train", transform=self.train_transform()
             )
-            self.val_data = Flowers102(self.data_dir, split="val", transform=self._transform)
+            self.val_data = Flowers102(self.data_dir, split="val", transform=self.transform())
 
         if stage == "test" or None:
-            self.test_data = Flowers102(self.data_dir, split="test", transform=self._transform)
+            self.test_data = Flowers102(self.data_dir, split="test", transform=self.transform())
 
         if stage == "predict" or None:
-            self.predict_data = Flowers102(self.data_dir, split="test", transform=self._transform)
+            self.predict_data = Flowers102(self.data_dir, split="test", transform=self.transform())
+
+    @classmethod
+    def transform(self):
+        return self._transform(cls.SIZE)
+
+    @classmethod
+    def train_transform(self):
+        return self._train_transform(cls.SIZE)

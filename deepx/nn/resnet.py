@@ -236,6 +236,8 @@ class ResNet101(ResNet):
 
 
 class ResNet152(ResNet):
+    NAME = "resnet152"
+
     def __init__(self, num_classes, in_channels: int = 3):
         super().__init__(in_channels, num_classes, BottleneckBlock)
         self.layers = self._make_layers([3, 8, 36, 3], p_dropout=0.3)
