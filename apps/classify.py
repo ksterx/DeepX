@@ -1,58 +1,59 @@
 import gradio as gr
 import torch
-import torchvision.transforms as transforms
-from PIL import Image
 
-from deepx.dms import CIFAR10DM
-from deepx.nn import ResNet18
+from deepx import registered_tasks
+from deepx.dms import CIFAR10DM, MNISTDM
+from deepx.nn import ResNet18, registered_models
 from deepx.tasks import Classification
 
-dm = CIFAR10DM
+registered_dms = registered_tasks['classification']['datamodule']
 
+def load_model(checkpoint_path, model_name, dm_name):
+    model_class = registered_models[model_name]
+    dm_class = registered_dms[dm_name]
+    dm = dm_class()
 
-# 学習済みモデルの読み込み（ダミーコード）
-def load_model(checkpoint_path):
-    model = ResNet18(num_classes=10, in_channels=3)
-    model = Classification.load_from_checkpoint(checkpoint_path, model=model, num_classes=dm.CLASSES)
+    model = model_class(num_classes=dm.NUM_CLASSES, in_channels=dm.NUM_CHANNELS)
+    model = Classification.load_from_checkpoint(checkpoint_path, model=model, num_classes=dm.NUM_CLASSES)
     model.eval()
-    return model
+    return model, dm
 
-# 画像の前処理
-def preprocess(image):
+
+def predict(ckpt_path, model_name, dm_name, image):
+    model = registered_models[model_name]
+    dm = registered_dms[dm_name]
+    model = model(num_classes=dm.NUM_CLASSES, in_channels=dm.NUM_CHANNELS)
+    model = Classification.load_from_checkpoint(ckpt_path, model=model, num_classes=dm.NUM_CLASSES)
+    model.eval()
+
+    # Preprocess
     transform = dm.transform()
     image = transform(image).unsqueeze(0)
-    return image
 
-# 推論
-def predict(model, image):
+    # Predict
+    image = image.to(model.device)
     output = model(image)
     _, predicted = torch.max(output, 1)
-    return predicted.item()
 
-# ウェブアプリの作成
-def classify_image(model, image):
-    image = preprocess(image)
-    prediction = predict(model, image)
+    # Result
     class_names = dm.CLASSES
-    return class_names[prediction]
+    return class_names[predicted.item()]
 
-def app():
-    # チェックポイントパスを入力するためのテキストボックスを作成
-    checkpoint_path = gr.inputs.Textbox(lines=1, label="Checkpoint Path")
-    model = None
 
-    def load_model_and_classify_image(checkpoint_path, image):
-        nonlocal model
-        if model is None:
-            model = load_model(checkpoint_path)
-        return classify_image(model, image)
+with gr.Blocks("Model") as app:
+    gr.Markdown("""
+        # Image Classification App
+    """)
+    with gr.Row():
+        with gr.Column():
+            image = gr.Image()
+            with gr.Row():
+                model_name = gr.Dropdown(list(registered_models.keys()), label="Model")
+                dm_name = gr.Dropdown(list(registered_dms.keys()), label="Dataset")
+            ckpt_path = gr.Textbox(lines=1, label="Checkpoint Path")
+            predict_btn = gr.Button(label="Predict")
+        with gr.Column():
+            result = gr.Label(label="Result")
+    predict_btn.click(fn=predict, inputs=[ckpt_path, model_name, dm_name, image], outputs=result)
 
-    # 画像の表示と推論結果の表示
-    image = gr.inputs.Image()
-    label = gr.outputs.Textbox()
-    interface = gr.Interface(fn=load_model_and_classify_image, inputs=[checkpoint_path, image], outputs=label, capture_session=True)
-    return interface
-
-if __name__ == "__main__":
-    app_instance = app()
-    app_instance.launch()
+app.launch()
