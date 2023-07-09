@@ -7,7 +7,7 @@ from .trainer import TrainerX
 
 
 class LangModelTrainer(TrainerX):
-    TASK_TYPE = "langmodel"
+    NAME = "langmodel"
 
     def __init__(
         self,
@@ -72,7 +72,7 @@ class LangModelTrainer(TrainerX):
                 "max_length": max_length,
             }
         )
-        self.task = self.get_task(task=self.TASK_TYPE, **self.task_cfg)
+        self.task = self.get_task(task=self.NAME, **self.task_cfg)
 
         self.hparams.update(self.dm_cfg)
         self.hparams.update(self.model_cfg)

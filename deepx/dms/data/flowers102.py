@@ -1,4 +1,3 @@
-from torch.utils.data import random_split
 from torchvision.datasets import Flowers102
 
 from ..classification import ClassificationDM

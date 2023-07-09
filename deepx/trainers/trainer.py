@@ -3,12 +3,12 @@ from lightning.pytorch.callbacks import EarlyStopping, ModelSummary
 from lightning.pytorch.loggers import MLFlowLogger
 from torch import nn, optim
 
-from deepx import tasks
+from deepx import registered_tasks
 from deepx.nn import registered_models
 
 
 class TrainerX:
-    TASK_TYPE = ""
+    NAME = ""
 
     def __init__(
         self,
@@ -65,7 +65,7 @@ class TrainerX:
 
     def get_datamodule(self, datamodule, **kwargs):
         if isinstance(datamodule, str):
-            dm_cls = tasks.registered_tasks[self.TASK_TYPE]["datamodule"][datamodule]
+            dm_cls = registered_tasks[self.NAME]["datamodule"][datamodule]
             return dm_cls(**kwargs)
         else:
             return datamodule
@@ -79,7 +79,7 @@ class TrainerX:
 
     def get_task(self, task, **kwargs):
         if isinstance(task, str):
-            task_cls = tasks.registered_tasks[task]["task"]
+            task_cls = registered_tasks[task]["task"]
             return task_cls(**kwargs)
         else:
             return task

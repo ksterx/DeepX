@@ -1,8 +1,18 @@
+# Development
 black
 flake8
-lightning
-mlflow
 mypy
 snakeviz
+
+# MLOps
+lightning
+mlflow
 torch-tb-profiler
 transformers
+
+# Others
+ipywidgets
+portalocker
+fugashi
+ipadic
+ujson
