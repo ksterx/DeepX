@@ -8,7 +8,7 @@ from .core import MLP
 
 
 class Attention(nn.Module):
-    def __init__(self, embed_dim: int, num_heads: int = 1, dropout: float = 0.1):
+    def __init__(self, embed_dim: int, num_heads: int = 1, dropout: float = 0.0):
         super().__init__()
         self.dropout = nn.Dropout(p=dropout)
         self.scale = math.sqrt(embed_dim)
@@ -74,7 +74,7 @@ class SelfAttention(Attention):
 
 
 class MultiHeadAttention(nn.Module):
-    def __init__(self, embed_dim: int, num_heads: int, dropout: float = 0.1):
+    def __init__(self, embed_dim: int, num_heads: int, dropout: float = 0.0):
         super().__init__()
 
         self.head_dim = embed_dim // num_heads
@@ -82,9 +82,9 @@ class MultiHeadAttention(nn.Module):
 
         self.dropout = nn.Dropout(p=dropout)
         self.heads = nn.ModuleList(
-            [Attention(embed_dim, self.head_dim, dropout) for _ in range(num_heads)]
+            [Attention(embed_dim, num_heads, dropout) for _ in range(num_heads)]
         )
-        self.fc = nn.Linear(embed_dim * num_heads, embed_dim)
+        self.fc = nn.Linear(embed_dim, embed_dim)
         self.relu = nn.ReLU()
 
     def forward(
@@ -150,7 +150,9 @@ class TransformerEncoderBlock(nn.Module):
         self.attention = MultiHeadSelfAttention(embed_dim, num_heads, dropout)
         self.dropout = nn.Dropout(p=dropout)
         self.norm1 = nn.LayerNorm(embed_dim)
-        self.fc = MLP([embed_dim, hidden_dim, embed_dim], dropout=dropout, activation=nn.GELU())
+        self.fc = MLP(
+            [embed_dim, hidden_dim, embed_dim], dropout=dropout, activation=nn.GELU(), flatten=False
+        )
         self.norm2 = nn.LayerNorm(embed_dim)
 
     def forward(self, x: Tensor, mask: Tensor | None = None) -> tuple[Tensor, Tensor]:

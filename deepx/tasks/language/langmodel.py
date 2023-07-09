@@ -34,7 +34,7 @@ class LangModel(TaskX):
     def _mode_step(self, batch, batch_idx, mode: str):
         x = batch[:, :-1]
         y = batch[:, 1:]
-        logits = self(x)
+        logits, sim = self(x)
         loss = self.loss_fn(logits, y)
         self.log(f"{mode}_loss", loss)
 
