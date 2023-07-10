@@ -16,3 +16,4 @@ portalocker
 fugashi
 ipadic
 ujson
+gradio
