@@ -1,3 +1,5 @@
+from tkinter import filedialog
+
 import gradio as gr
 import torch
 
@@ -33,7 +35,8 @@ def predict(ckpt_path, model_name, dm_name, image):
     # Predict
     image = image.to(model.device)
     output = model(image)
-    _, predicted = torch.max(output, 1)
+    # _, predicted = torch.max(output, 1)
+    predicted = torch.argmax(output, dim=1)
 
     # Result
     class_names = dm.CLASSES
@@ -46,12 +49,24 @@ with gr.Blocks("Model") as app:
     """)
     with gr.Row():
         with gr.Column():
-            image = gr.Image()
-            with gr.Row():
-                model_name = gr.Dropdown(list(registered_models.keys()), label="Model")
-                dm_name = gr.Dropdown(list(registered_dms.keys()), label="Dataset")
-            ckpt_path = gr.Textbox(lines=1, label="Checkpoint Path")
-            predict_btn = gr.Button(label="Predict")
+            with gr.Box():
+                image = gr.Image(live=True, label="Image")
+
+                with gr.Row():
+                    model_name = gr.Dropdown(list(registered_models.keys()), label="Model")
+                    dm_name = gr.Dropdown(list(registered_dms.keys()), label="Dataset")
+
+                ckpt_path = gr.Textbox(label="Checkpoint path")
+                ckpt_btn = gr.Button(value="Select checkpoint", size="sm")
+
+                def set_ckpt_path():
+                    path = filedialog.askopenfilename(initialdir="/workspace/experiments", title="Select checkpoint file",)
+                    return path
+
+                ckpt_btn.click(fn=set_ckpt_path, outputs=ckpt_path)
+
+            predict_btn = gr.Button(value="Predict")
+
         with gr.Column():
             result = gr.Label(label="Result")
     predict_btn.click(fn=predict, inputs=[ckpt_path, model_name, dm_name, image], outputs=result)

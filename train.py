@@ -4,7 +4,7 @@ from deepx.trainers import ClassificationTrainer, LangModelTrainer, Segmentation
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-t", "--task", type=str, required=True)
-parser.add_argument("-m", "--model", type=str, required=True)
+parser.add_argument("-m", "--model", type=str, nargs="*", required=True)
 parser.add_argument("-d", "--dataset", type=str, required=True)
 parser.add_argument("-b", "--batch_size", type=int, default=32)
 parser.add_argument("-e", "--epochs", type=int, default=100)
@@ -21,5 +21,9 @@ match args.task:
     case _:
         raise ValueError(f"Task {args.task} not supported")
 
-trainer = trainer_cls(args.model, args.dataset, batch_size=args.batch_size, num_workers=args.num_workers)
-trainer.fit(epochs=args.epochs)
+if isinstance(args.model, str):
+    args.model = [args.model]
+
+for model in args.model:
+    trainer = trainer_cls(model, args.dataset, batch_size=args.batch_size)
+    trainer.train(epochs=args.epochs)

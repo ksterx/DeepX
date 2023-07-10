@@ -51,6 +51,24 @@ pip install -e .
 
 #### Classification
 
+- Terminal
+
+```bash
+python train.py --task classification --model resnet18 resnet50 --dataset mnist
+
+# usage: train.py [-h] -t TASK -m [MODEL ...] -d DATASET [-b BATCH_SIZE] [-e EPOCHS]
+
+# options:
+#   -h, --help            show this help message and exit
+#   -t TASK, --task TASK
+#   -m [MODEL ...], --model [MODEL ...]
+#   -d DATASET, --dataset DATASET
+#   -b BATCH_SIZE, --batch_size BATCH_SIZE
+#   -e EPOCHS, --epochs EPOCHS
+```
+
+- Python script
+
 ```python
 # Using default config
 from deepx.trainers import ClassificationTrainer
@@ -80,6 +98,14 @@ trainer.train(epochs=100, batch_size=128)
 
 #### Segmentation
 
+- Terminal
+
+```bash
+python train.py --task segmentation --model unet --dataset vocseg
+```
+
+- Python script
+
 ```python
 from deepx.trainers import SegmentationTrainer
 
@@ -88,14 +114,28 @@ trainer = SegmentationTrainer(model="unet", datamodule="vocseg")
 trainer.train()
 ```
 
+#### Other examples can be found in `docs/examples/`.
+
+### Visualization
+
+```bash
+bash dashboard.sh
+```
+
+or
+
+```bash
+mlflow server --backend-store-uri file:./experiments --host <host> --port <port>
+```
+
 ### Inference
 
 ```bash
 cd apps
-python inference.py
+python classify.py
 ```
 
-![inference](./docs/app.png)
+![inference](./docs/classifier.png)
 
 ## Development
 
