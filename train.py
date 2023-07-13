@@ -34,6 +34,5 @@ for model in args.model:
         batch_size=args.batch_size,
         download=args.download,
         root_dir=args.root_dir,
-        debug=args.debug,
     )
-    trainer.train(epochs=args.epochs)
+    trainer.train(epochs=args.epochs, debug=args.debug)

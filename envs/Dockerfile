@@ -15,6 +15,7 @@ RUN apt-get update \
     build-essential \
     curl \
     ffmpeg \
+    htop \
     python3-tk \
     zsh \
     && apt-get clean \

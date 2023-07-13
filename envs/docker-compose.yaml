@@ -8,9 +8,8 @@ services:
     # image: ksterx/ai:ubuntu-0.1
     shm_size: '16gb'
     ports:
-      - "5000:5000"
-      - "8080:8080"
       - "8888:8888"
+      - "8080:8080"
       - "6006:6006"
       - "2525:2525"
     volumes:
@@ -29,3 +28,17 @@ services:
               capabilities: [ gpu ]
               count: 1
     working_dir: /workspace
+
+  mlflow:
+    container_name: mlflow
+    image: ghcr.io/mlflow/mlflow:latest
+    ports:
+      - "5000:5000"
+    volumes:
+      - ../experiments:/workspace/mlruns
+    restart: always
+    depends_on:
+      - deepx
+    tty: true
+    working_dir: /workspace
+    command: mlflow server --backend-store-uri /workspace/mlruns --host 0.0.0.0

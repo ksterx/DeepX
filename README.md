@@ -16,10 +16,14 @@
 
   - Vision
     - Classification
-      -  [x] ResNet
+      - [x] ResNet
     - Segmentation
       - [x] UNet
     - Object Detection
+      - [ ] YOLO
+      - [ ] SSD
+    - Image Generation
+      - [ ] GAN
   - Language
     - [x] Language Model
     - [ ] Text Classification
