@@ -14,6 +14,7 @@ parser.add_argument("-bb", "--backbone", type=str, default="resnet18")
 parser.add_argument("-d", "--dataset", type=str, required=True)
 parser.add_argument("-b", "--batch_size", type=int, default=32)
 parser.add_argument("-e", "--epochs", type=int, default=100)
+parser.add_argument("-do", "--dropout", type=float, default=0.0)
 parser.add_argument("-r", "--root_dir", type=str, default="/workspace")
 parser.add_argument("-mo", "--monitor", type=str, default="val_loss")
 parser.add_argument("--debug", action="store_true")
@@ -44,5 +45,6 @@ for model in args.model:
         batch_size=args.batch_size,
         download=args.download,
         root_dir=args.root_dir,
+        dropout=args.dropout,
     )
     trainer.train(epochs=args.epochs, debug=args.debug, monitor=args.monitor)

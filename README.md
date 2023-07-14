@@ -23,7 +23,7 @@
       - [ ] YOLO
       - [ ] SSD
     - Image Generation
-      - [ ] GAN
+      - [x] GAN
   - Language
     - [x] Language Model
     - [ ] Text Classification
@@ -60,15 +60,21 @@ pip install -e .
 ```bash
 python train.py --task classification --model resnet18 resnet50 --dataset mnist
 
-# usage: train.py [-h] -t TASK -m [MODEL ...] -d DATASET [-b BATCH_SIZE] [-e EPOCHS]
+# usage: train.py [-h] -t TASK -m [MODEL ...] [-bb BACKBONE] -d DATASET [-b BATCH_SIZE] [-e EPOCHS] [-do DROPOUT] [-r ROOT_DIR] [-mo MONITOR] [--debug] [--download]
 
 # options:
 #   -h, --help            show this help message and exit
 #   -t TASK, --task TASK
 #   -m [MODEL ...], --model [MODEL ...]
+#   -bb BACKBONE, --backbone BACKBONE
 #   -d DATASET, --dataset DATASET
 #   -b BATCH_SIZE, --batch_size BATCH_SIZE
 #   -e EPOCHS, --epochs EPOCHS
+#   -do DROPOUT, --dropout DROPOUT
+#   -r ROOT_DIR, --root_dir ROOT_DIR
+#   -mo MONITOR, --monitor MONITOR
+#   --debug
+#   --download
 ```
 
 - Python script

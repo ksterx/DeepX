@@ -1,7 +1,7 @@
 import torch
 from lightning import LightningDataModule, LightningModule, Trainer
 from lightning.pytorch.callbacks import EarlyStopping, ModelSummary
-from lightning.pytorch.loggers import MLFlowLogger
+from lightning.pytorch.loggers import MLFlowLogger, TensorBoardLogger
 from torch import nn, optim
 
 from deepx import registered_tasks
@@ -94,6 +94,7 @@ class TrainerX:
         benchmark: bool = False,
         debug: bool = False,
         monitor: str = "val_loss",
+        logger: str = "mlflow",
         **kwargs,
     ):
         self.hparams.update(kwargs)
@@ -107,10 +108,11 @@ class TrainerX:
             benchmark=benchmark,
             debug=debug,
             logging=True,
+            logger=logger,
             monitor=monitor,
             **kwargs,
         )
-        # self.compiled_task = torch.compile(self.task)
+        # compiled_task = torch.compile(self.task)
         self.trainer.fit(self.task, datamodule=self.datamodule, ckpt_path=ckpt_path)
         if not debug:
             self.trainer.test(ckpt_path="best", datamodule=self.datamodule)
@@ -130,16 +132,21 @@ class TrainerX:
         benchmark: bool = False,
         debug: bool = False,
         logging: bool = True,
+        logger: str = "mlflow",
         monitor: str = "val_loss",
         **kwargs,
     ):
         if logging:
-            logger = MLFlowLogger(
-                experiment_name=self.datamodule.NAME,
-                tags={"model": self.model.NAME},
-                tracking_uri=f"file://{self.log_dir}",
-            )
-            logger.log_hyperparams(self.hparams)
+            match logger:
+                case "mlflow":
+                    logger = MLFlowLogger(
+                        experiment_name=self.datamodule.NAME,
+                        tags={"model": self.model.NAME},
+                        tracking_uri=f"file://{self.log_dir}",
+                    )
+                    logger.log_hyperparams(self.hparams)
+                case "tensorboard":
+                    logger = TensorBoardLogger(save_dir=self.log_dir, name=self.datamodule.NAME)
         else:
             logger = None
 
