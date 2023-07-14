@@ -1,4 +1,7 @@
+from torch.nn import BCELoss, CrossEntropyLoss, MSELoss
+
 from .core import MLP
+from .gan import GAN
 from .losses import DiceLoss, FocalLoss
 from .resnet import ResNet, ResNet18, ResNet34, ResNet50, ResNet101, ResNet152
 from .transformer import LangModelTransformer
@@ -14,11 +17,15 @@ registered_models = {
     "unet": UNet,
     "mlp": MLP,
     "lmtransformer": LangModelTransformer,
+    "gan": GAN,
 }
 
 registered_losses = {
     "dice": DiceLoss,
     "focal": FocalLoss,
+    "ce": CrossEntropyLoss,
+    "bce": BCELoss,
+    "mse": MSELoss,
 }
 
 

@@ -14,7 +14,7 @@ class ResidualBlock(nn.Module):
         hidden_channels: int,
         out_channels: int,
         is_first: bool = False,
-        p_dropout: float = 0.5,
+        p_dropout: float = 0.0,
     ):
         super().__init__()
         self.bn1 = nn.BatchNorm2d(in_channels)
@@ -74,7 +74,7 @@ class BottleneckBlock(nn.Module):
         hidden_channels: int,
         out_channels: int,
         is_first: bool = False,
-        p_dropout: float = 0.5,
+        p_dropout: float = 0.0,
     ):
         super().__init__()
         self.conv1 = nn.Conv2d(in_channels, hidden_channels, kernel_size=1, padding=0)
@@ -141,11 +141,13 @@ class ResNet(nn.Module):
         in_channels: int,
         num_classes: int,
         block: ResidualBlock | BottleneckBlock,
+        has_head: bool = True,
     ) -> None:
         super().__init__()
         self.input_channels = 64
         self.num_classes = num_classes
         self.block = block
+        self.has_head = has_head
 
         self.conv1 = nn.Conv2d(in_channels, 64, kernel_size=7, stride=2, padding=3)
         self.bn1 = nn.BatchNorm2d(64)
@@ -160,13 +162,14 @@ class ResNet(nn.Module):
         x = self.relu(x)
         x = self.maxpool(x)
         x = self.layers(x)
-        x = self.head(x)
+        if self.has_head:
+            x = self.head(x)
         return x
 
     def _make_layers(
         self,
         blocks_in_layers: list[int],
-        p_dropout: float = 0.5,
+        p_dropout: float = 0.0,
     ):
         layers = []
         for i, c in enumerate(self.block.CHANNELS_IN_LAYERS):
@@ -206,38 +209,38 @@ class ResNet(nn.Module):
 class ResNet18(ResNet):
     NAME = "resnet18"
 
-    def __init__(self, num_classes, in_channels: int = 3):
-        super().__init__(in_channels, num_classes, ResidualBlock)
-        self.layers = self._make_layers([2, 2, 2, 2], p_dropout=0.3)
+    def __init__(self, num_classes, in_channels, p_dropout=0.0, has_head=True):
+        super().__init__(in_channels, num_classes, ResidualBlock, has_head=has_head)
+        self.layers = self._make_layers([2, 2, 2, 2], p_dropout=p_dropout)
 
 
 class ResNet34(ResNet):
     NAME = "resnet34"
 
-    def __init__(self, num_classes, in_channels: int = 3):
-        super().__init__(in_channels, num_classes, ResidualBlock)
-        self.layers = self._make_layers([3, 4, 6, 3], p_dropout=0.3)
+    def __init__(self, num_classes, in_channels, p_dropout=0.0, has_head=True):
+        super().__init__(in_channels, num_classes, ResidualBlock, has_head=has_head)
+        self.layers = self._make_layers([3, 4, 6, 3], p_dropout=p_dropout)
 
 
 class ResNet50(ResNet):
     NAME = "resnet50"
 
-    def __init__(self, num_classes, in_channels: int = 3):
-        super().__init__(in_channels, num_classes, BottleneckBlock)
-        self.layers = self._make_layers([3, 4, 6, 3], p_dropout=0.3)
+    def __init__(self, num_classes, in_channels, p_dropout=0.0, has_head=True):
+        super().__init__(in_channels, num_classes, BottleneckBlock, has_head)
+        self.layers = self._make_layers([3, 4, 6, 3], p_dropout=p_dropout)
 
 
 class ResNet101(ResNet):
     NAME = "resnet101"
 
-    def __init__(self, num_classes, in_channels: int = 3):
-        super().__init__(in_channels, num_classes, BottleneckBlock)
-        self.layers = self._make_layers([3, 4, 23, 3], p_dropout=0.3)
+    def __init__(self, num_classes, in_channels, p_dropout=0.0, has_head=True):
+        super().__init__(in_channels, num_classes, BottleneckBlock, has_head)
+        self.layers = self._make_layers([3, 4, 23, 3], p_dropout=p_dropout)
 
 
 class ResNet152(ResNet):
     NAME = "resnet152"
 
-    def __init__(self, num_classes, in_channels: int = 3):
-        super().__init__(in_channels, num_classes, BottleneckBlock)
-        self.layers = self._make_layers([3, 8, 36, 3], p_dropout=0.3)
+    def __init__(self, num_classes, in_channels, p_dropout=0.0, has_head=True):
+        super().__init__(in_channels, num_classes, BottleneckBlock, has_head)
+        self.layers = self._make_layers([3, 8, 36, 3], p_dropout=p_dropout)

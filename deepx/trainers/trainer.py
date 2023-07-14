@@ -1,3 +1,4 @@
+import torch
 from lightning import LightningDataModule, LightningModule, Trainer
 from lightning.pytorch.callbacks import EarlyStopping, ModelSummary
 from lightning.pytorch.loggers import MLFlowLogger
@@ -92,6 +93,7 @@ class TrainerX:
         max_depth: int = 1,
         benchmark: bool = False,
         debug: bool = False,
+        monitor: str = "val_loss",
         **kwargs,
     ):
         self.hparams.update(kwargs)
@@ -105,8 +107,10 @@ class TrainerX:
             benchmark=benchmark,
             debug=debug,
             logging=True,
+            monitor=monitor,
             **kwargs,
         )
+        # self.compiled_task = torch.compile(self.task)
         self.trainer.fit(self.task, datamodule=self.datamodule, ckpt_path=ckpt_path)
         if not debug:
             self.trainer.test(ckpt_path="best", datamodule=self.datamodule)
@@ -126,6 +130,7 @@ class TrainerX:
         benchmark: bool = False,
         debug: bool = False,
         logging: bool = True,
+        monitor: str = "val_loss",
         **kwargs,
     ):
         if logging:
@@ -145,7 +150,7 @@ class TrainerX:
             logger=logger,
             enable_checkpointing=True,
             callbacks=[
-                EarlyStopping(monitor="val_loss", patience=stopping_patience),
+                EarlyStopping(monitor=monitor, patience=stopping_patience),
                 ModelSummary(max_depth=max_depth),
             ],
             benchmark=benchmark,

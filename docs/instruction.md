@@ -52,4 +52,18 @@ class NewTrainer(TrainerX):
     NAME = "new_trainer"
 ```
 
-- Register your task in `deepx/tasks/__init__.py`.
+## Register your task to `deepx/__init__.py`
+
+```python
+from .dms import MNISTDM
+from .tasks import NewTask
+
+registered_tasks = {
+    "new_task" {
+        "task": NewTask,
+        "datamodule": {
+            "mnist": MNISTDM
+        }
+    }
+}
+```

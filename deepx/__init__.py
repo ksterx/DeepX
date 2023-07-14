@@ -8,7 +8,7 @@ from .dms import (
     VOCSegDM,
     WikiText103DM,
 )
-from .tasks import Classification, LangModel, Segmentation
+from .tasks import Classification, ImageGen, LangModel, Segmentation
 
 registered_tasks = {
     "classification": {
@@ -25,6 +25,12 @@ registered_tasks = {
         "task": Segmentation,
         "datamodule": {
             "vocseg": VOCSegDM,
+        },
+    },
+    "imagegen": {
+        "task": ImageGen,
+        "datamodule": {
+            "mnist": MNISTDM,
         },
     },
     "langmodel": {

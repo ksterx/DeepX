@@ -1,10 +1,16 @@
 import argparse
 
-from deepx.trainers import ClassificationTrainer, LangModelTrainer, SegmentationTrainer
+from deepx.trainers import (
+    ClassificationTrainer,
+    ImageGenTrainer,
+    LangModelTrainer,
+    SegmentationTrainer,
+)
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-t", "--task", type=str, required=True)
 parser.add_argument("-m", "--model", type=str, nargs="*", required=True)
+parser.add_argument("-bb", "--backbone", type=str, default="resnet18")
 parser.add_argument("-d", "--dataset", type=str, required=True)
 parser.add_argument("-b", "--batch_size", type=int, default=32)
 parser.add_argument("-e", "--epochs", type=int, default=100)
@@ -19,6 +25,8 @@ match args.task:
         trainer_cls = ClassificationTrainer
     case "segmentation":
         trainer_cls = SegmentationTrainer
+    case "imagegen":
+        trainer_cls = ImageGenTrainer
     case "langmodel":
         trainer_cls = LangModelTrainer
     case _:
@@ -31,6 +39,7 @@ for model in args.model:
     trainer = trainer_cls(
         model,
         args.dataset,
+        backbone=args.backbone,
         batch_size=args.batch_size,
         download=args.download,
         root_dir=args.root_dir,
