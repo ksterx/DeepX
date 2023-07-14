@@ -12,7 +12,7 @@
   - [ ] Vision Transformer
   - [x] Transformer
 
-- Tasks
+- Algorithms
 
   - Vision
     - Classification

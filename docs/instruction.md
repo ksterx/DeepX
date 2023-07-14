@@ -18,7 +18,7 @@ Declare your model name as `NAME = <new_model>` at the top of the class, and als
     ```python
     from .algo import Algorithm
 
-    class NewTask(Algorithm):
+    class NewAlgo(Algorithm):
         NAME = "new_algo"
     ```
 
@@ -27,7 +27,7 @@ Declare your model name as `NAME = <new_model>` at the top of the class, and als
     ```python
     from .dm import DataModuleX
 
-    class NewTaskDM(DatamoduleX):
+    class NewAlgoDM(DatamoduleX):
     ```
 
 ## Creating a new dataset module
@@ -56,11 +56,11 @@ class NewTrainer(TrainerX):
 
 ```python
 from .dms import MNISTDM
-from .algos import NewTask
+from .algos import NewAlgo
 
 registered_algos = {
     "new_algo" {
-        "algo": NewTask,
+        "algo": NewAlgo,
         "datamodule": {
             "mnist": MNISTDM
         }

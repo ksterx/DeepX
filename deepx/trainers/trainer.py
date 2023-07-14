@@ -95,7 +95,7 @@ class TrainerX:
                 return algo_cls(**kwargs)
             except KeyError:
                 raise ValueError(
-                    f"Task {algo} not supported. Please register it at deepx/__init__.py"
+                    f"Algorithm {algo} not supported. Please register it at deepx/__init__.py"
                 )
         else:
             return algo
