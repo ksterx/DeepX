@@ -15,6 +15,7 @@ parser.add_argument("-d", "--dataset", type=str, required=True)
 parser.add_argument("-b", "--batch_size", type=int, default=32)
 parser.add_argument("-e", "--epochs", type=int, default=100)
 parser.add_argument("-r", "--root_dir", type=str, default="/workspace")
+parser.add_argument("-mo", "--monitor", type=str, default="val_loss")
 parser.add_argument("--debug", action="store_true")
 parser.add_argument("--download", action="store_true")
 args = parser.parse_args()
@@ -37,11 +38,11 @@ if isinstance(args.model, str):
 
 for model in args.model:
     trainer = trainer_cls(
-        model,
-        args.dataset,
+        model=model,
+        datamodule=args.dataset,
         backbone=args.backbone,
         batch_size=args.batch_size,
         download=args.download,
         root_dir=args.root_dir,
     )
-    trainer.train(epochs=args.epochs, debug=args.debug)
+    trainer.train(epochs=args.epochs, debug=args.debug, monitor=args.monitor)

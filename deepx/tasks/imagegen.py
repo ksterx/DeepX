@@ -1,5 +1,8 @@
+import tempfile
+
 import torch
 from torch import nn
+from torchvision.utils import save_image
 
 from .task import TaskX
 
@@ -27,6 +30,7 @@ class ImageGen(TaskX):
 
     def _mode_step(self, batch, batch_idx, mode):
         img, _ = batch
+        self.type_ = img
 
         opt_g, opt_d = self.optimizers()
 
@@ -37,8 +41,7 @@ class ImageGen(TaskX):
         preds = self.discriminator(img)
         loss_real = self.loss_fn(preds, torch.ones_like(preds))
         # for fake images
-        z = torch.randn(img.shape[0], self.generator.latent_dim, 1, 1)
-        z = z.type_as(img)
+        z = self.generate_noize(img.shape[0])
         fake_img = self.generator(z)
         preds = self.discriminator(fake_img)
         loss_fake = self.loss_fn(preds, torch.zeros_like(preds))
@@ -74,3 +77,15 @@ class ImageGen(TaskX):
         print("Generator optimizer:", opt_g)
         print("Discriminator optimizer:", opt_d)
         return opt_g, opt_d
+
+    def on_validation_epoch_end(self):
+        z = self.generate_noize(16)
+        fake_img = self.generator(z)
+        print("Generated images:", fake_img.shape)
+        save_image(fake_img, "generated.png", nrow=4, normalize=False)
+        save_image(fake_img, "generated_norm.png", nrow=4, normalize=True)
+
+    def generate_noize(self, batch_size):
+        z = torch.randn(batch_size, self.generator.latent_dim, 1, 1)
+        z = z.to(self.device)
+        return z

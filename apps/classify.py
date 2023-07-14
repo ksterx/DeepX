@@ -4,11 +4,11 @@ import gradio as gr
 import torch
 
 from deepx import registered_tasks
-from deepx.dms import CIFAR10DM, MNISTDM
-from deepx.nn import ResNet18, registered_models
+from deepx.nn import registered_models
 from deepx.tasks import Classification
 
-registered_dms = registered_tasks['classification']['datamodule']
+registered_dms = registered_tasks["classification"]["datamodule"]
+
 
 def load_model(checkpoint_path, model_name, dm_name):
     model_class = registered_models[model_name]
@@ -16,7 +16,9 @@ def load_model(checkpoint_path, model_name, dm_name):
     dm = dm_class()
 
     model = model_class(num_classes=dm.NUM_CLASSES, in_channels=dm.NUM_CHANNELS)
-    model = Classification.load_from_checkpoint(checkpoint_path, model=model, num_classes=dm.NUM_CLASSES)
+    model = Classification.load_from_checkpoint(
+        checkpoint_path, model=model, num_classes=dm.NUM_CLASSES
+    )
     model.eval()
     return model, dm
 
@@ -44,9 +46,11 @@ def predict(ckpt_path, model_name, dm_name, image):
 
 
 with gr.Blocks("Model") as app:
-    gr.Markdown("""
+    gr.Markdown(
+        """
         # Image Classification App
-    """)
+    """
+    )
     with gr.Row():
         with gr.Column():
             with gr.Box():
@@ -60,7 +64,10 @@ with gr.Blocks("Model") as app:
                 ckpt_btn = gr.Button(value="Select checkpoint", size="sm")
 
                 def set_ckpt_path():
-                    path = filedialog.askopenfilename(initialdir="/workspace/experiments", title="Select checkpoint file",)
+                    path = filedialog.askopenfilename(
+                        initialdir="/workspace/experiments",
+                        title="Select checkpoint file",
+                    )
                     return path
 
                 ckpt_btn.click(fn=set_ckpt_path, outputs=ckpt_path)
