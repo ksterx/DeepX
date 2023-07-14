@@ -1,8 +1,8 @@
 from torch.nn import BCELoss, CrossEntropyLoss, MSELoss
 
-from .core import MLP
 from .gan import GAN
 from .losses import DiceLoss, FocalLoss
+from .mlp import MLP
 from .resnet import ResNet, ResNet18, ResNet34, ResNet50, ResNet101, ResNet152
 from .transformer import LangModelTransformer
 from .unet import UNet

@@ -3,13 +3,13 @@ from tkinter import filedialog
 import gradio as gr
 from torchvision.utils import save_image
 
+from deepx.algos import ImageGen
 from deepx.nn import registered_models
-from deepx.tasks import ImageGen
 
 
 def generate(ckpt_path, model_name):
     model = registered_models[model_name]
-    model = model(backbone="resnet18", tgt_shape=(1, 8, 8))
+    model = model(backbone="mlp", tgt_shape=(1, 8, 8))
     model = ImageGen.load_from_checkpoint(ckpt_path, model=model)
     model.eval()
     z = model.generate_noize(16)

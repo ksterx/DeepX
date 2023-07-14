@@ -1,3 +1,5 @@
+import warnings
+
 from lightning import LightningDataModule, LightningModule
 from torch import nn, optim
 
@@ -9,7 +11,7 @@ class ImageGenTrainer(TrainerX):
 
     def __init__(
         self,
-        backbone: str,
+        backbone: str | nn.Module,
         model: str | LightningModule,
         datamodule: str | LightningDataModule,
         batch_size: int = 32,
@@ -45,6 +47,9 @@ class ImageGenTrainer(TrainerX):
             **kwargs,
         )
 
+        if loss_fn != "bce":
+            warnings.warn(f"Loss function {loss_fn} might cause problems. Use 'bce' instead.")
+
         # self.dm_cfg.update({})
         self.datamodule = self.get_datamodule(datamodule=datamodule, **self.dm_cfg)
 
@@ -62,9 +67,9 @@ class ImageGenTrainer(TrainerX):
         )
         self.model = self.get_model(model, **self.model_cfg)
 
-        self.task_cfg.update({"model": self.model})
-        self.task = self.get_task(task=self.NAME, **self.task_cfg)
+        self.algo_cfg.update({"model": self.model})
+        self.algo = self.get_algo(algo=self.NAME, **self.algo_cfg)
 
         self.hparams.update(self.dm_cfg)
         self.hparams.update(self.model_cfg)
-        self.hparams.update(self.task_cfg)
+        self.hparams.update(self.algo_cfg)

@@ -6,10 +6,10 @@ from torch import nn
 from torchmetrics import Accuracy
 from transformers import AutoTokenizer
 
-from .task import TaskX
+from .algo import Algorithm
 
 
-class Translation(TaskX):
+class Translation(Algorithm):
     NAME = "langmodel"
 
     def __init__(
@@ -30,9 +30,9 @@ class Translation(TaskX):
             self.tokenizer = tokenizer
         self.max_length = max_length
 
-        self.train_acc = Accuracy(task="multiclass", num_classes=self.tokenizer.vocab_size)
-        self.val_acc = Accuracy(task="multiclass", num_classes=self.tokenizer.vocab_size)
-        self.test_acc = Accuracy(task="multiclass", num_classes=self.tokenizer.vocab_size)
+        self.train_acc = Accuracy(algo="multiclass", num_classes=self.tokenizer.vocab_size)
+        self.val_acc = Accuracy(algo="multiclass", num_classes=self.tokenizer.vocab_size)
+        self.test_acc = Accuracy(algo="multiclass", num_classes=self.tokenizer.vocab_size)
 
     def _mode_step(self, batch, batch_idx, mode: str):
         x = batch[:, :-1]

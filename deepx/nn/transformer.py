@@ -4,7 +4,7 @@ import torch
 from torch import Tensor, nn
 from torch.nn import functional as F
 
-from .core import MLP
+from .mlp import MLP
 
 
 class Attention(nn.Module):

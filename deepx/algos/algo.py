@@ -5,8 +5,8 @@ from torch import nn
 from ..nn import registered_losses
 
 
-class TaskX(LightningModule):
-    NAME = ""
+class Algorithm(LightningModule):
+    NAME: str
 
     def __init__(
         self,

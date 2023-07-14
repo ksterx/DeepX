@@ -3,11 +3,11 @@ from tkinter import filedialog
 import gradio as gr
 import torch
 
-from deepx import registered_tasks
+from deepx import registered_algos
+from deepx.algos import Classification
 from deepx.nn import registered_models
-from deepx.tasks import Classification
 
-registered_dms = registered_tasks["classification"]["datamodule"]
+registered_dms = registered_algos["classification"]["datamodule"]
 
 
 def load_model(checkpoint_path, model_name, dm_name):

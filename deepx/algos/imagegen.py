@@ -3,10 +3,10 @@ from lightning.pytorch.loggers import TensorBoardLogger
 from torch import nn
 from torchvision.utils import make_grid
 
-from .task import TaskX
+from .algo import Algorithm
 
 
-class ImageGen(TaskX):
+class ImageGen(Algorithm):
     NAME = "imagegen"
 
     def __init__(
@@ -100,6 +100,5 @@ class ImageGen(TaskX):
     #         )
 
     def generate_noize(self, batch_size):
-        z = torch.randn(batch_size, self.generator.latent_dim, 1, 1)
-        z = z.to(self.device)
+        z = torch.randn(batch_size, self.generator.latent_dim, 1, 1, device=self.device)
         return z

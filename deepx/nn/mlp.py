@@ -11,6 +11,7 @@ class MLP(nn.Module):
         output_activation: nn.Module | None = None,
         flatten: bool = True,
         dropout: float = 0.0,
+        **kwargs,
     ):
         super().__init__()
         self.layers = nn.ModuleList()

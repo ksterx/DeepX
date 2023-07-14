@@ -40,8 +40,6 @@ class SegmentationTrainer(TrainerX):
             **kwargs,
         )
 
-
-
         # self.dm_cfg.update({})
         self.datamodule = self.get_datamodule(datamodule=datamodule, **self.dm_cfg)
 
@@ -51,9 +49,9 @@ class SegmentationTrainer(TrainerX):
         self.model_cfg.update({"num_classes": num_classes, "in_channels": num_channels})
         self.model = self.get_model(model, **self.model_cfg)
 
-        self.task_cfg.update({"model": self.model, "num_classes": num_classes})
-        self.task = self.get_task(task=self.NAME, **self.task_cfg)
+        self.algo_cfg.update({"model": self.model, "num_classes": num_classes})
+        self.algo = self.get_algo(algo=self.NAME, **self.algo_cfg)
 
         self.hparams.update(self.dm_cfg)
         self.hparams.update(self.model_cfg)
-        self.hparams.update(self.task_cfg)
+        self.hparams.update(self.algo_cfg)

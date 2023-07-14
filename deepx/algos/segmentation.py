@@ -5,10 +5,10 @@ from PIL import Image
 from torch import nn
 from torchmetrics.classification import MulticlassJaccardIndex
 
-from .task import TaskX
+from .algo import Algorithm
 
 
-class Segmentation(TaskX):
+class Segmentation(Algorithm):
     NAME = "segmentation"
 
     def __init__(

@@ -2,10 +2,10 @@ import torch
 from torch import nn
 from torchmetrics import Accuracy
 
-from .task import TaskX
+from .algo import Algorithm
 
 
-class Classification(TaskX):
+class Classification(Algorithm):
     NAME = "classification"
 
     def __init__(
@@ -19,9 +19,9 @@ class Classification(TaskX):
     ):
         super().__init__(model=model, lr=lr, loss_fn=loss_fn, optimizer=optimizer, **kwargs)
 
-        self.train_acc = Accuracy(task="multiclass", num_classes=num_classes)
-        self.val_acc = Accuracy(task="multiclass", num_classes=num_classes)
-        self.test_acc = Accuracy(task="multiclass", num_classes=num_classes)
+        self.train_acc = Accuracy(algo="multiclass", num_classes=num_classes)
+        self.val_acc = Accuracy(algo="multiclass", num_classes=num_classes)
+        self.test_acc = Accuracy(algo="multiclass", num_classes=num_classes)
 
     def predict_step(self, batch, batch_idx, dataloader_idx):
         x = batch

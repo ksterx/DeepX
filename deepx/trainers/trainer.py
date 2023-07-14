@@ -1,15 +1,15 @@
 import torch
 from lightning import LightningDataModule, LightningModule, Trainer
-from lightning.pytorch.callbacks import EarlyStopping, ModelSummary
+from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint, ModelSummary
 from lightning.pytorch.loggers import MLFlowLogger, TensorBoardLogger
 from torch import nn, optim
 
-from deepx import registered_tasks
+from deepx import registered_algos
 from deepx.nn import registered_models
 
 
 class TrainerX:
-    NAME = ""
+    NAME: str
 
     def __init__(
         self,
@@ -58,7 +58,7 @@ class TrainerX:
 
         self.model_cfg = {}
 
-        self.task_cfg = {
+        self.algo_cfg = {
             "lr": lr,
             "loss_fn": loss_fn,
             "optimizer": optimizer,
@@ -66,24 +66,39 @@ class TrainerX:
 
     def get_datamodule(self, datamodule, **kwargs):
         if isinstance(datamodule, str):
-            dm_cls = registered_tasks[self.NAME]["datamodule"][datamodule]
-            return dm_cls(**kwargs)
+            try:
+                dm_cls = registered_algos[self.NAME]["datamodule"][datamodule]
+                return dm_cls(**kwargs)
+            except KeyError:
+                raise ValueError(
+                    f"Datamodule {datamodule} not supported. Please register it at deepx/__init__.py"
+                )
         else:
             return datamodule
 
     def get_model(self, model, **kwargs):
         if isinstance(model, str):
-            model_cls = registered_models[model]
-            return model_cls(**kwargs)
+            try:
+                model_cls = registered_models[model]
+                return model_cls(**kwargs)
+            except KeyError:
+                raise ValueError(
+                    f"Model {model} not supported. Please register it at deepx/nn/__init__.py"
+                )
         else:
             return model
 
-    def get_task(self, task, **kwargs):
-        if isinstance(task, str):
-            task_cls = registered_tasks[task]["task"]
-            return task_cls(**kwargs)
+    def get_algo(self, algo, **kwargs):
+        if isinstance(algo, str):
+            try:
+                algo_cls = registered_algos[algo]["algo"]
+                return algo_cls(**kwargs)
+            except KeyError:
+                raise ValueError(
+                    f"Task {algo} not supported. Please register it at deepx/__init__.py"
+                )
         else:
-            return task
+            return algo
 
     def train(
         self,
@@ -112,8 +127,8 @@ class TrainerX:
             monitor=monitor,
             **kwargs,
         )
-        # compiled_task = torch.compile(self.task)
-        self.trainer.fit(self.task, datamodule=self.datamodule, ckpt_path=ckpt_path)
+        # compiled_algo = torch.compile(self.algo)  # exec("SOMETHING") causes error
+        self.trainer.fit(self.algo, datamodule=self.datamodule, ckpt_path=ckpt_path)
         if not debug:
             self.trainer.test(ckpt_path="best", datamodule=self.datamodule)
 
@@ -140,7 +155,7 @@ class TrainerX:
             match logger:
                 case "mlflow":
                     logger = MLFlowLogger(
-                        experiment_name=self.datamodule.NAME,
+                        experiment_name=f"{self.datamodule.NAME}-{self.NAME}",
                         tags={"model": self.model.NAME},
                         tracking_uri=f"file://{self.log_dir}",
                     )
@@ -159,14 +174,15 @@ class TrainerX:
             callbacks=[
                 EarlyStopping(monitor=monitor, patience=stopping_patience),
                 ModelSummary(max_depth=max_depth),
+                ModelCheckpoint(monitor=monitor, save_top_k=1, mode="min", save_last=True),
             ],
             benchmark=benchmark,
             fast_dev_run=debug,
             **kwargs,
         )
 
-        self.task_summary()
+        self.algo_summary()
 
-    def task_summary(self):
+    def algo_summary(self):
         for k, v in self.hparams.items():
             print(f"{k}: {v}")

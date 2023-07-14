@@ -1,6 +1,6 @@
 # DeepX
 
-*Deep learning algorithms implemented with PyTorch and Lightning.*
+*Deep learning algos implemented with PyTorch and Lightning.*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -58,13 +58,13 @@ pip install -e .
 - Terminal
 
 ```bash
-python train.py --task classification --model resnet18 resnet50 --dataset mnist
+python train.py --algo classification --model resnet18 resnet50 --dataset mnist
 
 # usage: train.py [-h] -t TASK -m [MODEL ...] [-bb BACKBONE] -d DATASET [-b BATCH_SIZE] [-e EPOCHS] [-do DROPOUT] [-r ROOT_DIR] [-mo MONITOR] [--debug] [--download]
 
 # options:
 #   -h, --help            show this help message and exit
-#   -t TASK, --task TASK
+#   -t TASK, --algo TASK
 #   -m [MODEL ...], --model [MODEL ...]
 #   -bb BACKBONE, --backbone BACKBONE
 #   -d DATASET, --dataset DATASET
@@ -111,7 +111,7 @@ trainer.train(epochs=100, batch_size=128)
 - Terminal
 
 ```bash
-python train.py --task segmentation --model unet --dataset vocseg
+python train.py --algo segmentation --model unet --dataset vocseg
 ```
 
 - Python script
@@ -126,17 +126,9 @@ trainer.train()
 
 #### Other examples can be found in `docs/examples/`.
 
-### Visualization
+### Experiment Tracking
 
-```bash
-bash dashboard.sh
-```
-
-or
-
-```bash
-mlflow server --backend-store-uri file:./experiments --host <host> --port <port>
-```
+Access `http://localhost:5000` in your browser.
 
 ### Inference
 

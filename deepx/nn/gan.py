@@ -31,7 +31,7 @@ class GAN(nn.Module):
         )
         self.discriminator = Discriminator(
             backbone=backbone,
-            in_channels=tgt_shape[0],
+            tgt_shape=tgt_shape,
             hidden_dim=hidden_dim,
             negative_slope=negative_slope,
             p_dropout=p_dropout,
@@ -42,23 +42,35 @@ class GAN(nn.Module):
 
 
 class Discriminator(nn.Module):
-    def __init__(self, backbone, in_channels, hidden_dim=1024, negative_slope=0.01, p_dropout=0.0):
+    def __init__(self, backbone, tgt_shape, hidden_dim=1024, negative_slope=0.01, p_dropout=0.0):
         super().__init__()
+        c, h, w = tgt_shape
 
-        self.backbone = deepx.nn.registered_models[backbone](
-            num_classes=0, in_channels=in_channels, p_dropout=p_dropout, has_head=False
-        )
-        self.head = nn.Sequential(
-            nn.AdaptiveAvgPool2d((1, 1)),
-            nn.Flatten(),
-            nn.Linear(
-                self.backbone.block.CHANNELS_IN_LAYERS[-1] * self.backbone.block.EXPANSION,
-                hidden_dim,
-            ),
-            nn.LeakyReLU(negative_slope=negative_slope),
-            nn.Linear(hidden_dim, 1),
-            nn.Sigmoid(),
-        )
+        if "resnet" in backbone:
+            self.backbone = deepx.nn.registered_models[backbone](
+                num_classes=0, in_channels=c, p_dropout=p_dropout, has_head=False
+            )
+            self.head = nn.Sequential(
+                nn.AdaptiveAvgPool2d((1, 1)),
+                nn.Flatten(),
+                nn.Linear(
+                    self.backbone.block.CHANNELS_IN_LAYERS[-1] * self.backbone.block.EXPANSION,
+                    hidden_dim,
+                ),
+                nn.LeakyReLU(negative_slope=negative_slope),
+                nn.Linear(hidden_dim, 1),
+                nn.Sigmoid(),
+            )
+        elif backbone == "mlp":
+            input_dim = c * h * w
+            self.backbone = deepx.nn.registered_models[backbone](
+                channels_in_layers=[input_dim, 512],
+                activation=nn.LeakyReLU(negative_slope=negative_slope),
+                output_activation=nn.LeakyReLU(negative_slope=negative_slope),
+                p_dropout=p_dropout,
+                flatten=True,
+            )
+            self.head = nn.Sequential(nn.Linear(512, 1), nn.Sigmoid())
 
     def forward(self, x):
         x = self.backbone(x)
@@ -67,7 +79,7 @@ class Discriminator(nn.Module):
 
 
 class Generator(nn.Module):
-    def __init__(self, tgt_shape, latent_dim=100, base_channels=32):
+    def __init__(self, tgt_shape, latent_dim=100, base_channels=32, negative_slope=0.01):
         super().__init__()
 
         self.tgt_shape = tgt_shape
@@ -83,7 +95,7 @@ class Generator(nn.Module):
             [
                 nn.ConvTranspose2d(latent_dim, base_channels * (power - 2), 4, 1, 0),
                 nn.BatchNorm2d(base_channels * (power - 2)),
-                nn.ReLU(inplace=True),
+                nn.LeakyReLU(negative_slope=negative_slope, inplace=True),
             ]
         )
 
@@ -92,7 +104,7 @@ class Generator(nn.Module):
                 nn.Sequential(
                     nn.ConvTranspose2d(channels[i], channels[i + 1], 4, 2, 1),
                     nn.BatchNorm2d(channels[i + 1]),
-                    nn.ReLU(inplace=True),
+                    nn.LeakyReLU(negative_slope=negative_slope, inplace=True),
                 )
             )
 
