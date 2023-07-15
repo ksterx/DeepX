@@ -1,8 +1,10 @@
 import torch
 from lightning.pytorch.loggers import TensorBoardLogger
 from torch import nn
+from torchmetrics.image.fid import FrechetInceptionDistance
 from torchvision.utils import make_grid
 
+from ..utils.vision import inverse_transform
 from .algo import Algorithm
 
 
@@ -26,6 +28,10 @@ class ImageGen(Algorithm):
 
         self.generator = self.model.generator
         self.discriminator = self.model.discriminator
+
+        self.train_metric = FrechetInceptionDistance()
+        self.val_metric = FrechetInceptionDistance()
+        self.test_metric = FrechetInceptionDistance()
 
     def forward(self, x):
         return self.generator(x)
@@ -66,12 +72,25 @@ class ImageGen(Algorithm):
             self.toggle_optimizer(opt_g)
         fake_img = self.generator(z)
         preds = self.discriminator(fake_img)
+
+        # Generator loss
         loss_g = self.loss_fn(preds, torch.ones_like(preds))
 
-        self.log(f"{mode}_loss_g", loss_g, on_step=True, on_epoch=True, prog_bar=True)
-        self.log(f"{mode}_loss_d", loss_d, on_step=True, on_epoch=True, prog_bar=True)
-        self.log(f"{mode}_loss_real", loss_real, on_step=True, on_epoch=True)
-        self.log(f"{mode}_loss_fake", loss_fake, on_step=True, on_epoch=True)
+        # Metrics
+        if img.shape[1] == 3 and mode != "train":
+            img = inverse_transform(img, mean=0.1307, std=0.3081, is_batch=True)
+            fake_img = inverse_transform(fake_img, mean=0.1307, std=0.3081, is_batch=True)
+            exec(f"self.{mode}_metric.update(img, real=True)")
+            exec(f"self.{mode}_metric.update(fake_img, real=False)")
+            fid = eval(f"self.{mode}_metric.compute()")
+            self.log(f"{mode}_fid", fid, on_step=True, on_epoch=True, prog_bar=True)
+
+        self.log(f"{mode}_loss_g", loss_g, on_step=True, on_epoch=True)
+        self.log(f"{mode}_loss_d", loss_d, on_step=True, on_epoch=True)
+
+        if mode != "train":
+            self.log(f"{mode}_loss_real", loss_real, on_step=True, on_epoch=True)
+            self.log(f"{mode}_loss_fake", loss_fake, on_step=True, on_epoch=True)
 
         if mode == "train":
             self.manual_backward(loss_g)
@@ -80,7 +99,7 @@ class ImageGen(Algorithm):
             self.untoggle_optimizer(opt_g)
 
     def configure_optimizers(self):
-        opt_g = torch.optim.Adam(self.generator.parameters(), lr=self.lr)
+        opt_g = torch.optim.Adam(self.generator.parameters(), lr=self.lr * 10)
         opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=self.lr)
         print("Generator optimizer:", opt_g)
         print("Discriminator optimizer:", opt_d)

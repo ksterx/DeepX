@@ -30,9 +30,9 @@ class LangModel(Algorithm):
             self.tokenizer = tokenizer
         self.max_length = max_length
 
-        self.train_acc = Accuracy(algo="multiclass", num_classes=self.tokenizer.vocab_size)
-        self.val_acc = Accuracy(algo="multiclass", num_classes=self.tokenizer.vocab_size)
-        self.test_acc = Accuracy(algo="multiclass", num_classes=self.tokenizer.vocab_size)
+        self.train_acc = Accuracy(task="multiclass", num_classes=self.tokenizer.vocab_size)
+        self.val_acc = Accuracy(task="multiclass", num_classes=self.tokenizer.vocab_size)
+        self.test_acc = Accuracy(task="multiclass", num_classes=self.tokenizer.vocab_size)
 
     def _mode_step(self, batch, batch_idx, mode: str):
         x = batch[:, :-1]

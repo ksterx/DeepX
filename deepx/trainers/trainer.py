@@ -127,7 +127,7 @@ class TrainerX:
             monitor=monitor,
             **kwargs,
         )
-        # compiled_algo = torch.compile(self.algo)  # exec("SOMETHING") causes error
+        # self.algo = torch.compile(self.algo)  # ERROR: NotImplementedError
         self.trainer.fit(self.algo, datamodule=self.datamodule, ckpt_path=ckpt_path)
         if not debug:
             self.trainer.test(ckpt_path="best", datamodule=self.datamodule)

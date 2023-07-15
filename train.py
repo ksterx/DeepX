@@ -23,6 +23,7 @@ parser.add_argument("-lf", "--loss_fn", type=str, default="ce")
 parser.add_argument("-o", "--optimizer", type=str, default="adam")
 parser.add_argument("-ck", "--checkpoint", type=str, default=None)
 parser.add_argument("-bm", "--benchmark", action="store_true")
+parser.add_argument("-ratio", "--train_ratio", type=float, default=0.9)
 parser.add_argument("--debug", action="store_true")
 parser.add_argument("--download", action="store_true")
 args = parser.parse_args()
@@ -56,6 +57,7 @@ for model in args.model:
         lr=args.learning_rate,
         loss_fn=args.loss_fn,
         optimizer=args.optimizer,
+        train_ratio=args.train_ratio,
     )
     trainer.train(
         epochs=args.epochs,
