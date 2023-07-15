@@ -1,8 +1,9 @@
 import tempfile
 
 import torch
-from lightning.pytorch.loggers import MLFlowLogger, TensorBoardLogger
 from torch import nn
+
+# from torchmetrics.classification import BinaryAccuracy
 from torchmetrics.image.fid import FrechetInceptionDistance
 from torchvision.utils import make_grid, save_image
 
@@ -34,6 +35,8 @@ class ImageGen(Algorithm):
         self.generator = self.model.generator
         self.discriminator = self.model.discriminator
 
+        # self.val_acc_real = BinaryAccuracy()
+        # self.val_acc_fake = BinaryAccuracy()
         self.test_metric = FrechetInceptionDistance()
 
     def forward(self, x):
@@ -51,8 +54,12 @@ class ImageGen(Algorithm):
 
         # for real images
         preds = self.discriminator(img)  # [batch_size, 1]
-        tgt = torch.ones_like(preds) * self.one_side_label_smoothing
-        loss_real = self.loss_fn(preds, tgt)
+        tgt = torch.ones_like(preds)
+        loss_real = self.loss_fn(preds, tgt * self.one_side_label_smoothing)
+        # if mode == "val":
+        #     acc_real = self.val_acc_real(preds, tgt)
+
+        #     self.log("val_acc_real", acc_real, on_step=True, on_epoch=True)
 
         # for fake images
         z = self.generate_noize(img.shape[0])
@@ -60,6 +67,12 @@ class ImageGen(Algorithm):
         preds = self.discriminator(fake_img)  # [batch_size, 1]
         tgt = torch.zeros_like(preds)
         loss_fake = self.loss_fn(preds, tgt)
+        # if mode == "val":
+        #     acc_fake = self.val_acc_fake(preds, tgt)
+        #     acc = (acc_real + acc_fake) / 2
+
+        #     self.log("val_acc_fake", acc_fake, on_step=True, on_epoch=True)
+        #     self.log("val_acc", acc, on_step=True, on_epoch=True, prog_bar=True)
 
         # Discriminator loss
         loss_d = (loss_real + loss_fake) / 2

@@ -17,6 +17,7 @@ parser.add_argument("-e", "--epochs", type=int, default=100)
 parser.add_argument("-do", "--dropout", type=float, default=0.0)
 parser.add_argument("-r", "--root_dir", type=str, default="/workspace")
 parser.add_argument("-mo", "--monitor", type=str, default="val_loss")
+parser.add_argument("--monitor_max", action="store_true")
 parser.add_argument("-p", "--patience", type=int, default=10)
 parser.add_argument("-w", "--num_workers", type=int, default=4)
 parser.add_argument("-lr", "--learning_rate", type=float, default=1e-3)
@@ -66,6 +67,7 @@ for model in args.model:
         epochs=args.epochs,
         debug=args.debug,
         monitor=args.monitor,
+        monitor_max=args.monitor_max,
         stopping_patience=args.patience,
         benchmark=args.benchmark,
         ckpt_path=args.checkpoint,

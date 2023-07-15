@@ -112,12 +112,19 @@ class TrainerX:
         benchmark: bool = False,
         debug: bool = False,
         monitor: str = "val_loss",
+        monitor_max: bool = False,
         logger: str = "mlflow",
         **kwargs,
     ):
         self.hparams.update(kwargs)
         self.hparams.update(
-            {"epochs": epochs, "stopping_patience": stopping_patience, "ckpt_path": ckpt_path}
+            {
+                "epochs": epochs,
+                "stopping_patience": stopping_patience,
+                "ckpt_path": ckpt_path,
+                "monitor": monitor,
+                "monitor_max": monitor_max,
+            }
         )
         self.set(
             epochs=epochs,
@@ -128,6 +135,7 @@ class TrainerX:
             logging=True,
             logger=logger,
             monitor=monitor,
+            monitor_max=monitor_max,
             **kwargs,
         )
         # self.algo = torch.compile(self.algo)  # ERROR: NotImplementedError
@@ -156,6 +164,7 @@ class TrainerX:
         logging: bool = True,
         logger: str = "mlflow",
         monitor: str = "val_loss",
+        monitor_max: bool = False,
         **kwargs,
     ):
         if logging:
@@ -176,6 +185,11 @@ class TrainerX:
         else:
             logger = None
 
+        if monitor_max:
+            monitor_mode = "max"
+        else:
+            monitor_mode = "min"
+
         self.trainer = Trainer(
             max_epochs=epochs,
             accelerator="gpu",
@@ -185,7 +199,7 @@ class TrainerX:
             callbacks=[
                 EarlyStopping(monitor=monitor, patience=stopping_patience),
                 ModelSummary(max_depth=max_depth),
-                ModelCheckpoint(monitor=monitor, save_top_k=1, mode="min", save_last=True),
+                ModelCheckpoint(monitor=monitor, save_top_k=1, mode=monitor_mode, save_last=True),
             ],
             benchmark=benchmark,
             fast_dev_run=debug,

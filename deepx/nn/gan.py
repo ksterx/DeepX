@@ -27,7 +27,10 @@ class GAN(nn.Module):
         super().__init__()
 
         self.generator = Generator(
-            tgt_shape=tgt_shape, latent_dim=latent_dim, base_channels=base_channels
+            tgt_shape=tgt_shape,
+            latent_dim=latent_dim,
+            base_channels=base_channels,
+            dropout=dropout,
         )
         self.discriminator = Discriminator(
             backbone=backbone,
@@ -79,7 +82,9 @@ class Discriminator(nn.Module):
 
 
 class Generator(nn.Module):
-    def __init__(self, tgt_shape, latent_dim=100, base_channels=32, negative_slope=0.01):
+    def __init__(
+        self, tgt_shape, latent_dim=100, base_channels=32, negative_slope=0.01, dropout=0.0
+    ):
         super().__init__()
 
         self.tgt_shape = tgt_shape
@@ -94,6 +99,7 @@ class Generator(nn.Module):
         self.model = nn.ModuleList(
             [
                 nn.ConvTranspose2d(latent_dim, base_channels * (power - 2), 4, 1, 0),
+                nn.Dropout2d(dropout),
                 nn.BatchNorm2d(base_channels * (power - 2)),
                 nn.LeakyReLU(negative_slope=negative_slope, inplace=True),
             ]
@@ -103,6 +109,7 @@ class Generator(nn.Module):
             self.model.append(
                 nn.Sequential(
                     nn.ConvTranspose2d(channels[i], channels[i + 1], 4, 2, 1),
+                    nn.Dropout2d(dropout),
                     nn.BatchNorm2d(channels[i + 1]),
                     nn.LeakyReLU(negative_slope=negative_slope, inplace=True),
                 )

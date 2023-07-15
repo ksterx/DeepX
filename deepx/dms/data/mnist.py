@@ -7,7 +7,7 @@ class MNISTDM(ClassificationDM):
     NAME = "mnist"
     NUM_CLASSES = 10
     NUM_CHANNELS = 1
-    SIZE = (8, 8)
+    SIZE = (32, 32)
 
     def __init__(
         self,

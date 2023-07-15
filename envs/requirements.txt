@@ -9,6 +9,7 @@ lightning
 mlflow
 torch-tb-profiler
 transformers
+torchmetrics[image]
 
 # Others
 ipywidgets

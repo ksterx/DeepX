@@ -1,3 +1,4 @@
+import math
 import warnings
 
 from lightning import LightningDataModule, LightningModule
@@ -55,7 +56,9 @@ class ImageGenTrainer(TrainerX):
         # self.dm_cfg.update({})
         self.datamodule = self.get_datamodule(datamodule=datamodule, **self.dm_cfg)
 
-        tgt_shape = (self.datamodule.NUM_CHANNELS, *self.datamodule.SIZE)
+        h, _ = self.datamodule.SIZE
+        h = 2 ** math.ceil(math.log2(h))
+        tgt_shape = (self.datamodule.NUM_CHANNELS, h, h)
         self.model_cfg.update(
             {
                 "backbone": backbone,

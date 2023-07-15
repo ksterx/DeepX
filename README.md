@@ -137,7 +137,7 @@ cd apps
 python classify.py
 ```
 
-![inference](./docs/classifier.png)
+![inference](./docs/images/classifier.png)
 
 ## Development
 

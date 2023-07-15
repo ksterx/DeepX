@@ -75,6 +75,8 @@ class Algorithm(LightningModule):
                     scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(
                         optimizer, T_0=10, T_mult=2
                     )
+                case "none":
+                    scheduler = None
                 case _:
                     raise ValueError(f"Invalid scheduler: {self.scheduler}")
         else:
