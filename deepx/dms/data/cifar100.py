@@ -143,8 +143,8 @@ class CIFAR100DM(ClassificationDM):
 
     @classmethod
     def transform(cls):
-        return cls._transform()
+        return cls._transform(cls.SIZE)
 
     @classmethod
     def train_transform(cls):
-        return cls._train_transform((32, 32))
+        return cls._train_transform(cls.SIZE)

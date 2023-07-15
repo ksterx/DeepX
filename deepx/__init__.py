@@ -31,7 +31,10 @@ registered_algos = {
         "algo": ImageGen,
         "datamodule": {
             "mnist": MNISTDM,
+            "fashionmnist": FashionMNISTDM,
             "cifar10": CIFAR10DM,
+            "cifar100": CIFAR100DM,
+            "flowers102": Flowers102DM,
         },
     },
     "langmodel": {

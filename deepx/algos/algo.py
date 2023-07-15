@@ -14,6 +14,7 @@ class Algorithm(LightningModule):
         lr: float,
         loss_fn: nn.Module | str,
         optimizer: str | torch.optim.Optimizer,
+        scheduler: str | torch.optim.lr_scheduler._LRScheduler,
         **kwargs,
     ):
         super().__init__()
@@ -21,6 +22,7 @@ class Algorithm(LightningModule):
         self.model = model
         self.lr = lr
         self.optimizer = optimizer
+        self.scheduler = scheduler
 
         # Loss function
         if isinstance(loss_fn, str):
@@ -47,11 +49,35 @@ class Algorithm(LightningModule):
 
     def configure_optimizers(self):
         if isinstance(self.optimizer, str):
-            if self.optimizer == "adam":
-                return torch.optim.Adam(self.parameters(), lr=self.lr)
-            elif self.optimizer == "sgd":
-                return torch.optim.SGD(self.parameters(), lr=self.lr)
-            else:
-                raise ValueError(f"Invalid optimizer: {self.optimizer}")
+            match self.optimizer:
+                case "adam":
+                    optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
+                case "sgd":
+                    optimizer = torch.optim.SGD(self.parameters(), lr=self.lr)
+                case _:
+                    raise ValueError(f"Invalid optimizer: {self.optimizer}")
         else:
-            return self.optimizer(self.parameters(), lr=self.lr)
+            optimizer = self.optimizer(self.parameters(), lr=self.lr)
+
+        if isinstance(self.scheduler, str):
+            match self.scheduler:
+                case "cos":
+                    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+                        optimizer, T_max=self.trainer.max_epochs
+                    )
+                case "step":
+                    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=30, gamma=0.1)
+                case "plateau":
+                    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+                        optimizer, mode="min", factor=0.1, patience=10
+                    )
+                case "coswarm":
+                    scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(
+                        optimizer, T_0=10, T_mult=2
+                    )
+                case _:
+                    raise ValueError(f"Invalid scheduler: {self.scheduler}")
+        else:
+            scheduler = self.scheduler(optimizer)
+
+        return [optimizer], [scheduler]

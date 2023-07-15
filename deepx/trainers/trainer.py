@@ -22,6 +22,7 @@ class TrainerX:
         lr: float,
         loss_fn: str | nn.Module,
         optimizer: str | optim.Optimizer,
+        scheduler: str | optim.lr_scheduler._LRScheduler,
         root_dir: str,
         data_dir: str,
         log_dir: str,
@@ -37,6 +38,7 @@ class TrainerX:
                 "lr": lr,
                 "loss_fn": loss_fn,
                 "optimizer": optimizer,
+                "scheduler": scheduler,
             }
         )
 
@@ -62,6 +64,7 @@ class TrainerX:
             "lr": lr,
             "loss_fn": loss_fn,
             "optimizer": optimizer,
+            "scheduler": scheduler,
         }
 
     def get_datamodule(self, datamodule, **kwargs):
@@ -128,7 +131,11 @@ class TrainerX:
             **kwargs,
         )
         # self.algo = torch.compile(self.algo)  # ERROR: NotImplementedError
-        self.trainer.fit(self.algo, datamodule=self.datamodule, ckpt_path=ckpt_path)
+        self.trainer.fit(
+            self.algo,
+            datamodule=self.datamodule,
+            ckpt_path=ckpt_path,
+        )
         if not debug:
             self.trainer.test(ckpt_path="best", datamodule=self.datamodule)
 
@@ -159,7 +166,11 @@ class TrainerX:
                         tags={"model": self.model.NAME},
                         tracking_uri=f"file://{self.log_dir}",
                     )
+                    print(f"Experiment ID: {logger.experiment_id}")
+                    print(f"Run ID: {logger.run_id}")
+
                     logger.log_hyperparams(self.hparams)
+
                 case "tensorboard":
                     logger = TensorBoardLogger(save_dir=self.log_dir, name=self.datamodule.NAME)
         else:
@@ -178,6 +189,7 @@ class TrainerX:
             ],
             benchmark=benchmark,
             fast_dev_run=debug,
+            num_sanity_val_steps=0,
             **kwargs,
         )
 

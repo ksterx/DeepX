@@ -13,11 +13,14 @@ class Classification(Algorithm):
         model: str | nn.Module,
         num_classes: int,
         lr: float = 1e-3,
-        loss_fn: nn.Module | str = nn.CrossEntropyLoss(),
+        loss_fn: nn.Module | str = "ce",
         optimizer: str | torch.optim.Optimizer = "adam",
+        scheduler: str | torch.optim.lr_scheduler._LRScheduler = "cos",
         **kwargs,
     ):
-        super().__init__(model=model, lr=lr, loss_fn=loss_fn, optimizer=optimizer, **kwargs)
+        super().__init__(
+            model=model, lr=lr, loss_fn=loss_fn, optimizer=optimizer, scheduler=scheduler, **kwargs
+        )
 
         self.train_acc = Accuracy(task="multiclass", num_classes=num_classes)
         self.val_acc = Accuracy(task="multiclass", num_classes=num_classes)

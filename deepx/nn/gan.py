@@ -14,7 +14,7 @@ class GAN(nn.Module):
         tgt_shape: tuple[int, int, int],
         hidden_dim: int = 1024,
         negative_slope: float = 0.01,
-        p_dropout: float = 0.0,
+        dropout: float = 0.0,
         latent_dim: int = 100,
         base_channels: int = 32,
     ) -> None:
@@ -34,7 +34,7 @@ class GAN(nn.Module):
             tgt_shape=tgt_shape,
             hidden_dim=hidden_dim,
             negative_slope=negative_slope,
-            p_dropout=p_dropout,
+            dropout=dropout,
         )
 
     def forward(self, x):
@@ -42,13 +42,13 @@ class GAN(nn.Module):
 
 
 class Discriminator(nn.Module):
-    def __init__(self, backbone, tgt_shape, hidden_dim=1024, negative_slope=0.01, p_dropout=0.0):
+    def __init__(self, backbone, tgt_shape, hidden_dim=1024, negative_slope=0.01, dropout=0.0):
         super().__init__()
         c, h, w = tgt_shape
 
         if "resnet" in backbone:
             self.backbone = deepx.nn.registered_models[backbone](
-                num_classes=0, in_channels=c, p_dropout=p_dropout, has_head=False
+                num_classes=0, in_channels=c, dropout=dropout, has_head=False
             )
             self.head = nn.Sequential(
                 nn.AdaptiveAvgPool2d((1, 1)),
@@ -67,7 +67,7 @@ class Discriminator(nn.Module):
                 channels_in_layers=[input_dim, 512],
                 activation=nn.LeakyReLU(negative_slope=negative_slope),
                 output_activation=nn.LeakyReLU(negative_slope=negative_slope),
-                p_dropout=p_dropout,
+                dropout=dropout,
                 flatten=True,
             )
             self.head = nn.Sequential(nn.Linear(512, 1), nn.Sigmoid())

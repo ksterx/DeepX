@@ -17,10 +17,12 @@ parser.add_argument("-e", "--epochs", type=int, default=100)
 parser.add_argument("-do", "--dropout", type=float, default=0.0)
 parser.add_argument("-r", "--root_dir", type=str, default="/workspace")
 parser.add_argument("-mo", "--monitor", type=str, default="val_loss")
+parser.add_argument("-p", "--patience", type=int, default=10)
 parser.add_argument("-w", "--num_workers", type=int, default=4)
 parser.add_argument("-lr", "--learning_rate", type=float, default=1e-3)
 parser.add_argument("-lf", "--loss_fn", type=str, default="ce")
 parser.add_argument("-o", "--optimizer", type=str, default="adam")
+parser.add_argument("-s", "--scheduler", type=str, default="cos")
 parser.add_argument("-ck", "--checkpoint", type=str, default=None)
 parser.add_argument("-bm", "--benchmark", action="store_true")
 parser.add_argument("-ratio", "--train_ratio", type=float, default=0.9)
@@ -57,12 +59,14 @@ for model in args.model:
         lr=args.learning_rate,
         loss_fn=args.loss_fn,
         optimizer=args.optimizer,
+        scheduler=args.scheduler,
         train_ratio=args.train_ratio,
     )
     trainer.train(
         epochs=args.epochs,
         debug=args.debug,
         monitor=args.monitor,
+        stopping_patience=args.patience,
         benchmark=args.benchmark,
         ckpt_path=args.checkpoint,
     )

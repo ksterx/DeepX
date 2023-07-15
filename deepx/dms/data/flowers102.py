@@ -7,7 +7,7 @@ class Flowers102DM(ClassificationDM):
     NAME = "flowers102"
     NUM_CLASSES = 102
     NUM_CHANNELS = 3
-    SIZE = (224, 224)
+    SIZE = (256, 256)
     CLASSES = [
         "pink primrose",
         "hard-leaved pocket orchid",
@@ -148,9 +148,9 @@ class Flowers102DM(ClassificationDM):
             self.predict_data = Flowers102(self.data_dir, split="test", transform=self.transform())
 
     @classmethod
-    def transform(self):
-        return self._transform(cls.SIZE)
+    def transform(cls):
+        return cls._transform(cls.SIZE)
 
     @classmethod
-    def train_transform(self):
-        return self._train_transform(cls.SIZE)
+    def train_transform(cls):
+        return cls._train_transform(cls.SIZE)

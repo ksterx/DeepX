@@ -16,13 +16,16 @@ class Translation(Algorithm):
         self,
         model: str | LightningModule,
         lr: float = 0.001,
-        loss_fn: nn.Module | str = nn.CrossEntropyLoss(),
+        loss_fn: nn.Module | str = "ce",
         optimizer: str | torch.optim.Optimizer = "adam",
+        scheduler: str | torch.optim.lr_scheduler._LRScheduler = "cos",
         tokenizer: str | Any = "bert-base-uncased",
         max_length: int = 128,
         **kwargs,
     ):
-        super().__init__(model=model, lr=lr, loss_fn=loss_fn, optimizer=optimizer, **kwargs)
+        super().__init__(
+            model=model, lr=lr, loss_fn=loss_fn, optimizer=optimizer, scheduler=scheduler, **kwargs
+        )
 
         if isinstance(tokenizer, str):
             self.tokenizer = AutoTokenizer.from_pretrained(tokenizer)

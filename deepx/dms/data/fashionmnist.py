@@ -41,8 +41,8 @@ class FashionMNISTDM(ClassificationDM):
 
     @classmethod
     def transform(cls):
-        return cls._transform()
+        return cls._transform(cls.SIZE)
 
     @classmethod
     def train_transform(cls):
-        return cls._train_transform()
+        return cls._train_transform(cls.SIZE)

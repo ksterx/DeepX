@@ -16,11 +16,13 @@ class ClassificationTrainer(TrainerX):
         num_workers: int = 2,
         download: bool = False,
         lr: float = 1e-3,
-        loss_fn: str | nn.Module = nn.CrossEntropyLoss(),
+        loss_fn: str | nn.Module = "ce",
         optimizer: str | optim.Optimizer = "adam",
+        scheduler: str | optim.lr_scheduler._LRScheduler = "cos",
         root_dir: str = "/workspace",
         data_dir: str = "/workspace/data",
         log_dir: str = "/workspace/experiments",
+        dropout: float = 0.0,
         **kwargs,
     ):
         super().__init__(
@@ -33,6 +35,7 @@ class ClassificationTrainer(TrainerX):
             lr=lr,
             loss_fn=loss_fn,
             optimizer=optimizer,
+            scheduler=scheduler,
             root_dir=root_dir,
             data_dir=data_dir,
             log_dir=log_dir,
@@ -45,7 +48,9 @@ class ClassificationTrainer(TrainerX):
         num_classes = self.datamodule.NUM_CLASSES
         num_channels = self.datamodule.NUM_CHANNELS
 
-        self.model_cfg.update({"num_classes": num_classes, "in_channels": num_channels})
+        self.model_cfg.update(
+            {"num_classes": num_classes, "in_channels": num_channels, "dropout": dropout}
+        )
         self.model = self.get_model(model, **self.model_cfg)
 
         self.algo_cfg.update({"model": self.model, "num_classes": num_classes})
