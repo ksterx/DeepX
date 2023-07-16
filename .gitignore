@@ -274,9 +274,9 @@ $RECYCLE.BIN/
 # End of https://www.toptal.com/developers/gitignore/api/linux,windows,macos,jupyternotebooks,python
 
 credentials.yaml
-data/*
-!data/README.md
-experiments/*
+experiments/runs/*
 !experiments/README.md
+experiments/data/*
+!experiments/data/README.md
 flagged/
 *.prof

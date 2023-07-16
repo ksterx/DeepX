@@ -65,7 +65,7 @@ with gr.Blocks("Model") as app:
 
                 def set_ckpt_path():
                     path = filedialog.askopenfilename(
-                        initialdir="/workspace/experiments",
+                        initialdir="/workspace/experiments/runs",
                         title="Select checkpoint file",
                     )
                     return path

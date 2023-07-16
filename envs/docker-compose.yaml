@@ -35,7 +35,7 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - ../experiments:/workspace/mlruns
+      - ../experiments/runs:/workspace/mlruns
     restart: always
     depends_on:
       - deepx

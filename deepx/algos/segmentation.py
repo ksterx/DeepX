@@ -39,11 +39,11 @@ class Segmentation(Algorithm):
         )
 
     def on_validation_epoch_end(self):
-        car_img = Image.open("/workspace/data/images/car.jpg")
+        car_img = Image.open("/workspace/experiments/data/images/car.jpg")
         car_img = self.dataset["transform"](car_img)
         car_img = car_img.unsqueeze(0).to(self.device)
         car_pred = self.predict_step(car_img, 0).squeeze().cpu().numpy()
-        np.save("/workspace/data/images/car_pred.npy", car_pred)
+        np.save("/workspace/experiments/data/images/car_pred.npy", car_pred)
 
     def predict_step(self, batch, batch_idx):
         x = batch

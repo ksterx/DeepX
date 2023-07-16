@@ -20,8 +20,8 @@ class ClassificationTrainer(TrainerX):
         optimizer: str | optim.Optimizer = "adam",
         scheduler: str | optim.lr_scheduler._LRScheduler = "cos",
         root_dir: str = "/workspace",
-        data_dir: str = "/workspace/data",
-        log_dir: str = "/workspace/experiments",
+        data_dir: str = "/workspace/experiments/data",
+        log_dir: str = "/workspace/experiments/runs",
         dropout: float = 0.0,
         **kwargs,
     ):

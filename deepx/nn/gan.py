@@ -15,7 +15,7 @@ class GAN(nn.Module):
         hidden_dim: int = 1024,
         negative_slope: float = 0.01,
         dropout: float = 0.0,
-        latent_dim: int = 100,
+        latent_dim: int = 1024,
         base_channels: int = 32,
     ) -> None:
         """Generative Adversarial Network
@@ -70,7 +70,7 @@ class Discriminator(nn.Module):
                 channels_in_layers=[input_dim, 512],
                 activation=nn.LeakyReLU(negative_slope=negative_slope),
                 output_activation=nn.LeakyReLU(negative_slope=negative_slope),
-                dropout=dropout,
+                dropout=0.5,
                 flatten=True,
             )
             self.head = nn.Sequential(nn.Linear(512, 1), nn.Sigmoid())
@@ -83,7 +83,7 @@ class Discriminator(nn.Module):
 
 class Generator(nn.Module):
     def __init__(
-        self, tgt_shape, latent_dim=100, base_channels=32, negative_slope=0.01, dropout=0.0
+        self, tgt_shape, latent_dim=1024, base_channels=32, negative_slope=0.01, dropout=0.0
     ):
         super().__init__()
 
