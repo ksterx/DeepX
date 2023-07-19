@@ -45,7 +45,9 @@ class UNet(nn.Module):
                     )
                 )
                 self.ups.append(
-                    self.upconv(HIDDEN_CHANNELS_LAYERS[i + 1], HIDDEN_CHANNELS_LAYERS[i])
+                    self.upconv(
+                        HIDDEN_CHANNELS_LAYERS[i + 1], HIDDEN_CHANNELS_LAYERS[i]
+                    )
                 )
 
         self.final = nn.Conv2d(64, num_classes, kernel_size=1)
@@ -64,7 +66,9 @@ class UNet(nn.Module):
         x = self.encs[-1](x)
 
         # Decoder
-        for identity, dec, up in zip(reversed(identities), reversed(self.decs), reversed(self.ups)):
+        for identity, dec, up in zip(
+            reversed(identities), reversed(self.decs), reversed(self.ups)
+        ):
             x = up(x)
             x = self.crop_cat(x, identity)
             x = dec(x)

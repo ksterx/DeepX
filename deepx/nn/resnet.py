@@ -25,7 +25,9 @@ class ResidualBlock(nn.Module):
         self.dropout = nn.Dropout(dropout)
 
         if is_first:
-            self.rescale = nn.Conv2d(in_channels, out_channels, kernel_size=1, padding=0)
+            self.rescale = nn.Conv2d(
+                in_channels, out_channels, kernel_size=1, padding=0
+            )
         else:
             self.rescale = lambda x: x
 
@@ -79,7 +81,9 @@ class BottleneckBlock(nn.Module):
         super().__init__()
         self.conv1 = nn.Conv2d(in_channels, hidden_channels, kernel_size=1, padding=0)
         self.bn1 = nn.BatchNorm2d(hidden_channels)
-        self.conv2 = nn.Conv2d(hidden_channels, hidden_channels, kernel_size=3, padding=1)
+        self.conv2 = nn.Conv2d(
+            hidden_channels, hidden_channels, kernel_size=3, padding=1
+        )
         self.bn2 = nn.BatchNorm2d(hidden_channels)
         self.conv3 = nn.Conv2d(hidden_channels, out_channels, kernel_size=1, padding=0)
         self.bn3 = nn.BatchNorm2d(out_channels)
@@ -87,7 +91,9 @@ class BottleneckBlock(nn.Module):
         self.dropout = nn.Dropout(dropout)
 
         if is_first:
-            self.rescale = nn.Conv2d(in_channels, out_channels, kernel_size=1, padding=0)
+            self.rescale = nn.Conv2d(
+                in_channels, out_channels, kernel_size=1, padding=0
+            )
         else:
             self.rescale = lambda x: x
 
@@ -202,7 +208,10 @@ class ResNet(nn.Module):
         return nn.Sequential(
             nn.AdaptiveAvgPool2d((1, 1)),
             nn.Flatten(),
-            nn.Linear(self.block.CHANNELS_IN_LAYERS[-1] * self.block.EXPANSION, self.num_classes),
+            nn.Linear(
+                self.block.CHANNELS_IN_LAYERS[-1] * self.block.EXPANSION,
+                self.num_classes,
+            ),
         )
 
 

@@ -58,7 +58,9 @@ with gr.Blocks("Model") as app:
         with gr.Column():
             result = gr.Image(label="Result")
     genarate_btn.click(
-        fn=generate, inputs=[ckpt_path, model_name, target_shape, backbone], outputs=result
+        fn=generate,
+        inputs=[ckpt_path, model_name, target_shape, backbone],
+        outputs=result,
     )
 
 app.launch()

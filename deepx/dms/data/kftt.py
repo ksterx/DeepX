@@ -27,9 +27,15 @@ class KFTTDM(TranslationDM):
     def setup(self, stage=None):
         en_tokenizer = "bert-base-cased"
         ja_tokenizer = "cl-tohoku/bert-base-japanese"
-        self.train_data = KFTTDataset(self.data_dir, en_tokenizer, ja_tokenizer, "train", self.max_length)
-        self.val_data = KFTTDataset(self.data_dir, en_tokenizer, ja_tokenizer, "val", self.max_length)
-        self.test_data = KFTTDataset(self.data_dir, en_tokenizer, ja_tokenizer, "test", self.max_length)
+        self.train_data = KFTTDataset(
+            self.data_dir, en_tokenizer, ja_tokenizer, "train", self.max_length
+        )
+        self.val_data = KFTTDataset(
+            self.data_dir, en_tokenizer, ja_tokenizer, "val", self.max_length
+        )
+        self.test_data = KFTTDataset(
+            self.data_dir, en_tokenizer, ja_tokenizer, "test", self.max_length
+        )
 
 
 class KFTTDataset(Dataset):

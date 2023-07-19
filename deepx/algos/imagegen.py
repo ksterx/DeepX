@@ -25,7 +25,12 @@ class ImageGen(Algorithm):
         **kwargs,
     ):
         super().__init__(
-            model=model, lr=lr, loss_fn=loss_fn, optimizer=optimizer, scheduler=scheduler, **kwargs
+            model=model,
+            lr=lr,
+            loss_fn=loss_fn,
+            optimizer=optimizer,
+            scheduler=scheduler,
+            **kwargs,
         )
 
         self.one_side_label_smoothing = one_side_label_smoothing
@@ -95,7 +100,9 @@ class ImageGen(Algorithm):
         # Metrics
         if img.shape[1] == 3 and mode == "test":
             img = inverse_transform(img, mean=0.1307, std=0.3081, is_batch=True)
-            fake_img = inverse_transform(fake_img, mean=0.1307, std=0.3081, is_batch=True)
+            fake_img = inverse_transform(
+                fake_img, mean=0.1307, std=0.3081, is_batch=True
+            )
             exec(f"self.{mode}_metric.update(img, real=True)")
             exec(f"self.{mode}_metric.update(fake_img, real=False)")
             fid = eval(f"self.{mode}_metric.compute()")

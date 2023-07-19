@@ -31,13 +31,19 @@ class FashionMNISTDM(ClassificationDM):
 
     def setup(self, stage=None):
         if stage == "fit":
-            data = FashionMNIST(self.data_dir, train=True, transform=self.train_transform())
+            data = FashionMNIST(
+                self.data_dir, train=True, transform=self.train_transform()
+            )
             self.train_data, self.val_data = self._random_split(data)
 
-            self.test_data = FashionMNIST(self.data_dir, train=False, transform=self.transform())
+            self.test_data = FashionMNIST(
+                self.data_dir, train=False, transform=self.transform()
+            )
 
         if stage == "predict":
-            self.predict_data = FashionMNIST(self.data_dir, train=False, transform=self.transform())
+            self.predict_data = FashionMNIST(
+                self.data_dir, train=False, transform=self.transform()
+            )
 
     @classmethod
     def transform(cls):

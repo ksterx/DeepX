@@ -49,7 +49,11 @@ class ClassificationTrainer(TrainerX):
         num_channels = self.datamodule.NUM_CHANNELS
 
         self.model_cfg.update(
-            {"num_classes": num_classes, "in_channels": num_channels, "dropout": dropout}
+            {
+                "num_classes": num_classes,
+                "in_channels": num_channels,
+                "dropout": dropout,
+            }
         )
         self.model = self.get_model(model, **self.model_cfg)
 

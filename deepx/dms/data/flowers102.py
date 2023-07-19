@@ -139,13 +139,19 @@ class Flowers102DM(ClassificationDM):
             self.train_data = Flowers102(
                 self.data_dir, split="train", transform=self.train_transform()
             )
-            self.val_data = Flowers102(self.data_dir, split="val", transform=self.transform())
+            self.val_data = Flowers102(
+                self.data_dir, split="val", transform=self.transform()
+            )
 
         if stage == "test" or None:
-            self.test_data = Flowers102(self.data_dir, split="test", transform=self.transform())
+            self.test_data = Flowers102(
+                self.data_dir, split="test", transform=self.transform()
+            )
 
         if stage == "predict" or None:
-            self.predict_data = Flowers102(self.data_dir, split="test", transform=self.transform())
+            self.predict_data = Flowers102(
+                self.data_dir, split="test", transform=self.transform()
+            )
 
     @classmethod
     def transform(cls):

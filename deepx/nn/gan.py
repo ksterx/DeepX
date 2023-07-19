@@ -45,7 +45,9 @@ class GAN(nn.Module):
 
 
 class Discriminator(nn.Module):
-    def __init__(self, backbone, tgt_shape, hidden_dim=1024, negative_slope=0.01, dropout=0.0):
+    def __init__(
+        self, backbone, tgt_shape, hidden_dim=1024, negative_slope=0.01, dropout=0.0
+    ):
         super().__init__()
         c, h, w = tgt_shape
 
@@ -57,7 +59,8 @@ class Discriminator(nn.Module):
                 nn.AdaptiveAvgPool2d((1, 1)),
                 nn.Flatten(),
                 nn.Linear(
-                    self.backbone.block.CHANNELS_IN_LAYERS[-1] * self.backbone.block.EXPANSION,
+                    self.backbone.block.CHANNELS_IN_LAYERS[-1]
+                    * self.backbone.block.EXPANSION,
                     hidden_dim,
                 ),
                 nn.LeakyReLU(negative_slope=negative_slope),
@@ -83,7 +86,12 @@ class Discriminator(nn.Module):
 
 class Generator(nn.Module):
     def __init__(
-        self, tgt_shape, latent_dim=1024, base_channels=32, negative_slope=0.01, dropout=0.0
+        self,
+        tgt_shape,
+        latent_dim=1024,
+        base_channels=32,
+        negative_slope=0.01,
+        dropout=0.0,
     ):
         super().__init__()
 

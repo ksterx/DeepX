@@ -8,4 +8,14 @@ from .penntreebank import PennTreebankDM
 from .vocseg import VOCSegDM
 from .wikitext103 import WikiText103DM
 
-__all__ = ["CIFAR10DM", "CIFAR100DM", "KFTTDM", "MNISTDM", "FashionMNISTDM", "Flowers102DM", "PennTreebankDM", "VOCSegDM", "WikiText103DM"]
+__all__ = [
+    "CIFAR10DM",
+    "CIFAR100DM",
+    "KFTTDM",
+    "MNISTDM",
+    "FashionMNISTDM",
+    "Flowers102DM",
+    "PennTreebankDM",
+    "VOCSegDM",
+    "WikiText103DM",
+]

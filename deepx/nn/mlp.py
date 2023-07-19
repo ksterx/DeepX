@@ -18,7 +18,9 @@ class MLP(nn.Module):
         if flatten:
             self.layers.append(nn.Flatten())
         for i in range(len(channels_in_layers) - 1):
-            self.layers.append(nn.Linear(channels_in_layers[i], channels_in_layers[i + 1]))
+            self.layers.append(
+                nn.Linear(channels_in_layers[i], channels_in_layers[i + 1])
+            )
         self.activation = activation
         self.output_activation = output_activation
         self.dropout = nn.Dropout(p=dropout)

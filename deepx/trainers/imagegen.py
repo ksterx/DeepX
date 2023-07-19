@@ -51,7 +51,9 @@ class ImageGenTrainer(TrainerX):
         )
 
         if loss_fn != "bce":
-            warnings.warn(f"Loss function {loss_fn} might cause problems. Use 'bce' instead.")
+            warnings.warn(
+                f"Loss function {loss_fn} might cause problems. Use 'bce' instead."
+            )
 
         # self.dm_cfg.update({})
         self.datamodule = self.get_datamodule(datamodule=datamodule, **self.dm_cfg)

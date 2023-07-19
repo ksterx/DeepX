@@ -27,7 +27,9 @@ def predict(ckpt_path, model_name, dm_name, image):
     model = registered_models[model_name]
     dm = registered_dms[dm_name]
     model = model(num_classes=dm.NUM_CLASSES, in_channels=dm.NUM_CHANNELS)
-    model = Classification.load_from_checkpoint(ckpt_path, model=model, num_classes=dm.NUM_CLASSES)
+    model = Classification.load_from_checkpoint(
+        ckpt_path, model=model, num_classes=dm.NUM_CLASSES
+    )
     model.eval()
 
     # Preprocess
@@ -57,7 +59,9 @@ with gr.Blocks("Model") as app:
                 image = gr.Image(live=True, label="Image")
 
                 with gr.Row():
-                    model_name = gr.Dropdown(list(registered_models.keys()), label="Model")
+                    model_name = gr.Dropdown(
+                        list(registered_models.keys()), label="Model"
+                    )
                     dm_name = gr.Dropdown(list(registered_dms.keys()), label="Dataset")
 
                 ckpt_path = gr.Textbox(label="Checkpoint path")
@@ -76,6 +80,8 @@ with gr.Blocks("Model") as app:
 
         with gr.Column():
             result = gr.Label(label="Result")
-    predict_btn.click(fn=predict, inputs=[ckpt_path, model_name, dm_name, image], outputs=result)
+    predict_btn.click(
+        fn=predict, inputs=[ckpt_path, model_name, dm_name, image], outputs=result
+    )
 
 app.launch()

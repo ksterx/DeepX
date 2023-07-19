@@ -23,7 +23,17 @@ def main(cfg):
         log_dir=cfg.log_dir,
         dropout=tcfg.dropout,
     )
-    trainer.train(ckpt_path=tcfg.ckpt_path, epochs=tcfg.epochs, stopping_patience=tcfg.patience, max_depth=tcfg.max_depth, benchmark=tcfg.benchmark, debug=tcfg.debug, monitor=tcfg.monitor, monitor_max=tcfg.monitor_max, logger=tcfg.logger,)
+    trainer.train(
+        ckpt_path=tcfg.ckpt_path,
+        epochs=tcfg.epochs,
+        stopping_patience=tcfg.patience,
+        max_depth=tcfg.max_depth,
+        benchmark=tcfg.benchmark,
+        debug=tcfg.debug,
+        monitor=tcfg.monitor,
+        monitor_max=tcfg.monitor_max,
+        logger=tcfg.logger,
+    )
 
 
 if __name__ == "__main__":

@@ -13,7 +13,9 @@ class Attention(nn.Module):
         self.dropout = nn.Dropout(p=dropout)
         self.scale = math.sqrt(embed_dim)
         head_dim = embed_dim // num_heads
-        assert head_dim * num_heads == embed_dim, "embed_dim must be divisible by num_heads"
+        assert (
+            head_dim * num_heads == embed_dim
+        ), "embed_dim must be divisible by num_heads"
         self.w_q = nn.Linear(embed_dim, head_dim, bias=False)
         self.w_k = nn.Linear(embed_dim, head_dim, bias=False)
         self.w_v = nn.Linear(embed_dim, head_dim, bias=False)
@@ -61,7 +63,9 @@ class Attention(nn.Module):
         num_channels = query.shape[-1]
         assert query.shape == key.shape, "query and key must have the same shape"
 
-        similarity = query @ key.transpose(-2, -1) / num_channels  # (batch_size, seq_len, seq_len)
+        similarity = (
+            query @ key.transpose(-2, -1) / num_channels
+        )  # (batch_size, seq_len, seq_len)
         if mask is not None:
             similarity = similarity + mask
         similarity = F.softmax(similarity, dim=-1)  # (batch_size, seq_len, seq_len)
@@ -78,7 +82,9 @@ class MultiHeadAttention(nn.Module):
         super().__init__()
 
         self.head_dim = embed_dim // num_heads
-        assert self.head_dim * num_heads == embed_dim, "embed_dim must be divisible by num_heads"
+        assert (
+            self.head_dim * num_heads == embed_dim
+        ), "embed_dim must be divisible by num_heads"
 
         self.dropout = nn.Dropout(p=dropout)
         self.heads = nn.ModuleList(
@@ -151,7 +157,10 @@ class TransformerEncoderBlock(nn.Module):
         self.dropout = nn.Dropout(p=dropout)
         self.norm1 = nn.LayerNorm(embed_dim)
         self.fc = MLP(
-            [embed_dim, hidden_dim, embed_dim], dropout=dropout, activation=nn.GELU(), flatten=False
+            [embed_dim, hidden_dim, embed_dim],
+            dropout=dropout,
+            activation=nn.GELU(),
+            flatten=False,
         )
         self.norm2 = nn.LayerNorm(embed_dim)
 
@@ -179,7 +188,9 @@ class TransformerDecoderBlock(nn.Module):
         self.norm1 = nn.LayerNorm(embed_dim)
         self.attention = MultiHeadAttention(embed_dim, num_heads, dropout)
         self.norm2 = nn.LayerNorm(embed_dim)
-        self.fc = MLP([embed_dim, hidden_dim, embed_dim], dropout=dropout, activation=nn.GELU())
+        self.fc = MLP(
+            [embed_dim, hidden_dim, embed_dim], dropout=dropout, activation=nn.GELU()
+        )
         self.norm3 = nn.LayerNorm(embed_dim)
 
     def forward(
@@ -217,7 +228,9 @@ class TransformerEncoder(nn.Module):
             ]
         )
 
-    def forward(self, x: Tensor, mask: Tensor | None = None) -> tuple[Tensor, list[Tensor]]:
+    def forward(
+        self, x: Tensor, mask: Tensor | None = None
+    ) -> tuple[Tensor, list[Tensor]]:
         x = self.embed(x)
         x = self.pe(x)
         sims = []
@@ -323,7 +336,9 @@ class LangModelTransformer(TransformerEncoder):
         self.vocab_size = vocab_size
         self.head = nn.Linear(embed_dim, vocab_size)
 
-    def forward(self, x: Tensor, mask: Tensor | None = None) -> tuple[Tensor, list[Tensor]]:
+    def forward(
+        self, x: Tensor, mask: Tensor | None = None
+    ) -> tuple[Tensor, list[Tensor]]:
         x = self.embed(x)
         x = self.pe(x)
         sims = []

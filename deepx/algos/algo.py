@@ -66,7 +66,9 @@ class Algorithm(LightningModule):
                         optimizer, T_max=self.trainer.max_epochs
                     )
                 case "step":
-                    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=30, gamma=0.1)
+                    scheduler = torch.optim.lr_scheduler.StepLR(
+                        optimizer, step_size=30, gamma=0.1
+                    )
                 case "plateau":
                     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
                         optimizer, mode="min", factor=0.1, patience=10

@@ -5,4 +5,11 @@ from .langmodel import LangModel
 from .segmentation import Segmentation
 from .translation import Translation
 
-__all__ = ["Algorithm", "Classification", "LangModel", "Segmentation", "Translation", "ImageGen"]
+__all__ = [
+    "Algorithm",
+    "Classification",
+    "LangModel",
+    "Segmentation",
+    "Translation",
+    "ImageGen",
+]

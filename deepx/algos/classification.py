@@ -19,7 +19,12 @@ class Classification(Algorithm):
         **kwargs,
     ):
         super().__init__(
-            model=model, lr=lr, loss_fn=loss_fn, optimizer=optimizer, scheduler=scheduler, **kwargs
+            model=model,
+            lr=lr,
+            loss_fn=loss_fn,
+            optimizer=optimizer,
+            scheduler=scheduler,
+            **kwargs,
         )
 
         self.train_acc = Accuracy(task="multiclass", num_classes=num_classes)

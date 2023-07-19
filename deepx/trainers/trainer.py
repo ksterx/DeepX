@@ -181,7 +181,9 @@ class TrainerX:
                     logger.log_hyperparams(self.hparams)
 
                 case "tensorboard":
-                    logger = TensorBoardLogger(save_dir=self.log_dir, name=self.datamodule.NAME)
+                    logger = TensorBoardLogger(
+                        save_dir=self.log_dir, name=self.datamodule.NAME
+                    )
         else:
             logger = None
 
@@ -199,7 +201,9 @@ class TrainerX:
             callbacks=[
                 EarlyStopping(monitor=monitor, patience=stopping_patience),
                 ModelSummary(max_depth=max_depth),
-                ModelCheckpoint(monitor=monitor, save_top_k=1, mode=monitor_mode, save_last=True),
+                ModelCheckpoint(
+                    monitor=monitor, save_top_k=1, mode=monitor_mode, save_last=True
+                ),
             ],
             benchmark=benchmark,
             fast_dev_run=debug,

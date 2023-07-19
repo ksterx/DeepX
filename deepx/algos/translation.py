@@ -24,7 +24,12 @@ class Translation(Algorithm):
         **kwargs,
     ):
         super().__init__(
-            model=model, lr=lr, loss_fn=loss_fn, optimizer=optimizer, scheduler=scheduler, **kwargs
+            model=model,
+            lr=lr,
+            loss_fn=loss_fn,
+            optimizer=optimizer,
+            scheduler=scheduler,
+            **kwargs,
         )
 
         if isinstance(tokenizer, str):
@@ -33,9 +38,15 @@ class Translation(Algorithm):
             self.tokenizer = tokenizer
         self.max_length = max_length
 
-        self.train_acc = Accuracy(task="multiclass", num_classes=self.tokenizer.vocab_size)
-        self.val_acc = Accuracy(task="multiclass", num_classes=self.tokenizer.vocab_size)
-        self.test_acc = Accuracy(task="multiclass", num_classes=self.tokenizer.vocab_size)
+        self.train_acc = Accuracy(
+            task="multiclass", num_classes=self.tokenizer.vocab_size
+        )
+        self.val_acc = Accuracy(
+            task="multiclass", num_classes=self.tokenizer.vocab_size
+        )
+        self.test_acc = Accuracy(
+            task="multiclass", num_classes=self.tokenizer.vocab_size
+        )
 
     def _mode_step(self, batch, batch_idx, mode: str):
         x = batch[:, :-1]

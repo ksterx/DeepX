@@ -22,7 +22,12 @@ class Segmentation(Algorithm):
         **kwargs,
     ):
         super().__init__(
-            model=model, lr=lr, loss_fn=loss_fn, optimizer=optimizer, scheduler=scheduler, **kwargs
+            model=model,
+            lr=lr,
+            loss_fn=loss_fn,
+            optimizer=optimizer,
+            scheduler=scheduler,
+            **kwargs,
         )
 
         self.train_iou = MulticlassJaccardIndex(

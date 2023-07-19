@@ -17,17 +17,24 @@ class SegmentationDM(DataModuleX):
         return transforms.Compose(
             [
                 transforms.ToTensor(),
-                transforms.Resize(size, antialias=antialias, interpolation=interpolation),
+                transforms.Resize(
+                    size, antialias=antialias, interpolation=interpolation
+                ),
                 transforms.Normalize(mean, std),
             ]
         )
 
     def target_transform(
-        self, size, antialias=True, interpolation=transforms.InterpolationMode.NEAREST_EXACT
+        self,
+        size,
+        antialias=True,
+        interpolation=transforms.InterpolationMode.NEAREST_EXACT,
     ):
         return transforms.Compose(
             [
                 transforms.PILToTensor(),
-                transforms.Resize(size, antialias=antialias, interpolation=interpolation),
+                transforms.Resize(
+                    size, antialias=antialias, interpolation=interpolation
+                ),
             ]
         )

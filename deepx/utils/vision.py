@@ -3,7 +3,9 @@ import torch
 from torch import Tensor
 
 
-def inverse_transform(img: Tensor, mean: tuple, std: tuple, is_batch: bool, levels: int = 256):
+def inverse_transform(
+    img: Tensor, mean: tuple, std: tuple, is_batch: bool, levels: int = 256
+):
     """Inverse transform for images
 
     Args:
