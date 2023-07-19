@@ -16,6 +16,7 @@ class FashionMNISTDM(ClassificationDM):
         train_ratio: float = 0.9,
         num_workers: int = 2,
         download: bool = False,
+        **kwargs,
     ):
         super().__init__(
             data_dir=data_dir,
@@ -23,6 +24,7 @@ class FashionMNISTDM(ClassificationDM):
             train_ratio=train_ratio,
             num_workers=num_workers,
             download=download,
+            **kwargs,
         )
 
     def prepare_data(self):

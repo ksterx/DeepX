@@ -1,5 +1,6 @@
 from torch.nn import BCELoss, CrossEntropyLoss, MSELoss
 
+from .dcgan import DCGAN
 from .gan import GAN
 from .losses import DiceLoss, FocalLoss
 from .mlp import MLP
@@ -18,6 +19,7 @@ registered_models = {
     "mlp": MLP,
     "lmtransformer": LangModelTransformer,
     "gan": GAN,
+    "dcgan": DCGAN,
 }
 
 registered_losses = {

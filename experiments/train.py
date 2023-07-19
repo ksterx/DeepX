@@ -2,7 +2,7 @@ import argparse
 
 from deepx.trainers import (
     ClassificationTrainer,
-    ImageGenTrainer,
+    ImageGenerationTrainer,
     LangModelTrainer,
     SegmentationTrainer,
 )
@@ -38,7 +38,7 @@ match args.algo:
     case "segmentation":
         trainer_cls = SegmentationTrainer
     case "imagegen":
-        trainer_cls = ImageGenTrainer
+        trainer_cls = ImageGenerationTrainer
     case "langmodel":
         trainer_cls = LangModelTrainer
     case _:

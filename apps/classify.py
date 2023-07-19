@@ -56,7 +56,7 @@ with gr.Blocks("Model") as app:
     with gr.Row():
         with gr.Column():
             with gr.Box():
-                image = gr.Image(live=True, label="Image")
+                image = gr.Image(label="Image")
 
                 with gr.Row():
                     model_name = gr.Dropdown(

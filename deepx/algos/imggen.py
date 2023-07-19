@@ -11,8 +11,8 @@ from ..utils.vision import inverse_transform
 from .algo import Algorithm
 
 
-class ImageGen(Algorithm):
-    NAME = "imagegen"
+class ImageGeneration(Algorithm):
+    NAME = "imagegeneration"
 
     def __init__(
         self,

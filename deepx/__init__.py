@@ -1,4 +1,4 @@
-from .algos import Classification, ImageGen, LangModel, Segmentation
+from .algos import Classification, ImageGeneration, LangModel, Segmentation
 from .dms import (
     CIFAR10DM,
     CIFAR100DM,
@@ -27,8 +27,8 @@ registered_algos = {
             "vocseg": VOCSegDM,
         },
     },
-    "imagegen": {
-        "algo": ImageGen,
+    "imagegeneration": {
+        "algo": ImageGeneration,
         "datamodule": {
             "mnist": MNISTDM,
             "fashionmnist": FashionMNISTDM,

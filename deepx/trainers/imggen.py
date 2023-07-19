@@ -1,14 +1,15 @@
 import math
 import warnings
 
+import torch
 from lightning import LightningDataModule, LightningModule
 from torch import nn, optim
 
 from .trainer import TrainerX
 
 
-class ImageGenTrainer(TrainerX):
-    NAME = "imagegen"
+class ImageGenerationTrainer(TrainerX):
+    NAME = "imagegeneration"
 
     def __init__(
         self,
@@ -54,6 +55,8 @@ class ImageGenTrainer(TrainerX):
             warnings.warn(
                 f"Loss function {loss_fn} might cause problems. Use 'bce' instead."
             )
+
+        torch.manual_seed(2525)
 
         # self.dm_cfg.update({})
         self.datamodule = self.get_datamodule(datamodule=datamodule, **self.dm_cfg)

@@ -1,0 +1,12 @@
+root_dir: /workspace
+data_dir: /workspace/experiments/data
+log_dir: /workspace/experiments/runs
+
+defaults:
+  - _self_
+  - dataset: ???
+
+hydra:
+  output_subdir: null
+  run:
+    dir: /workspace/experiments/runs
