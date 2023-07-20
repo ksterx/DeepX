@@ -13,7 +13,6 @@ class ImageGenerationTrainer(TrainerX):
 
     def __init__(
         self,
-        backbone: str | nn.Module,
         model: str | LightningModule,
         datamodule: str | LightningDataModule,
         batch_size: int = 32,
@@ -27,11 +26,11 @@ class ImageGenerationTrainer(TrainerX):
         root_dir: str = "/workspace",
         data_dir: str = "/workspace/experiments/data",
         log_dir: str = "/workspace/experiments/runs",
-        hidden_dim: int = 1024,
         negative_slope: float = 0.01,
         dropout: float = 0.0,
         latent_dim: int = 1024,
-        base_channels: int = 32,
+        base_dim_g: int = 128,
+        base_dim_d: int = 128,
         **kwargs,
     ):
         super().__init__(
@@ -66,13 +65,12 @@ class ImageGenerationTrainer(TrainerX):
         tgt_shape = (self.datamodule.NUM_CHANNELS, h, h)
         self.model_cfg.update(
             {
-                "backbone": backbone,
                 "tgt_shape": tgt_shape,
-                "hidden_dim": hidden_dim,
                 "negative_slope": negative_slope,
                 "dropout": dropout,
                 "latent_dim": latent_dim,
-                "base_channels": base_channels,
+                "base_dim_g": base_dim_g,
+                "base_dim_d": base_dim_d,
             }
         )
         self.model = self.get_model(model, **self.model_cfg)

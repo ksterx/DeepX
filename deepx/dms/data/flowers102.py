@@ -116,10 +116,10 @@ class Flowers102DM(ClassificationDM):
     def __init__(
         self,
         data_dir: str,
-        batch_size: int = 32,
-        train_ratio: float = 0.9,
-        num_workers: int = 2,
-        download: bool = False,
+        batch_size: int,
+        train_ratio: float,
+        num_workers: int,
+        download: bool,
     ):
         super().__init__(
             data_dir=data_dir,

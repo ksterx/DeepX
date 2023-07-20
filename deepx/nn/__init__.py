@@ -1,7 +1,6 @@
-from torch.nn import BCELoss, CrossEntropyLoss, MSELoss
+from torch.nn import BCELoss, BCEWithLogitsLoss, CrossEntropyLoss, MSELoss
 
-from .dcgan import DCGAN
-from .gan import GAN
+from .dcgan import DCGAN, Discriminator, DiscriminatorBlock, Generator, GeneratorBlock
 from .losses import DiceLoss, FocalLoss
 from .mlp import MLP
 from .resnet import ResNet, ResNet18, ResNet34, ResNet50, ResNet101, ResNet152
@@ -18,7 +17,6 @@ registered_models = {
     "unet": UNet,
     "mlp": MLP,
     "lmtransformer": LangModelTransformer,
-    "gan": GAN,
     "dcgan": DCGAN,
 }
 
@@ -27,6 +25,7 @@ registered_losses = {
     "focal": FocalLoss,
     "ce": CrossEntropyLoss,
     "bce": BCELoss,
+    "bce_logits": BCEWithLogitsLoss,
     "mse": MSELoss,
 }
 

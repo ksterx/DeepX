@@ -1,4 +1,3 @@
-backbone: null
 model: dcgan
 datamodule: mnist
 batch_size: 32

@@ -10,7 +10,6 @@ from deepx.trainers import (
 parser = argparse.ArgumentParser()
 parser.add_argument("-a", "--algo", type=str, required=True)
 parser.add_argument("-m", "--model", type=str, nargs="*", required=True)
-parser.add_argument("-bb", "--backbone", type=str, default="resnet18")
 parser.add_argument("-d", "--dataset", type=str, required=True)
 parser.add_argument("-b", "--batch_size", type=int, default=32)
 parser.add_argument("-e", "--epochs", type=int, default=100)
@@ -51,7 +50,6 @@ for model in args.model:
     trainer = trainer_cls(
         model=model,
         datamodule=args.dataset,
-        backbone=args.backbone,
         batch_size=args.batch_size,
         download=args.download,
         root_dir=args.root_dir,

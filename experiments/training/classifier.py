@@ -3,7 +3,9 @@ import hydra
 from deepx.trainers import ClassificationTrainer
 
 
-@hydra.main(config_path="../conf/task/image_generation/", config_name="config", version_base=None)
+@hydra.main(
+    config_path="../conf/task/classification/", config_name="config", version_base=None
+)
 def main(cfg):
     ds_cfg = cfg.dataset
 

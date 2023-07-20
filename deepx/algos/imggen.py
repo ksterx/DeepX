@@ -122,7 +122,7 @@ class ImageGeneration(Algorithm):
             self.untoggle_optimizer(opt_g)
 
     def configure_optimizers(self):
-        opt_g = torch.optim.Adam(self.generator.parameters(), lr=self.lr * 10)
+        opt_g = torch.optim.Adam(self.generator.parameters(), lr=self.lr)
         opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=self.lr)
         print("Generator optimizer:", opt_g)
         print("Discriminator optimizer:", opt_d)

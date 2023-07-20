@@ -1,4 +1,3 @@
-backbone: null
 model: dcgan
 datamodule: cifar10
 batch_size: 32

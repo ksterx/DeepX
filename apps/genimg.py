@@ -3,16 +3,21 @@ from tkinter import filedialog
 import gradio as gr
 from torchvision.utils import save_image
 
-from deepx.algos import ImageGen
+from deepx.algos import ImageGeneration
 from deepx.nn import registered_models
 
 
-def generate(ckpt_path, model_name, tgt_shape, backbone):
+def generate(ckpt_path, model_name, tgt_shape, latent_dim, base_dim_g, base_dim_d):
     tgt_shape = tuple(map(int, tgt_shape.split("x")))
 
     model = registered_models[model_name]
-    model = model(backbone=backbone, tgt_shape=tgt_shape)
-    model = ImageGen.load_from_checkpoint(ckpt_path, model=model)
+    model = model(
+        tgt_shape=tgt_shape,
+        latent_dim=latent_dim,
+        base_dim_g=base_dim_g,
+        base_dim_d=base_dim_d,
+    )
+    model = ImageGeneration.load_from_checkpoint(ckpt_path, model=model)
     model.eval()
     z = model.generate_noize(16)
     generated = model.model.generator(z)
@@ -30,19 +35,26 @@ with gr.Blocks("Model") as app:
         with gr.Column():
             with gr.Row():
                 model_name = gr.Dropdown(list(registered_models.keys()), label="Model")
-                backbone = gr.Dropdown(list(registered_models.keys()), label="Backbone")
+
+                with gr.Column():
+                    ckpt_path = gr.Textbox(label="Checkpoint path")
+                    ckpt_btn = gr.Button(value="Select checkpoint")
+
             with gr.Row():
                 target_shape = gr.Dropdown(
                     [
-                        "1x8x8",
+                        "1x32x32",
                         "3x32x32",
+                        "3x64x64",
+                        "3x128x128",
                         "3x256x256",
                     ],
                     label="Target shape",
                 )
-                with gr.Column():
-                    ckpt_path = gr.Textbox(label="Checkpoint path")
-                    ckpt_btn = gr.Button(value="Select checkpoint")
+                # set a dimention (latent_dim)
+                latent_dim = gr.Number(label="Latent dim", value=100)
+                base_dim_g = gr.Number(label="Generator base dim", value=128)
+                base_dim_d = gr.Number(label="Discriminator base dim", value=128)
 
             def set_ckpt_path():
                 path = filedialog.askopenfilename(
@@ -59,7 +71,14 @@ with gr.Blocks("Model") as app:
             result = gr.Image(label="Result")
     genarate_btn.click(
         fn=generate,
-        inputs=[ckpt_path, model_name, target_shape, backbone],
+        inputs=[
+            ckpt_path,
+            model_name,
+            target_shape,
+            latent_dim,
+            base_dim_g,
+            base_dim_d,
+        ],
         outputs=result,
     )
 

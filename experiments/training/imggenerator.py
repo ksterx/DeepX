@@ -3,12 +3,15 @@ import hydra
 from deepx.trainers import ImageGenerationTrainer
 
 
-@hydra.main(config_path="../conf/task/image_generation/", config_name="config", version_base=None)
+@hydra.main(
+    config_path="../conf/task/image_generation/",
+    config_name="config",
+    version_base=None,
+)
 def main(cfg):
     ds_cfg = cfg.dataset
 
     trainer = ImageGenerationTrainer(
-        backbone=ds_cfg.backbone,
         model=ds_cfg.model,
         datamodule=ds_cfg.datamodule,
         batch_size=ds_cfg.batch_size,
@@ -22,11 +25,11 @@ def main(cfg):
         root_dir=cfg.root_dir,
         data_dir=cfg.data_dir,
         log_dir=cfg.log_dir,
-        hidden_dim=ds_cfg.hidden_dim,
         negative_slope=ds_cfg.negative_slope,
         dropout=ds_cfg.dropout,
         latent_dim=ds_cfg.latent_dim,
-        base_channels=ds_cfg.base_channels,
+        base_dim_g=ds_cfg.base_dim_g,
+        base_dim_d=ds_cfg.base_dim_d,
     )
     trainer.train(
         ckpt_path=ds_cfg.ckpt_path,
