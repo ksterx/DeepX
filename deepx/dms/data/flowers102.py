@@ -7,7 +7,7 @@ class Flowers102DM(ClassificationDM):
     NAME = "flowers102"
     NUM_CLASSES = 102
     NUM_CHANNELS = 3
-    SIZE = (256, 256)
+    SIZE = (32, 32)
     CLASSES = [
         "pink primrose",
         "hard-leaved pocket orchid",

@@ -4,8 +4,10 @@ from .data import (
     CIFAR100DM,
     KFTTDM,
     MNISTDM,
+    CelebADM,
     FashionMNISTDM,
     Flowers102DM,
+    LFWPeopleDM,
     PennTreebankDM,
     VOCSegDM,
     WikiText103DM,
@@ -30,4 +32,6 @@ __all__ = [
     "PennTreebankDM",
     "VOCSegDM",
     "WikiText103DM",
+    "CelebADM",
+    "LFWPeopleDM",
 ]

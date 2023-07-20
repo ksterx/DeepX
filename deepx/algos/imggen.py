@@ -1,6 +1,10 @@
+import glob
+import os
 import tempfile
 
+import numpy as np
 import torch
+from PIL import Image, ImageDraw
 from torch import nn
 
 # from torchmetrics.classification import BinaryAccuracy
@@ -13,6 +17,7 @@ from .algo import Algorithm
 
 class ImageGeneration(Algorithm):
     NAME = "imagegeneration"
+    SEED = 2525
 
     def __init__(
         self,
@@ -136,8 +141,48 @@ class ImageGeneration(Algorithm):
         print("Discriminator optimizer:", opt_d)
         return opt_g, opt_d
 
+    def on_train_end(self):
+        # create gif from images
+        with tempfile.TemporaryDirectory() as tmpdir:
+            img_paths = sorted(
+                glob.glob(
+                    os.path.join(
+                        self.logger.save_dir,
+                        self.logger.experiment_id,
+                        self.logger.run_id,
+                        "artifacts/img_*.png",
+                    )
+                )
+            )
+
+            frames = []
+            for i, img_path in enumerate(img_paths):
+                img = Image.open(img_path)
+                draw = ImageDraw.Draw(img)
+                draw.multiline_text(
+                    (0, 0),
+                    f"Epoch: {i+1:03d}",
+                    (255, 255, 255),
+                    stroke_width=5,
+                    stroke_fill=(0, 0, 0),
+                )
+                frames.append(img)
+
+            frames[0].save(
+                f"{tmpdir}/training.gif",
+                save_all=True,
+                append_images=frames[1:],
+                optimize=False,
+                duration=100,
+                loop=0,
+            )
+
+            self.logger.experiment.log_artifact(
+                self.logger.run_id, f"{tmpdir}/training.gif"
+            )
+
     def on_validation_epoch_end(self):
-        z = self.generate_noize(16)
+        z = self.generate_noize(16, seed=self.SEED)
         fake_img = self.generator(z)
         grid = make_grid(fake_img, nrow=4)
 
@@ -146,6 +191,13 @@ class ImageGeneration(Algorithm):
             save_image(grid, fp=img_path)
             self.logger.experiment.log_artifacts(self.logger.run_id, tmpdir)
 
-    def generate_noize(self, batch_size):
-        z = torch.randn(batch_size, self.generator.latent_dim, 1, 1, device=self.device)
+    def generate_noize(self, batch_size: int, seed: int | None = None):
+        if isinstance(seed, int):
+            np.random.seed(seed)
+            z = np.random.randn(batch_size, self.generator.latent_dim, 1, 1)
+            z = torch.from_numpy(z).float().to(self.device)
+        else:
+            z = torch.randn(
+                batch_size, self.generator.latent_dim, 1, 1, device=self.device
+            )
         return z

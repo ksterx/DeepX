@@ -13,9 +13,11 @@ def generate(ckpt_path, model_name, tgt_shape, latent_dim, base_dim_g, base_dim_
     model = registered_models[model_name]
     model = model(
         tgt_shape=tgt_shape,
-        latent_dim=latent_dim,
-        base_dim_g=base_dim_g,
-        base_dim_d=base_dim_d,
+        latent_dim=int(latent_dim),
+        base_dim_g=int(base_dim_g),
+        base_dim_d=int(base_dim_d),
+        dropout=0.0,
+        negative_slope=0.0,
     )
     model = ImageGeneration.load_from_checkpoint(ckpt_path, model=model)
     model.eval()
