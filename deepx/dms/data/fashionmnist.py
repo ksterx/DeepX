@@ -7,7 +7,7 @@ class FashionMNISTDM(ClassificationDM):
     NAME = "fashionmnist"
     NUM_CLASSES = FashionMNIST.classes
     NUM_CHANNELS = 1
-    SIZE = (32, 32)
+    SIZE = (28, 28)
 
     def __init__(
         self,

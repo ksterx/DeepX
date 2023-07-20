@@ -30,7 +30,7 @@ def generate(ckpt_path, model_name, tgt_shape, latent_dim, base_dim_g, base_dim_
 with gr.Blocks("Model") as app:
     gr.Markdown(
         """
-        # Image Classification App
+        # Image Generation App
     """
     )
     with gr.Row():
@@ -45,7 +45,7 @@ with gr.Blocks("Model") as app:
             with gr.Row():
                 target_shape = gr.Dropdown(
                     [
-                        "1x32x32",
+                        "1x28x28",
                         "3x32x32",
                         "3x64x64",
                         "3x128x128",

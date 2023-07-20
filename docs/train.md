@@ -9,7 +9,7 @@ cd /workspace/experiments/training
 python imggenerator.py dataset=mnist
 ```
 
-![mnist](./images/mnist.png)
+![mnist](./images/mnist.gif)
 
 ### LFW
 

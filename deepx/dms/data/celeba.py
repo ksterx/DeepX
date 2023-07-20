@@ -7,7 +7,7 @@ class CelebADM(ClassificationDM):
     NAME = "celeba"
     NUM_CLASSES = None
     NUM_CHANNELS = 3
-    SIZE = (32, 32)
+    SIZE = (128, 128)
 
     def __init__(
         self,
