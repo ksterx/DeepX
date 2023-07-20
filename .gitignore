@@ -280,3 +280,4 @@ experiments/data/*
 !experiments/data/README.md
 flagged/
 *.prof
+multirun/

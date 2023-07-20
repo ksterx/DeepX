@@ -31,7 +31,11 @@ class ClassificationDM(DataModuleX):
         return transforms.Compose(
             [
                 transforms.ToTensor(),
-                transforms.Resize(size, antialias=antialias),
+                transforms.Resize(
+                    size,
+                    antialias=antialias,
+                    interpolation=transforms.InterpolationMode.BICUBIC,
+                ),
                 transforms.Normalize(mean, std),
             ]
         )
@@ -43,7 +47,11 @@ class ClassificationDM(DataModuleX):
                 transforms.RandomCrop(size, padding=4),
                 transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
-                transforms.Resize(size, antialias=antialias),
+                transforms.Resize(
+                    size,
+                    antialias=antialias,
+                    interpolation=transforms.InterpolationMode.BICUBIC,
+                ),
                 transforms.Normalize(mean, std),
             ]
         )

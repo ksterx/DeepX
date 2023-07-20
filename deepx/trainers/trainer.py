@@ -20,6 +20,8 @@ class TrainerX:
         num_workers: int,
         download: bool,
         lr: float,
+        beta1: float,
+        beta2: float,
         loss_fn: str | nn.Module,
         optimizer: str | optim.Optimizer,
         scheduler: str | optim.lr_scheduler._LRScheduler,
@@ -36,6 +38,8 @@ class TrainerX:
                 "batch_size": batch_size,
                 "train_ratio": train_ratio,
                 "lr": lr,
+                "beta1": beta1,
+                "beta2": beta2,
                 "loss_fn": loss_fn,
                 "optimizer": optimizer,
                 "scheduler": scheduler,
@@ -62,6 +66,8 @@ class TrainerX:
 
         self.algo_cfg = {
             "lr": lr,
+            "beta1": beta1,
+            "beta2": beta2,
             "loss_fn": loss_fn,
             "optimizer": optimizer,
             "scheduler": scheduler,

@@ -27,6 +27,7 @@ class DCGAN(nn.Module):
             tgt_shape=tgt_shape,
             latent_dim=latent_dim,
             base_channels=base_dim_g,
+            negative_slope=negative_slope,
             dropout=dropout,
         )
         self.discriminator = Discriminator(
@@ -36,8 +37,19 @@ class DCGAN(nn.Module):
             dropout=dropout,
         )
 
+        self.apply(self.init_weights)
+
     def forward(self, x):
         return self.generator(x)
+
+    @staticmethod
+    def init_weights(models):
+        for m in models.modules():
+            if isinstance(m, (nn.Conv2d, nn.ConvTranspose2d)):
+                nn.init.normal_(m.weight, 0.0, 0.02)
+            elif isinstance(m, (nn.BatchNorm2d, nn.BatchNorm1d)):
+                nn.init.normal_(m.weight, 1.0, 0.02)
+                nn.init.constant_(m.bias, 0)
 
 
 class Generator(nn.Module):
@@ -56,35 +68,26 @@ class Generator(nn.Module):
         self.base_channels = base_channels
 
         c, h, w = tgt_shape
-        assert h == w, "Height and width must be equal"
-        power = int(math.log2(h))
-        channels = [
-            base_channels * 2**i for i in range(power - 3, -1, -1)
-        ]  # [..., base * 2^2, base * 2^1, base * 2^0]
+        ksp_list = determine_ksp((h, w))
+        ksp_list.reverse()
+        channels = [base_channels * 2**i for i in range(len(ksp_list) - 1)]
+        channels.append(latent_dim)
+        channels.reverse()  # [latent_dim, ..., base * 2^1, base * 2^0]
 
         self.model = nn.Sequential(
-            GeneratorBlock(
-                in_channels=latent_dim,
-                out_channels=channels[0],
-                kernel_size=4,
-                stride=1,
-                padding=0,
-                negative_slope=negative_slope,
-                dropout=dropout,
-            ),
             *[
                 GeneratorBlock(
                     in_channels=channels[i],
                     out_channels=channels[i + 1],
-                    kernel_size=4,
-                    stride=2,
-                    padding=1,
+                    kernel_size=k,
+                    stride=s,
+                    padding=p,
                     negative_slope=negative_slope,
                     dropout=dropout,
                 )
-                for i in range(power - 3)
+                for i, (k, s, p) in enumerate(ksp_list[:-1])
             ],
-            nn.ConvTranspose2d(channels[-1], c, 4, 2, 1),
+            nn.ConvTranspose2d(channels[-1], c, *ksp_list[-1]),
             nn.Tanh(),
         )
 
@@ -93,35 +96,29 @@ class Generator(nn.Module):
 
 
 class Discriminator(nn.Module):
-    def __init__(self, tgt_shape, base_channels, negative_slope, dropout):
+    def __init__(self, tgt_shape, base_channels, negative_slope=0.01, dropout=0.0):
         super().__init__()
 
-        c, h, _ = tgt_shape
-        num_layers = int(math.log2(h)) - 1
+        c, h, w = tgt_shape
+        ksp_list = determine_ksp((h, w))
+        channels = [base_channels * 2**i for i in range(len(ksp_list) - 1)]
+        channels.append(1)
+        channels.insert(0, c)  # [c, base * 2^0, base * 2^1, ..., 1]
 
         self.model = nn.Sequential(
-            DiscriminatorBlock(
-                in_channels=c,
-                out_channels=base_channels,
-                kernel_size=4,
-                stride=2,
-                padding=1,
-                negative_slope=negative_slope,
-                dropout=dropout,
-            ),
             *[
                 DiscriminatorBlock(
-                    in_channels=base_channels * 2**i,
-                    out_channels=base_channels * 2 ** (i + 1),
-                    kernel_size=4,
-                    stride=2,
-                    padding=1,
+                    in_channels=channels[i],
+                    out_channels=channels[i + 1],
+                    kernel_size=k,
+                    stride=s,
+                    padding=p,
                     negative_slope=negative_slope,
                     dropout=dropout,
                 )
-                for i in range(num_layers - 2)
+                for i, (k, s, p) in enumerate(ksp_list[:-1])
             ],
-            nn.Conv2d(base_channels * 2 ** (num_layers - 2), 1, 4, 2, 0),
+            nn.Conv2d(channels[-2], channels[-1], *ksp_list[-1]),
             nn.Sigmoid(),
         )
 
@@ -188,6 +185,37 @@ class DiscriminatorBlock(nn.Module):
         )
 
     def forward(self, x):
-        out = self.model(x)
-        print(out.shape)
         return self.model(x)
+
+
+def determine_ksp(shape):
+    """Determine kernel_size, stride, and padding for Conv2d and ConvTranspose2d
+
+    Args:
+        shape (tuple[int, int]): (H, W)
+
+    Returns:
+        tuple[int, int, int]: (kernel_size, stride, padding)
+    """
+    h, w = shape
+    assert h == w, "Height and width must be equal"
+
+    ksp_list = []
+
+    def determine(x):
+        if x % 2 == 0 and x > 4:
+            ksp_list.append((4, 2, 1))
+            determine(x // 2)
+        elif x % 2 == 0 and x == 4:
+            ksp_list.append((4, 1, 0))
+        elif x % 2 == 1 and x > 3:
+            ksp_list.append((3, 2, 0))
+            determine(x // 2)
+        elif x % 2 == 1 and x == 3:
+            ksp_list.append((3, 1, 0))
+        else:
+            raise ValueError(f"Invalid height: {x}")
+
+    determine(h)
+
+    return ksp_list

@@ -22,6 +22,8 @@ class ImageGeneration(Algorithm):
         optimizer: str | torch.optim.Optimizer = "adam",
         scheduler: str | torch.optim.lr_scheduler._LRScheduler = "cos",
         one_side_label_smoothing: float = 0.9,
+        beta1: float = 0.9,
+        beta2: float = 0.999,
         **kwargs,
     ):
         super().__init__(
@@ -30,6 +32,8 @@ class ImageGeneration(Algorithm):
             loss_fn=loss_fn,
             optimizer=optimizer,
             scheduler=scheduler,
+            beta1=beta1,
+            beta2=beta2,
             **kwargs,
         )
 
@@ -122,8 +126,12 @@ class ImageGeneration(Algorithm):
             self.untoggle_optimizer(opt_g)
 
     def configure_optimizers(self):
-        opt_g = torch.optim.Adam(self.generator.parameters(), lr=self.lr)
-        opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=self.lr)
+        opt_g = torch.optim.Adam(
+            self.generator.parameters(), lr=self.lr, betas=(self.beta1, self.beta2)
+        )
+        opt_d = torch.optim.Adam(
+            self.discriminator.parameters(), lr=self.lr, betas=(self.beta1, self.beta2)
+        )
         print("Generator optimizer:", opt_g)
         print("Discriminator optimizer:", opt_d)
         return opt_g, opt_d

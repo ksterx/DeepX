@@ -1,10 +1,12 @@
+import pytest
 import torch
 
-from deepx.nn import Discriminator, Generator
+from deepx.nn.dcgan import Discriminator, Generator
 
 
-def test_dcgan():
-    N, in_channels, H, W = 4, 3, 64, 64
+@pytest.mark.parametrize("in_channels, H, W", [(3, 64, 64), (1, 28, 28), (3, 28, 28)])
+def test_dcgan(in_channels, H, W):
+    N = 4
     latent_dim = 100
     x = torch.randn(N, in_channels, H, W)
     noise = torch.randn(N, latent_dim, 1, 1)

@@ -20,6 +20,8 @@ class ImageGenerationTrainer(TrainerX):
         num_workers: int = 2,
         download: bool = False,
         lr: float = 1e-3,
+        beta1: float = 0.9,
+        beta2: float = 0.999,
         loss_fn: str | nn.Module = "bce",
         optimizer: str | optim.Optimizer = "adam",
         scheduler: str | optim.lr_scheduler._LRScheduler = "cos",
@@ -41,6 +43,8 @@ class ImageGenerationTrainer(TrainerX):
             num_workers=num_workers,
             download=download,
             lr=lr,
+            beta1=beta1,
+            beta2=beta2,
             loss_fn=loss_fn,
             optimizer=optimizer,
             scheduler=scheduler,
@@ -55,14 +59,11 @@ class ImageGenerationTrainer(TrainerX):
                 f"Loss function {loss_fn} might cause problems. Use 'bce' instead."
             )
 
-        torch.manual_seed(2525)
-
         # self.dm_cfg.update({})
         self.datamodule = self.get_datamodule(datamodule=datamodule, **self.dm_cfg)
 
-        h, _ = self.datamodule.SIZE
-        h = 2 ** math.ceil(math.log2(h))
-        tgt_shape = (self.datamodule.NUM_CHANNELS, h, h)
+        h, w = self.datamodule.SIZE
+        tgt_shape = (self.datamodule.NUM_CHANNELS, h, w)
         self.model_cfg.update(
             {
                 "tgt_shape": tgt_shape,

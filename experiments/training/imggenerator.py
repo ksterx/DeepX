@@ -19,6 +19,8 @@ def main(cfg):
         num_workers=ds_cfg.num_workers,
         download=ds_cfg.download,
         lr=ds_cfg.lr,
+        beta1=ds_cfg.beta1,
+        beta2=ds_cfg.beta2,
         loss_fn=ds_cfg.loss_fn,
         optimizer=ds_cfg.optimizer,
         scheduler=ds_cfg.scheduler,

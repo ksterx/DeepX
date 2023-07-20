@@ -15,12 +15,16 @@ class Algorithm(LightningModule):
         loss_fn: nn.Module | str,
         optimizer: str | torch.optim.Optimizer,
         scheduler: str | torch.optim.lr_scheduler._LRScheduler,
+        beta1: float = 0.9,
+        beta2: float = 0.999,
         **kwargs,
     ):
         super().__init__()
 
         self.model = model
         self.lr = lr
+        self.beta1 = beta1
+        self.beta2 = beta2
         self.optimizer = optimizer
         self.scheduler = scheduler
 
@@ -51,7 +55,9 @@ class Algorithm(LightningModule):
         if isinstance(self.optimizer, str):
             match self.optimizer:
                 case "adam":
-                    optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
+                    optimizer = torch.optim.Adam(
+                        self.parameters(), lr=self.lr, betas=(self.beta1, self.beta2)
+                    )
                 case "sgd":
                     optimizer = torch.optim.SGD(self.parameters(), lr=self.lr)
                 case _:
