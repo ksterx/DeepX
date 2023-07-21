@@ -21,7 +21,7 @@ class ClassificationTrainer(TrainerX):
         scheduler: str | optim.lr_scheduler._LRScheduler = "cos",
         root_dir: str = "/workspace",
         data_dir: str = "/workspace/experiments/data",
-        log_dir: str = "/workspace/experiments/runs",
+        log_dir: str = "/workspace/experiments/mlruns",
         dropout: float = 0.0,
         **kwargs,
     ):

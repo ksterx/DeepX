@@ -1,0 +1,27 @@
+model: dcgan
+datamodule: anime
+batch_size: 32
+train_ratio: 0.8
+num_workers: 4
+download: false
+lr: 2e-4
+beta1: 0.5
+beta2: 0.999
+loss_fn: bce
+optimizer: adam
+scheduler: null
+dropout: 0.3
+negative_slope: 0.2
+latent_dim: 100
+base_dim_g: 128
+base_dim_d: 128
+
+ckpt_path: null
+epochs: 100
+patience: 100
+max_depth: 1
+benchmark: True
+debug: false
+monitor: val_loss_g
+monitor_max: false
+logger: mlflow

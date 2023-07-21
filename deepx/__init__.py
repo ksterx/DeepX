@@ -3,6 +3,7 @@ from .dms import (
     CIFAR10DM,
     CIFAR100DM,
     MNISTDM,
+    AnimeDM,
     CelebADM,
     FashionMNISTDM,
     Flowers102DM,
@@ -39,6 +40,7 @@ registered_algos = {
             "flowers102": Flowers102DM,
             "celeba": CelebADM,
             "lfw": LFWPeopleDM,
+            "anime": AnimeDM,
         },
     },
     "langmodel": {

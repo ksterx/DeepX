@@ -1,3 +1,4 @@
+from .anime import AnimeDM
 from .celeba import CelebADM
 from .cifar10 import CIFAR10DM
 from .cifar100 import CIFAR100DM
@@ -11,6 +12,7 @@ from .vocseg import VOCSegDM
 from .wikitext103 import WikiText103DM
 
 __all__ = [
+    "AnimeDM",
     "CelebADM",
     "CIFAR10DM",
     "CIFAR100DM",

@@ -27,7 +27,7 @@ class ImageGenerationTrainer(TrainerX):
         scheduler: str | optim.lr_scheduler._LRScheduler = "cos",
         root_dir: str = "/workspace",
         data_dir: str = "/workspace/experiments/data",
-        log_dir: str = "/workspace/experiments/runs",
+        log_dir: str = "/workspace/experiments/mlruns",
         negative_slope: float = 0.01,
         dropout: float = 0.0,
         latent_dim: int = 1024,

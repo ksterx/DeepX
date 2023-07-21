@@ -23,7 +23,7 @@ class LangModelTrainer(TrainerX):
         scheduler: str | torch.optim.lr_scheduler._LRScheduler = "cos",
         root_dir: str = "/workspace",
         data_dir: str = "/workspace/experiments/data",
-        log_dir: str = "/workspace/experiments/runs",
+        log_dir: str = "/workspace/experiments/mlruns",
         tokenizer: str = "bert-base-uncased",
         max_length: int = 128,
         embed_dim: int = 512,

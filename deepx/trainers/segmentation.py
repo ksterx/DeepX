@@ -22,7 +22,7 @@ class SegmentationTrainer(TrainerX):
         scheduler: str | torch.optim.lr_scheduler._LRScheduler = "cos",
         root_dir: str = "/workspace",
         data_dir: str = "/workspace/experiments/data",
-        log_dir: str = "/workspace/experiments/runs",
+        log_dir: str = "/workspace/experiments/mlruns",
         **kwargs,
     ):
         super().__init__(

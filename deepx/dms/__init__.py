@@ -4,6 +4,7 @@ from .data import (
     CIFAR100DM,
     KFTTDM,
     MNISTDM,
+    AnimeDM,
     CelebADM,
     FashionMNISTDM,
     Flowers102DM,
@@ -18,6 +19,7 @@ from .segmentation import SegmentationDM
 from .translation import TranslationDM
 
 __all__ = [
+    "AnimeDM",
     "DataModuleX",
     "ClassificationDM",
     "LangModelDM",

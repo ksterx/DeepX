@@ -274,7 +274,7 @@ $RECYCLE.BIN/
 # End of https://www.toptal.com/developers/gitignore/api/linux,windows,macos,jupyternotebooks,python
 
 credentials.yaml
-experiments/runs/*
+experiments/mlruns/*
 !experiments/README.md
 experiments/data/*
 !experiments/data/README.md
