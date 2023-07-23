@@ -10,6 +10,7 @@ from deepx.trainers import ImageGenerationTrainer
 )
 def main(cfg):
     ds_cfg = cfg.dataset
+    machine_cfg = cfg.machine
 
     trainer = ImageGenerationTrainer(
         model=ds_cfg.model,
@@ -24,9 +25,9 @@ def main(cfg):
         loss_fn=ds_cfg.loss_fn,
         optimizer=ds_cfg.optimizer,
         scheduler=ds_cfg.scheduler,
-        root_dir=cfg.root_dir,
-        data_dir=cfg.data_dir,
-        log_dir=cfg.log_dir,
+        root_dir=machine_cfg.root_dir,
+        data_dir=machine_cfg.data_dir,
+        log_dir=machine_cfg.log_dir,
         negative_slope=ds_cfg.negative_slope,
         dropout=ds_cfg.dropout,
         latent_dim=ds_cfg.latent_dim,

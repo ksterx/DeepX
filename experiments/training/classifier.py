@@ -8,6 +8,7 @@ from deepx.trainers import ClassificationTrainer
 )
 def main(cfg):
     ds_cfg = cfg.dataset
+    machine_cfg = cfg.machine
 
     trainer = ClassificationTrainer(
         model=ds_cfg.model,
@@ -17,12 +18,14 @@ def main(cfg):
         num_workers=ds_cfg.num_workers,
         download=ds_cfg.download,
         lr=ds_cfg.lr,
+        beta1=ds_cfg.beta1,
+        beta2=ds_cfg.beta2,
         loss_fn=ds_cfg.loss_fn,
         optimizer=ds_cfg.optimizer,
         scheduler=ds_cfg.scheduler,
-        root_dir=cfg.root_dir,
-        data_dir=cfg.data_dir,
-        log_dir=cfg.log_dir,
+        root_dir=machine_cfg.root_dir,
+        data_dir=machine_cfg.data_dir,
+        log_dir=machine_cfg.log_dir,
         dropout=ds_cfg.dropout,
     )
     trainer.train(

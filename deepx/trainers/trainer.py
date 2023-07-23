@@ -200,8 +200,8 @@ class TrainerX:
 
         self.trainer = Trainer(
             max_epochs=epochs,
-            accelerator="gpu",
-            devices=1,
+            accelerator="auto",
+            devices=0,
             logger=logger,
             enable_checkpointing=True,
             callbacks=[

@@ -1,0 +1,3 @@
+root_dir: /Users/ksterx/Development/PythonProjects/DeepX
+data_dir: /Users/ksterx/Development/PythonProjects/DeepX/experiments/data
+log_dir: /Users/ksterx/Development/PythonProjects/DeepX/experiments/mlruns

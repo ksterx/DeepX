@@ -5,6 +5,8 @@ train_ratio: 0.9
 num_workers: 4
 download: false
 lr: 1e-4
+beta1: 0.9
+beta2: 0.999
 loss_fn: ce
 optimizer: adam
 scheduler: cos
