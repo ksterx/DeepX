@@ -2,6 +2,7 @@ defaults:
   - _self_
   - dataset: ???
   - machine: docker
+  - task: ???
 
 hydra:
   output_subdir: null

@@ -1,0 +1,3 @@
+name: celeba
+train_ratio: 0.8
+download: false

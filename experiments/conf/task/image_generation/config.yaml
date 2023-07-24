@@ -1,9 +1,0 @@
-defaults:
-  - _self_
-  - dataset: ???
-  - machine: docker
-
-hydra:
-  output_subdir: null
-  run:
-    dir: ${machine.log_dir}

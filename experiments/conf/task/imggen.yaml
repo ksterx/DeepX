@@ -1,0 +1,18 @@
+model: dcgan
+batch_size: 32
+lr: 1e-4
+beta1: 0.9
+beta2: 0.999
+negative_slope: 0.2
+dropout: 0.1
+latent_dim: 100
+base_dim_g: 128
+base_dim_d: 128
+loss_fn: ce
+optimizer: adam
+scheduler: cos
+monitor: val_loss
+monitor_max: false
+
+defaults:
+  - base

@@ -1,0 +1,14 @@
+model: resnet18
+batch_size: 32
+lr: 1e-4
+beta1: 0.9
+beta2: 0.999
+loss_fn: ce
+optimizer: adam
+scheduler: cos
+dropout: 0.1
+monitor: val_loss
+monitor_max: false
+
+defaults:
+  - base
