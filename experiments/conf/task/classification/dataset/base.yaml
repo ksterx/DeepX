@@ -1,0 +1,9 @@
+ckpt_path: null
+epochs: ???
+patience: ???
+max_depth: 1
+benchmark: True
+debug: false
+monitor: ???
+monitor_max: ???
+logger: mlflow

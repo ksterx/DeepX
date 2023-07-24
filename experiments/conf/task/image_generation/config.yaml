@@ -1,12 +1,9 @@
-root_dir: /workspace
-data_dir: /workspace/experiments/data
-log_dir: /workspace/experiments/mlruns
-
 defaults:
   - _self_
   - dataset: ???
+  - machine: docker
 
 hydra:
   output_subdir: null
   run:
-    dir: /workspace/experiments/mlruns
+    dir: ${machine.log_dir}

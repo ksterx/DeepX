@@ -24,6 +24,7 @@
       - [ ] SSD
     - Image Generation
       - [x] DCGAN
+      - [ ] Diffusion Models
   - Language
     - [x] Language Model
     - [ ] Text Classification

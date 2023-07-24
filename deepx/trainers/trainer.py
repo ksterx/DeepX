@@ -201,7 +201,7 @@ class TrainerX:
         self.trainer = Trainer(
             max_epochs=epochs,
             accelerator="auto",
-            devices=0,
+            devices=1,
             logger=logger,
             enable_checkpointing=True,
             callbacks=[
