@@ -3,6 +3,8 @@ black
 flake8
 mypy
 snakeviz
+sphinx
+sphinx_rtd_theme
 
 # MLOps
 lightning

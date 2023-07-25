@@ -1,6 +1,6 @@
 # DeepX
 
-*Deep learning algos implemented with PyTorch and Lightning.*
+*Deep learning algorithms implemented with PyTorch and Lightning.*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 

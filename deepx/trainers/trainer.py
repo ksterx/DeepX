@@ -94,7 +94,9 @@ class TrainerX:
             "scheduler": scheduler,
         }
 
-    def get_datamodule(self, datamodule, **kwargs):
+    def get_datamodule(
+        self, datamodule: str | LightningDataModule, **kwargs
+    ) -> LightningDataModule:
         if isinstance(datamodule, str):
             try:
                 dm_cls = registered_algos[self.NAME]["datamodule"][datamodule]
