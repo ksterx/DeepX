@@ -120,6 +120,8 @@ class TrainerX:
         monitor: str = "val_loss",
         monitor_max: bool = False,
         logger: str = "mlflow",
+        accelerator: str = "cpu",
+        devices: str | None = None,
         **kwargs,
     ):
         self.hparams.update(kwargs)
@@ -142,6 +144,8 @@ class TrainerX:
             logger=logger,
             monitor=monitor,
             monitor_max=monitor_max,
+            accelerator=accelerator,
+            devices=devices,
             **kwargs,
         )
         # self.algo = torch.compile(self.algo)  # ERROR: NotImplementedError
@@ -171,6 +175,8 @@ class TrainerX:
         logger: str = "mlflow",
         monitor: str = "val_loss",
         monitor_max: bool = False,
+        accelerator: str = "cpu",
+        devices: str | None = None,
         **kwargs,
     ):
         if logging:
@@ -200,8 +206,8 @@ class TrainerX:
 
         self.trainer = Trainer(
             max_epochs=epochs,
-            accelerator="auto",
-            devices=1,
+            accelerator=accelerator,
+            devices=devices,
             logger=logger,
             enable_checkpointing=True,
             callbacks=[

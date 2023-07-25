@@ -3,7 +3,8 @@ data_dir: /Users/ksterx/Development/PythonProjects/DeepX/experiments/data
 log_dir: /Users/ksterx/Development/PythonProjects/DeepX/experiments/mlruns
 
 num_workers: 1
-gpus: null
+accelerator: cpu
+devices: null
 
 defaults:
   - base

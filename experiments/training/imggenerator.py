@@ -45,6 +45,8 @@ def main(cfg):
         monitor=task_cfg.monitor,
         monitor_max=task_cfg.monitor_max,
         logger=task_cfg.logger,
+        accelerator=machine_cfg.accelerator,
+        devices=machine_cfg.devices,
     )
 
 

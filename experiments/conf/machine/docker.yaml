@@ -2,8 +2,9 @@ root_dir: /workspace
 data_dir: /workspace/experiments/data
 log_dir: /workspace/experiments/mlruns
 
-num_workers: 1
-gpus: null
+num_workers: 8
+accelerator: gpu
+devices: 1
 
 defaults:
   - base
