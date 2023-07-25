@@ -23,6 +23,7 @@
       - [ ] YOLO
       - [ ] SSD
     - Image Generation
+      - [ ] VAE
       - [x] DCGAN
       - [ ] Diffusion Models
   - Language
@@ -35,7 +36,8 @@
 - Docker installation:
 
 ```bash
-./build.sh
+cd envs
+docker compose up -d
 ```
 
 - PyPI installation:
@@ -49,34 +51,12 @@ pip install -e .
 ### Starting a container
 
 ```bash
-./up.sh
+docker exec -it deepx bash
 ```
 
 ### Training
 
 #### Classification
-
-- Terminal
-
-```bash
-python train.py --algo classification --model resnet18 resnet50 --dataset mnist
-
-# usage: train.py [-h] -t TASK -m [MODEL ...] [-bb BACKBONE] -d DATASET [-b BATCH_SIZE] [-e EPOCHS] [-do DROPOUT] [-r ROOT_DIR] [-mo MONITOR] [--debug] [--download]
-
-# options:
-#   -h, --help            show this help message and exit
-#   -t TASK, --algo TASK
-#   -m [MODEL ...], --model [MODEL ...]
-#   -bb BACKBONE, --backbone BACKBONE
-#   -d DATASET, --dataset DATASET
-#   -b BATCH_SIZE, --batch_size BATCH_SIZE
-#   -e EPOCHS, --epochs EPOCHS
-#   -do DROPOUT, --dropout DROPOUT
-#   -r ROOT_DIR, --root_dir ROOT_DIR
-#   -mo MONITOR, --monitor MONITOR
-#   --debug
-#   --download
-```
 
 - Python script
 
@@ -109,12 +89,6 @@ trainer.train(epochs=100, batch_size=128)
 
 #### Segmentation
 
-- Terminal
-
-```bash
-python train.py --algo segmentation --model unet --dataset vocseg
-```
-
 - Python script
 
 ```python
@@ -125,7 +99,7 @@ trainer = SegmentationTrainer(model="unet", datamodule="vocseg")
 trainer.train()
 ```
 
-#### Other examples can be found in `docs/examples/`.
+#### Other examples can be found in `docs/examples/` and `experiment/training/`.
 
 ### Experiment Tracking
 
@@ -145,5 +119,6 @@ python classify.py
 ### Profiling
 
 ```bash
-python -m cProfile -o profile.prof train.py <args>
+cd experiments/training
+python -m cProfile -o profile.prof <task>.py <args>
 ```

@@ -1,3 +1,15 @@
 # Experiments
 
-If `is_test` is `True`, the results will be saved in `experiments/test` directory.
+## Training Examples
+
+### Classification
+
+```bash
+python classifier.py task=classification dataset=mnist machine=docker
+```
+
+### Image Generation
+
+```bash
+python imggenerator.py task=imggen dataset=mnist machine=docker
+```

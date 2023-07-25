@@ -6,7 +6,7 @@
 
 ```bash
 cd /workspace/experiments/training
-python imggenerator.py dataset=mnist
+python imggenerator.py dataset=mnist machine=docker task=imggen
 ```
 
 ![mnist](./images/mnist.gif)
@@ -15,7 +15,7 @@ python imggenerator.py dataset=mnist
 
 ```bash
 cd /workspace/experiments/training
-python imggenerator.py dataset=lfw
+python imggenerator.py dataset=lfw machine=docker task=imggen
 ```
 
 ![lfw](./images/lfw.gif)
