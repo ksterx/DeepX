@@ -41,4 +41,4 @@ services:
       - deepx
     tty: true
     working_dir: /workspace
-    command: mlflow server --backend-store-uri /workspace/mlruns --host 0.0.0.0
+    command: mlflow server --backend-store-uri /workspace/mlruns --host 0.0.0.0 --default-artifact-root /workspace/mlruns --port 5000
