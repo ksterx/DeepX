@@ -1,4 +1,5 @@
-import torch
+from typing import Any
+
 from lightning import LightningDataModule, LightningModule, Trainer
 from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint, ModelSummary
 from lightning.pytorch.loggers import MLFlowLogger, TensorBoardLogger
@@ -30,6 +31,26 @@ class TrainerX:
         log_dir: str,
         **kwargs,
     ):
+        """Base class for all trainers.
+
+        Args:
+            model (str | LightningModule): Model to train. If str, it should be registered at `deepx/nn/__init__.py`
+            datamodule (str | LightningDataModule): Data module. If str, it should be registered at `deepx/dms/__init__.py`
+            batch_size (int): Batch size
+            train_ratio (float): Ratio of training data
+            num_workers (int): Number of workers
+            download (bool): Whether to download data
+            lr (float): Learning rate
+            beta1 (float): Adam beta1
+            beta2 (float): Adam beta2
+            loss_fn (str | nn.Module): Loss function. If str, it should be registered at `deepx/nn/__init__.py`
+            optimizer (str | optim.Optimizer): Optimizer
+            scheduler (str | optim.lr_scheduler._LRScheduler): Learning rate scheduler
+            root_dir (str): Root directory for the project
+            data_dir (str): Data directory
+            log_dir (str): Log directory
+        """
+
         self.hparams = kwargs
         self.hparams.update(
             {
@@ -62,7 +83,7 @@ class TrainerX:
             "download": download,
         }
 
-        self.model_cfg = {}
+        self.model_cfg: dict[str, Any] = {}
 
         self.algo_cfg = {
             "lr": lr,

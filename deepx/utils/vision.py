@@ -8,11 +8,11 @@ def inverse_transform(
     """Inverse transform for images
 
     Args:
-        img (Tensor): [batch_size, channels, height, width]
-        mean (tuple): mean for normalization
-        std (tuple): std for normalization
+        img (Tensor): Image tensor. [batch_size, channels, height, width]
+        mean (tuple): Mean of the dataset
+        std (tuple): Standard deviation of the dataset
         is_batch (bool): If True, img is [batch_size, channels, height, width]
-        levels (int, optional): [description]. Defaults to 256.
+        levels (int, optional): Number of levels. Defaults to 256.
 
     Returns:
         Tensor: [batch_size, channels, height, width]

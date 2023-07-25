@@ -11,5 +11,5 @@ __all__ = [
     "LangModel",
     "Segmentation",
     "Translation",
-    "ImageGen",
+    "ImageGeneration",
 ]

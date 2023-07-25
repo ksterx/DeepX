@@ -10,7 +10,7 @@ class Classification(Algorithm):
 
     def __init__(
         self,
-        model: str | nn.Module,
+        model: nn.Module,
         num_classes: int,
         lr: float = 1e-3,
         loss_fn: nn.Module | str = "ce",

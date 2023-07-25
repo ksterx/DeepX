@@ -5,7 +5,7 @@ import tempfile
 import numpy as np
 import torch
 from PIL import Image, ImageDraw
-from torch import nn
+from torch import Tensor, nn
 
 # from torchmetrics.classification import BinaryAccuracy
 from torchmetrics.image.fid import FrechetInceptionDistance
@@ -21,7 +21,7 @@ class ImageGeneration(Algorithm):
 
     def __init__(
         self,
-        model: str | nn.Module,
+        model: nn.Module,
         lr: float = 1e-3,
         loss_fn: nn.Module | str = "bce",
         optimizer: str | torch.optim.Optimizer = "adam",
@@ -53,7 +53,7 @@ class ImageGeneration(Algorithm):
         # self.val_acc_fake = BinaryAccuracy()
         self.test_metric = FrechetInceptionDistance()
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tensor:
         return self.generator(x)
 
     def _mode_step(self, batch, batch_idx, mode):

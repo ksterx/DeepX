@@ -1,6 +1,6 @@
 import torch
 from lightning import LightningModule
-from torch import nn
+from torch import nn, optim
 
 from ..nn import registered_losses
 
@@ -10,15 +10,29 @@ class Algorithm(LightningModule):
 
     def __init__(
         self,
-        model,
+        model: nn.Module,
         lr: float,
         loss_fn: nn.Module | str,
-        optimizer: str | torch.optim.Optimizer,
-        scheduler: str | torch.optim.lr_scheduler._LRScheduler,
+        optimizer: str | optim.Optimizer,
+        scheduler: str | optim.lr_scheduler._LRScheduler,
         beta1: float = 0.9,
         beta2: float = 0.999,
         **kwargs,
     ):
+        """Base class for all task algorithms.
+
+        Args:
+            model (nn.Module): The model to train.
+            lr (float): Learning rate.
+            loss_fn (nn.Module | str): Loss function.
+            optimizer (str | optim.Optimizer): Optimizer.
+            scheduler (str | optim.lr_scheduler._LRScheduler): Learning rate scheduler.
+            beta1 (float, optional): Adam beta1. Defaults to 0.9
+            beta2 (float, optional): Adam beta2. Defaults to 0.999
+
+        Raises:
+            ValueError: Invalid loss function.
+        """
         super().__init__()
 
         self.model = model
@@ -55,11 +69,11 @@ class Algorithm(LightningModule):
         if isinstance(self.optimizer, str):
             match self.optimizer:
                 case "adam":
-                    optimizer = torch.optim.Adam(
+                    optimizer = optim.Adam(
                         self.parameters(), lr=self.lr, betas=(self.beta1, self.beta2)
                     )
                 case "sgd":
-                    optimizer = torch.optim.SGD(self.parameters(), lr=self.lr)
+                    optimizer = optim.SGD(self.parameters(), lr=self.lr)
                 case _:
                     raise ValueError(f"Invalid optimizer: {self.optimizer}")
         else:
@@ -68,19 +82,19 @@ class Algorithm(LightningModule):
         if isinstance(self.scheduler, str):
             match self.scheduler:
                 case "cos":
-                    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+                    scheduler = optim.lr_scheduler.CosineAnnealingLR(
                         optimizer, T_max=self.trainer.max_epochs
                     )
                 case "step":
-                    scheduler = torch.optim.lr_scheduler.StepLR(
+                    scheduler = optim.lr_scheduler.StepLR(
                         optimizer, step_size=30, gamma=0.1
                     )
                 case "plateau":
-                    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+                    scheduler = optim.lr_scheduler.ReduceLROnPlateau(
                         optimizer, mode="min", factor=0.1, patience=10
                     )
                 case "coswarm":
-                    scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(
+                    scheduler = optim.lr_scheduler.CosineAnnealingWarmRestarts(
                         optimizer, T_0=10, T_mult=2
                     )
                 case "none":

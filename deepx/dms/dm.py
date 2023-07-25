@@ -14,6 +14,16 @@ class DataModuleX(LightningDataModule, ABC):
         num_workers: int = 2,
         download: bool = False,
     ):
+        """Base class for all data modules.
+
+        Args:
+            data_dir (str | pathlib.Path): Data directory
+            batch_size (int, optional): Batch size. Defaults to 32.
+            train_ratio (float, optional): Ratio of training data. Defaults to 0.9.
+            num_workers (int, optional): Number of workers. Defaults to 2.
+            download (bool, optional): Download data. Defaults to False.
+        """
+
         LightningDataModule.__init__(self)
         ABC.__init__(self)
 
@@ -28,10 +38,7 @@ class DataModuleX(LightningDataModule, ABC):
 
     @abstractmethod
     def setup(self, stage=None):
-        self.train_data = None
-        self.val_data = None
-        self.test_data = None
-        self.predict_data = None
+        raise NotImplementedError
 
     def train_dataloader(self):
         return DataLoader(
