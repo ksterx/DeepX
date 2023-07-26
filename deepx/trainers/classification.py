@@ -15,7 +15,7 @@ class ClassificationTrainer(TrainerX):
         train_ratio: float = 0.8,
         num_workers: int = 2,
         download: bool = False,
-        lr: float = 1e-3,
+        lr: float = 1e-4,
         loss_fn: str | nn.Module = "ce",
         optimizer: str | optim.Optimizer = "adam",
         scheduler: str | optim.lr_scheduler._LRScheduler = "cos",

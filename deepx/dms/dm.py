@@ -10,9 +10,7 @@ class DataModuleX(LightningDataModule, ABC):
         self,
         data_dir: str | pathlib.Path,
         batch_size: int = 32,
-        train_ratio: float = 0.9,
         num_workers: int = 2,
-        download: bool = False,
     ):
         """Base class for all data modules.
 
@@ -32,9 +30,7 @@ class DataModuleX(LightningDataModule, ABC):
 
         self.data_dir = data_dir
         self.batch_size = batch_size
-        self.train_ratio = train_ratio
         self.num_workers = num_workers
-        self.download = download
 
     @abstractmethod
     def setup(self, stage=None):
@@ -73,8 +69,8 @@ class DataModuleX(LightningDataModule, ABC):
             pin_memory=True,
         )
 
-    def _random_split(self, data):
+    def _random_split(self, data, train_ratio):
         num_data = len(data)
-        len_train = int(num_data * self.train_ratio)
+        len_train = int(num_data * train_ratio)
         len_val = num_data - len_train
         return random_split(dataset=data, lengths=[len_train, len_val])

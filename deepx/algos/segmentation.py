@@ -15,10 +15,12 @@ class Segmentation(Algorithm):
         self,
         model: str | LightningModule,
         num_classes: int,
-        lr: float = 1e-3,
+        lr: float = 1e-4,
         loss_fn: nn.Module | str = "ce",
         optimizer: str | torch.optim.Optimizer = "adam",
         scheduler: str | torch.optim.lr_scheduler._LRScheduler = "cos",
+        beta1: float = 0.9,
+        beta2: float = 0.999,
         **kwargs,
     ):
         super().__init__(
@@ -27,6 +29,9 @@ class Segmentation(Algorithm):
             loss_fn=loss_fn,
             optimizer=optimizer,
             scheduler=scheduler,
+            beta1=beta1,
+            beta2=beta2,
+            ignore_index=255,
             **kwargs,
         )
 
@@ -43,12 +48,12 @@ class Segmentation(Algorithm):
             ignore_index=255,
         )
 
-    def on_validation_epoch_end(self):
-        car_img = Image.open("/workspace/experiments/data/images/car.jpg")
-        car_img = self.dataset["transform"](car_img)
-        car_img = car_img.unsqueeze(0).to(self.device)
-        car_pred = self.predict_step(car_img, 0).squeeze().cpu().numpy()
-        np.save("/workspace/experiments/data/images/car_pred.npy", car_pred)
+    # def on_validation_epoch_end(self):
+    #     car_img = Image.open("/workspace/experiments/data/images/car.jpg")
+    #     car_img = self.dataset["transform"](car_img)
+    #     car_img = car_img.unsqueeze(0).to(self.device)
+    #     car_pred = self.predict_step(car_img, 0).squeeze().cpu().numpy()
+    #     np.save("/workspace/experiments/data/images/car_pred.npy", car_pred)
 
     def predict_step(self, batch, batch_idx):
         x = batch

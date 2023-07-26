@@ -117,17 +117,17 @@ class Flowers102DM(ClassificationDM):
         self,
         data_dir: str,
         batch_size: int,
-        train_ratio: float,
         num_workers: int,
         download: bool,
+        **kwargs,
     ):
         super().__init__(
             data_dir=data_dir,
             batch_size=batch_size,
-            train_ratio=train_ratio,
             num_workers=num_workers,
-            download=download,
         )
+
+        self.download = download
 
     def prepare_data(self):
         Flowers102(self.data_dir, split="train", download=self.download)

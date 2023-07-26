@@ -1,3 +1,1 @@
 name: cifar10
-train_ratio: 0.8
-download: false

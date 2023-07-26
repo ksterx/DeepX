@@ -13,16 +13,12 @@ class LangModelDM(DataModuleX):
         max_length: int,
         data_dir: str | pathlib.Path,
         batch_size: int = 32,
-        train_ratio: float = 0.9,
         num_workers: int = 2,
-        download: bool = False,
     ):
         super().__init__(
             data_dir=data_dir,
             batch_size=batch_size,
-            train_ratio=train_ratio,
             num_workers=num_workers,
-            download=download,
         )
         if isinstance(tokenizer, str):
             self.tokenizer = AutoTokenizer.from_pretrained(tokenizer)

@@ -12,18 +12,18 @@ class VOCSegDM(SegmentationDM):
     def __init__(
         self,
         data_dir: str,
-        batch_size: int = 32,
-        train_ratio: float = 0.9,
-        num_workers: int = 2,
+        batch_size: int,
+        num_workers: int,
         download: bool = False,
+        **kwargs,
     ):
         super().__init__(
             data_dir=data_dir,
             batch_size=batch_size,
-            train_ratio=train_ratio,
             num_workers=num_workers,
-            download=download,
         )
+
+        self.download = download
 
         self._transform = self.transform(self.SIZE)
         self._target_transform = self.target_transform(self.SIZE)

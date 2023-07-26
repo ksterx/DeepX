@@ -13,17 +13,13 @@ class ClassificationDM(DataModuleX):
         self,
         data_dir: str,
         batch_size: int,
-        train_ratio: float,
         num_workers: int,
-        download: bool = False,
         **kwargs,
     ):
         super().__init__(
             data_dir=data_dir,
             batch_size=batch_size,
-            train_ratio=train_ratio,
             num_workers=num_workers,
-            download=download,
         )
 
     @classmethod

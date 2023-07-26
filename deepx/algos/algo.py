@@ -17,6 +17,7 @@ class Algorithm(LightningModule):
         scheduler: str | optim.lr_scheduler._LRScheduler,
         beta1: float = 0.9,
         beta2: float = 0.999,
+        ignore_index: int = -1,
         **kwargs,
     ):
         """Base class for all task algorithms.
@@ -43,7 +44,9 @@ class Algorithm(LightningModule):
         self.scheduler = scheduler
 
         # Loss function
-        if isinstance(loss_fn, str):
+        if loss_fn == "ce" and ignore_index != -1:
+            self.loss_fn = nn.CrossEntropyLoss(ignore_index=ignore_index)
+        elif isinstance(loss_fn, str):
             self.loss_fn = registered_losses[loss_fn]()
         elif isinstance(loss_fn, nn.Module):
             self.loss_fn = loss_fn

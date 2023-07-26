@@ -13,10 +13,12 @@ class SegmentationTrainer(TrainerX):
         model: str | LightningModule,
         datamodule: str | LightningDataModule,
         batch_size: int = 32,
-        train_ratio: float = 0.8,
+        train_ratio: float | None = None,
         num_workers: int = 2,
         download: bool = False,
-        lr: float = 1e-3,
+        lr: float = 1e-4,
+        beta1: float = 0.9,
+        beta2: float = 0.999,
         loss_fn: str | nn.Module = "ce",
         optimizer: str | torch.optim.Optimizer = "adam",
         scheduler: str | torch.optim.lr_scheduler._LRScheduler = "cos",
@@ -33,6 +35,8 @@ class SegmentationTrainer(TrainerX):
             num_workers=num_workers,
             download=download,
             lr=lr,
+            beta1=beta1,
+            beta2=beta2,
             loss_fn=loss_fn,
             optimizer=optimizer,
             scheduler=scheduler,
@@ -48,7 +52,12 @@ class SegmentationTrainer(TrainerX):
         num_classes = self.datamodule.NUM_CLASSES
         num_channels = self.datamodule.NUM_CHANNELS
 
-        self.model_cfg.update({"num_classes": num_classes, "in_channels": num_channels})
+        self.model_cfg.update(
+            {
+                "num_classes": num_classes,
+                "in_channels": num_channels,
+            }
+        )
         self.model = self.get_model(model, **self.model_cfg)
 
         self.algo_cfg.update({"model": self.model, "num_classes": num_classes})

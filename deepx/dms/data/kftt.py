@@ -46,6 +46,7 @@ class KFTTDataset(Dataset):
         ja_tokenizer: str,
         mode: str,
         max_len: int,
+        **kwargs,
     ):
         super().__init__()
 

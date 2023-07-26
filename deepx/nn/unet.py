@@ -20,6 +20,7 @@ class UNet(nn.Module):
         super().__init__()
 
         HIDDEN_CHANNELS_LAYERS = [in_channels, 64, 128, 256, 512, 1024]
+
         self.encs = nn.ModuleList()  # [enc1, enc2, enc3, enc4, enc5]
         self.decs = nn.ModuleList()  # [dec1, dec2, dec3, dec4]
         self.ups = nn.ModuleList()  # [up1, up2, up3, up4]

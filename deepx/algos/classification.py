@@ -12,7 +12,7 @@ class Classification(Algorithm):
         self,
         model: nn.Module,
         num_classes: int,
-        lr: float = 1e-3,
+        lr: float = 1e-4,
         loss_fn: nn.Module | str = "ce",
         optimizer: str | torch.optim.Optimizer = "adam",
         scheduler: str | torch.optim.lr_scheduler._LRScheduler = "cos",

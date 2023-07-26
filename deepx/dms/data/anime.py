@@ -16,6 +16,24 @@ class AnimeDM(ClassificationDM):
     NUM_CHANNELS = 3
     SIZE = (64, 64)
 
+    def __init__(
+        self,
+        data_dir: str,
+        batch_size: int,
+        num_workers: int,
+        train_ratio: float,
+        download: bool = False,
+        **kwargs,
+    ):
+        super().__init__(
+            data_dir=data_dir,
+            batch_size=batch_size,
+            num_workers=num_workers,
+        )
+
+        self.train_ratio = train_ratio
+        self.download = download
+
     def prepare_data(self):
         URL = "https://www.kaggle.com/datasets/shanmukh05/anime-names-and-image-generation/download?datasetVersionNumber=10"
         tgt_path = os.path.join(self.data_dir, "archive.zip")
@@ -32,7 +50,7 @@ class AnimeDM(ClassificationDM):
 
     def setup(self, stage=None):
         data = AnimeDataset(data_dir=self.data_dir, transform=self.transform())
-        self.train_data, self.val_data = self._random_split(data)
+        self.train_data, self.val_data = self._random_split(data, self.train_ratio)
         self.test_data = self.val_data
 
     @classmethod
