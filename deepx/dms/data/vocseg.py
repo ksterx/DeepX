@@ -21,12 +21,10 @@ class VOCSegDM(SegmentationDM):
             data_dir=data_dir,
             batch_size=batch_size,
             num_workers=num_workers,
+            **kwargs,
         )
 
         self.download = download
-
-        self._transform = self.transform(self.SIZE)
-        self._target_transform = self.target_transform(self.SIZE)
 
     def prepare_data(self):
         VOCSegmentation(self.data_dir, image_set="train", download=self.download)
@@ -37,28 +35,36 @@ class VOCSegDM(SegmentationDM):
             self.train_data = VOCSegmentation(
                 self.data_dir,
                 image_set="train",
-                transform=self._transform,
-                target_transform=self._target_transform,
+                transform=self.transform(),
+                target_transform=self.target_transform(),
             )
             self.val_data = VOCSegmentation(
                 self.data_dir,
                 image_set="val",
-                transform=self._transform,
-                target_transform=self._target_transform,
+                transform=self.transform(),
+                target_transform=self.target_transform(),
             )
 
         if stage == "test" or stage is None:
             self.test_data = VOCSegmentation(
                 self.data_dir,
                 image_set="val",
-                transform=self._transform,
-                target_transform=self._target_transform,
+                transform=self.transform(),
+                target_transform=self.target_transform(),
             )
 
         if stage == "predict":
             self.predict_data = VOCSegmentation(
                 self.data_dir,
                 image_set="val",
-                transform=self._transform,
-                target_transform=self._target_transform,
+                transform=self.transform(),
+                target_transform=self.target_transform(),
             )
+
+    @classmethod
+    def transform(cls):
+        return cls._transform(cls.SIZE)
+
+    @classmethod
+    def target_transform(cls):
+        return cls._target_transform(cls.SIZE)

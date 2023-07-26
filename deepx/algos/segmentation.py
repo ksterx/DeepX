@@ -1,16 +1,21 @@
-import numpy as np
+import tempfile
+
 import torch
 from lightning import LightningModule
-from PIL import Image
 from torch import nn
+from torch.nn import functional as F
 from torchmetrics.classification import MulticlassJaccardIndex
+from torchvision.utils import save_image
 
+from ..utils.vision import denormalize
+from ..utils.wrappers import watch_kwargs
 from .algo import Algorithm
 
 
 class Segmentation(Algorithm):
     NAME = "segmentation"
 
+    @watch_kwargs
     def __init__(
         self,
         model: str | LightningModule,
@@ -48,12 +53,28 @@ class Segmentation(Algorithm):
             ignore_index=255,
         )
 
-    # def on_validation_epoch_end(self):
-    #     car_img = Image.open("/workspace/experiments/data/images/car.jpg")
-    #     car_img = self.dataset["transform"](car_img)
-    #     car_img = car_img.unsqueeze(0).to(self.device)
-    #     car_pred = self.predict_step(car_img, 0).squeeze().cpu().numpy()
-    #     np.save("/workspace/experiments/data/images/car_pred.npy", car_pred)
+    def on_train_end(self):
+        self._make_gif_from_images("pred_masks_*.png", "epoch", "training.gif")
+
+    def on_validation_epoch_end(self):
+        x, logits = self.val_step_outputs
+        pred_masks = F.softmax(logits, dim=0).unsqueeze(1)
+        x = denormalize(
+            x,
+            mean=(0.5, 0.5, 0.5),
+            std=(0.5, 0.5, 0.5),
+            is_batch=False,
+            levels=2,
+            dtype=torch.float,
+        )
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            save_image(
+                pred_masks,
+                fp=f"{tmpdir}/pred_masks_{self.trainer.current_epoch:03d}.png",
+            )
+            save_image(x, fp=f"{tmpdir}/image.png")
+            self.logger.experiment.log_artifacts(self.logger.run_id, tmpdir)
 
     def predict_step(self, batch, batch_idx):
         x = batch
@@ -69,5 +90,9 @@ class Segmentation(Algorithm):
         exec(f"self.{mode}_iou.update(logits, y)")
         self.log(f"{mode}_iou", eval(f"self.{mode}_iou"), prog_bar=True)
         self.log(f"{mode}_loss", loss)
+
+        # Log x, logits at the last step of every training epoch
+        if mode == "val":
+            self.val_step_outputs = (x[0], logits[0])
 
         return loss

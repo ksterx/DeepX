@@ -4,13 +4,17 @@ from abc import ABC, abstractmethod
 from lightning import LightningDataModule
 from torch.utils.data import DataLoader, random_split
 
+from ..utils.wrappers import watch_kwargs
+
 
 class DataModuleX(LightningDataModule, ABC):
+    @watch_kwargs
     def __init__(
         self,
         data_dir: str | pathlib.Path,
         batch_size: int = 32,
         num_workers: int = 2,
+        **kwargs,
     ):
         """Base class for all data modules.
 

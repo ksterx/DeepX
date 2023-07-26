@@ -13,9 +13,7 @@ def main(cfg):
         model=task_cfg.model,
         datamodule=ds_cfg.name,
         batch_size=task_cfg.batch_size,
-        train_ratio=ds_cfg.train_ratio,
         num_workers=machine_cfg.num_workers,
-        download=ds_cfg.download,
         lr=task_cfg.lr,
         beta1=task_cfg.beta1,
         beta2=task_cfg.beta2,
@@ -26,6 +24,8 @@ def main(cfg):
         data_dir=machine_cfg.data_dir,
         log_dir=machine_cfg.log_dir,
         dropout=task_cfg.dropout,
+        train_ratio=ds_cfg.train_ratio if hasattr(ds_cfg, "train_ratio") else None,
+        download=ds_cfg.download if hasattr(ds_cfg, "download") else False,
     )
     trainer.train(
         ckpt_path=task_cfg.ckpt_path,

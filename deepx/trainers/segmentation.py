@@ -60,7 +60,12 @@ class SegmentationTrainer(TrainerX):
         )
         self.model = self.get_model(model, **self.model_cfg)
 
-        self.algo_cfg.update({"model": self.model, "num_classes": num_classes})
+        self.algo_cfg.update(
+            {
+                "model": self.model,
+                "num_classes": num_classes,
+            }
+        )
         self.algo = self.get_algo(algo=self.NAME, **self.algo_cfg)
 
         self.hparams.update(self.dm_cfg)

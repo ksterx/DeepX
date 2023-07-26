@@ -6,14 +6,15 @@ from .dm import DataModuleX
 class SegmentationDM(DataModuleX):
     SIZE: tuple[int, int]
 
-    def transform(
-        self,
+    @classmethod
+    def _transform(
+        cls,
         size,
         antialias=True,
         mean=(0.5, 0.5, 0.5),
         std=(0.5, 0.5, 0.5),
         interpolation=transforms.InterpolationMode.NEAREST_EXACT,
-    ):
+    ) -> transforms.Compose:
         return transforms.Compose(
             [
                 transforms.ToTensor(),
@@ -24,12 +25,13 @@ class SegmentationDM(DataModuleX):
             ]
         )
 
-    def target_transform(
-        self,
+    @classmethod
+    def _target_transform(
+        cls,
         size,
         antialias=True,
         interpolation=transforms.InterpolationMode.NEAREST_EXACT,
-    ):
+    ) -> transforms.Compose:
         return transforms.Compose(
             [
                 transforms.PILToTensor(),

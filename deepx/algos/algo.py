@@ -1,13 +1,20 @@
+import glob
+import os
+import tempfile
+
 import torch
 from lightning import LightningModule
 from torch import nn, optim
 
 from ..nn import registered_losses
+from ..utils.vision import make_gif_from_images
+from ..utils.wrappers import watch_kwargs
 
 
 class Algorithm(LightningModule):
     NAME: str
 
+    @watch_kwargs
     def __init__(
         self,
         model: nn.Module,
@@ -108,3 +115,36 @@ class Algorithm(LightningModule):
             scheduler = self.scheduler(optimizer)
 
         return [optimizer], [scheduler]
+
+    def _make_gif_from_images(
+        self,
+        src_filename: str,
+        metric: str,
+        tgt_filename: str = "out.gif",
+        duration: int = 100,
+        loop: int = 0,
+    ):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            img_paths = sorted(
+                glob.glob(
+                    os.path.join(
+                        self.logger.save_dir,
+                        self.logger.experiment_id,
+                        self.logger.run_id,
+                        "artifacts",
+                        src_filename,
+                    )
+                )
+            )
+
+            save_path = os.path.join(tmpdir, tgt_filename)
+
+            make_gif_from_images(
+                img_paths=img_paths,
+                save_path=save_path,
+                metric=metric.title(),
+                duration=duration,
+                loop=loop,
+            )
+
+            self.logger.experiment.log_artifact(self.logger.run_id, save_path)

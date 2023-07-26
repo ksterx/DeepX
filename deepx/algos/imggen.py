@@ -11,7 +11,7 @@ from torch import Tensor, nn
 from torchmetrics.image.fid import FrechetInceptionDistance
 from torchvision.utils import make_grid, save_image
 
-from ..utils.vision import inverse_transform
+from ..utils.vision import denormalize
 from .algo import Algorithm
 
 
@@ -108,10 +108,8 @@ class ImageGeneration(Algorithm):
 
         # Metrics
         if img.shape[1] == 3 and mode == "test":
-            img = inverse_transform(img, mean=0.1307, std=0.3081, is_batch=True)
-            fake_img = inverse_transform(
-                fake_img, mean=0.1307, std=0.3081, is_batch=True
-            )
+            img = denormalize(img, mean=0.1307, std=0.3081, is_batch=True)
+            fake_img = denormalize(fake_img, mean=0.1307, std=0.3081, is_batch=True)
             exec(f"self.{mode}_metric.update(img, real=True)")
             exec(f"self.{mode}_metric.update(fake_img, real=False)")
             fid = eval(f"self.{mode}_metric.compute()")
@@ -142,44 +140,7 @@ class ImageGeneration(Algorithm):
         return opt_g, opt_d
 
     def on_train_end(self):
-        # create gif from images
-        with tempfile.TemporaryDirectory() as tmpdir:
-            img_paths = sorted(
-                glob.glob(
-                    os.path.join(
-                        self.logger.save_dir,
-                        self.logger.experiment_id,
-                        self.logger.run_id,
-                        "artifacts/img_*.png",
-                    )
-                )
-            )
-
-            frames = []
-            for i, img_path in enumerate(img_paths):
-                img = Image.open(img_path)
-                draw = ImageDraw.Draw(img)
-                draw.multiline_text(
-                    (0, 0),
-                    f"Epoch: {i+1:03d}",
-                    (255, 255, 255),
-                    stroke_width=5,
-                    stroke_fill=(0, 0, 0),
-                )
-                frames.append(img)
-
-            frames[0].save(
-                f"{tmpdir}/training.gif",
-                save_all=True,
-                append_images=frames[1:],
-                optimize=False,
-                duration=100,
-                loop=0,
-            )
-
-            self.logger.experiment.log_artifact(
-                self.logger.run_id, f"{tmpdir}/training.gif"
-            )
+        self._make_gif_from_images("img_*.png", "epoch", "training.gif")
 
     def on_validation_epoch_end(self):
         z = self.generate_noize(16, seed=self.SEED)

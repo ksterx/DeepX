@@ -20,6 +20,7 @@ class ClassificationDM(DataModuleX):
             data_dir=data_dir,
             batch_size=batch_size,
             num_workers=num_workers,
+            **kwargs,
         )
 
     @classmethod

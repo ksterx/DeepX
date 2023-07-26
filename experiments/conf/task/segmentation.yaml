@@ -1,13 +1,13 @@
 model: unet
-batch_size: 32
+batch_size: 16
 lr: 1e-4
-beta1: 0.5
+beta1: 0.9
 beta2: 0.999
 loss_fn: ce
 optimizer: adam
 scheduler: cos
-monitor: val_loss
-monitor_max: false
+monitor: val_iou
+monitor_max: true
 
 defaults:
   - base

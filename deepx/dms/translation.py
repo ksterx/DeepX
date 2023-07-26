@@ -14,11 +14,13 @@ class TranslationDM(DataModuleX):
         data_dir: str | pathlib.Path,
         batch_size: int = 32,
         num_workers: int = 2,
+        **kwargs,
     ):
         super().__init__(
             data_dir=data_dir,
             batch_size=batch_size,
             num_workers=num_workers,
+            **kwargs,
         )
         if isinstance(tokenizer, str):
             self.tokenizer = AutoTokenizer.from_pretrained(tokenizer)

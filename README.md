@@ -67,6 +67,13 @@ Access `http://localhost:5000` in your browser.
 
 ```bash
 cd experiments/training
-python -m cProfile -o profile.prof <task>.py <args>
+python -m cProfile -o profile.prof <task>.py <args> task.debug=true machine.num_workers=0
 snakeviz profile.prof
+```
+
+- PyTorch Profiler
+
+```bash
+cd experiments/training
+python -m torch.utils.bottleneck <task>.py <args> task.debug=true machine.num_workers=0
 ```

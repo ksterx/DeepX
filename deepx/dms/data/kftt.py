@@ -5,6 +5,7 @@ import requests
 from torch.utils.data import Dataset
 from transformers import AutoTokenizer
 
+from ...utils.wrappers import watch_kwargs
 from ..translation import TranslationDM
 
 
@@ -39,6 +40,7 @@ class KFTTDM(TranslationDM):
 
 
 class KFTTDataset(Dataset):
+    @watch_kwargs
     def __init__(
         self,
         data_dir: str,
