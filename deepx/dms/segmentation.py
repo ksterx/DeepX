@@ -1,3 +1,4 @@
+import torch
 from torchvision import transforms
 
 from .dm import DataModuleX
@@ -5,6 +6,8 @@ from .dm import DataModuleX
 
 class SegmentationDM(DataModuleX):
     SIZE: tuple[int, int]
+    NUM_CHANNELS: int
+    CLASSES: list[str]
 
     @classmethod
     def _transform(
@@ -40,3 +43,7 @@ class SegmentationDM(DataModuleX):
                 ),
             ]
         )
+
+    @classmethod
+    def get_colors(cls):
+        return [torch.randint(255, (3,)) for _ in range(cls.NUM_CLASSES)]

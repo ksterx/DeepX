@@ -6,4 +6,4 @@ training
 
    classifier
    imggenerator
-   segmentator
+   segmenter

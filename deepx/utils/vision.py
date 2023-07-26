@@ -76,3 +76,26 @@ def make_gif_from_images(
         duration=duration,
         loop=loop,
     )
+
+
+def make_seg_color_labels(
+    mask: Tensor,
+    colors: list[tuple[int, int, int]],
+) -> Tensor:
+    """Convert segmentation mask to color mask
+
+    Args:
+        mask (Tensor): [height, width]
+        colors (list[tuple[int, int, int]]): List of colors
+
+    Returns:
+        Tensor: [3, height, width]
+    """
+    labels = torch.zeros((3, mask.shape[0], mask.shape[1]))
+    for i, color in enumerate(colors):
+        bool_mask = mask == i
+        bool_mask = bool_mask.to("cpu")
+        for j in range(3):
+            labels[j, :, :] += bool_mask * color[j]
+
+    return labels

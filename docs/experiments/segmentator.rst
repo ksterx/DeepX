@@ -1,7 +1,7 @@
-segmentator module
+segmenter module
 ==================
 
-.. automodule:: segmentator
+.. automodule:: segmenter
    :members:
    :undoc-members:
    :show-inheritance:
