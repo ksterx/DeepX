@@ -11,7 +11,8 @@ Welcome to DeepX's documentation!
    :caption: User Guide
 
    guide/installation
-   guide/training_examples
+   guide/training
+   guide/inference
    guide/customizing
 
 .. toctree::
