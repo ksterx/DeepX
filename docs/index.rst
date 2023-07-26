@@ -11,6 +11,7 @@ Welcome to DeepX's documentation!
    :caption: User Guide
 
    guide/installation
+   guide/training_examples
 
 .. toctree::
    :maxdepth: 2
