@@ -2,6 +2,7 @@ from tkinter import filedialog
 
 import gradio as gr
 from torchvision.utils import save_image
+from utils import set_ckpt_path
 
 from deepx.algos import ImageGeneration
 from deepx.nn import registered_models
@@ -23,14 +24,14 @@ def generate(ckpt_path, model_name, tgt_shape, latent_dim, base_dim_g, base_dim_
     model.eval()
     z = model.generate_noize(16)
     generated = model.model.generator(z)
-    save_image(generated, "generated.png", normalize=True)
+    save_image(generated, "generated.png", normalize=True, nrow=4)
     return "generated.png"
 
 
 with gr.Blocks("Model") as app:
     gr.Markdown(
         """
-        # Image Generation App
+        <center><strong><font size='8'>Image Generation App</font></strong></center>
     """
     )
     with gr.Row():
@@ -57,13 +58,6 @@ with gr.Blocks("Model") as app:
                 latent_dim = gr.Number(label="Latent dim", value=100)
                 base_dim_g = gr.Number(label="Generator base dim", value=128)
                 base_dim_d = gr.Number(label="Discriminator base dim", value=128)
-
-            def set_ckpt_path():
-                path = filedialog.askopenfilename(
-                    initialdir="/workspace/experiments/mlruns",
-                    title="Select checkpoint file",
-                )
-                return path
 
             ckpt_btn.click(fn=set_ckpt_path, outputs=ckpt_path)
 

@@ -2,6 +2,7 @@ from tkinter import filedialog
 
 import gradio as gr
 import torch
+from utils import set_ckpt_path
 
 from deepx import registered_algos
 from deepx.algos import Classification
@@ -50,7 +51,7 @@ def predict(ckpt_path, model_name, dm_name, image):
 with gr.Blocks("Model") as app:
     gr.Markdown(
         """
-        # Image Classification App
+        <center><strong><font size='8'>Image Classification App</font></strong></center>
     """
     )
     with gr.Row():
@@ -67,19 +68,13 @@ with gr.Blocks("Model") as app:
                 ckpt_path = gr.Textbox(label="Checkpoint path")
                 ckpt_btn = gr.Button(value="Select checkpoint", size="sm")
 
-                def set_ckpt_path():
-                    path = filedialog.askopenfilename(
-                        initialdir="/workspace/experiments/mlruns",
-                        title="Select checkpoint file",
-                    )
-                    return path
-
                 ckpt_btn.click(fn=set_ckpt_path, outputs=ckpt_path)
 
             predict_btn = gr.Button(value="Predict")
 
         with gr.Column():
             result = gr.Label(label="Result")
+
     predict_btn.click(
         fn=predict, inputs=[ckpt_path, model_name, dm_name, image], outputs=result
     )
