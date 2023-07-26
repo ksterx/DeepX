@@ -1,3 +1,5 @@
+.. _training_examples:
+
 Training Examples
 =================
 
@@ -24,3 +26,4 @@ LFW
     python imggenerator.py dataset=lfw machine=docker task=imggen
 
 .. image:: ../_static/lfw.gif
+    :align: center
