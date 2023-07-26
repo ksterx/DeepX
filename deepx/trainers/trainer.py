@@ -234,7 +234,9 @@ class TrainerX:
             logger=logger,
             enable_checkpointing=True,
             callbacks=[
-                EarlyStopping(monitor=monitor, patience=stopping_patience),
+                EarlyStopping(
+                    monitor=monitor, patience=stopping_patience, mode=monitor_mode
+                ),
                 ModelSummary(max_depth=max_depth),
                 ModelCheckpoint(
                     monitor=monitor, save_top_k=1, mode=monitor_mode, save_last=True

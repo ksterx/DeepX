@@ -17,10 +17,15 @@ Welcome to DeepX's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents
+   :caption: Modules
 
-   modules
+   modules/modules
 
+.. toctree::
+   :maxdepth: 2
+   :caption: Experiments
+
+   experiments/modules
 
 Indices and tables
 ==================

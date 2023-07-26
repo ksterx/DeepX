@@ -54,7 +54,7 @@ pip install -e .
 - Starting a container:
 
 ```bash
-docker exec -it deepx bash
+docker exec -it deepx zsh
 ```
 
 - Experiment Tracking:
