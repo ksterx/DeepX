@@ -8,7 +8,13 @@ Welcome to DeepX's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: User Guide
+
+   guide/installation
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents
 
    modules
 

@@ -31,6 +31,9 @@
     - [ ] Text Classification
     - [ ] Translation
 
+## Documentation
+Documentation is available [here!!](https://ksterx.github.io/DeepX/)
+
 ## Installation
 
 - Docker installation:
