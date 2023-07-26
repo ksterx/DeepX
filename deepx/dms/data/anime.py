@@ -29,6 +29,7 @@ class AnimeDM(ClassificationDM):
             data_dir=data_dir,
             batch_size=batch_size,
             num_workers=num_workers,
+            **kwargs,
         )
 
         self.train_ratio = train_ratio

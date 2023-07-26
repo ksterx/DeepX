@@ -2,10 +2,13 @@ import math
 
 from torch import nn
 
+from ..utils.wrappers import watch_kwargs
+
 
 class DCGAN(nn.Module):
     NAME = "dcgan"
 
+    @watch_kwargs
     def __init__(
         self,
         tgt_shape: tuple[int, int, int],

@@ -1,9 +1,12 @@
 from torch import nn
 
+from ..utils.wrappers import watch_kwargs
+
 
 class MLP(nn.Module):
     NAME = "mlp"
 
+    @watch_kwargs
     def __init__(
         self,
         channels_in_layers: list[int],
