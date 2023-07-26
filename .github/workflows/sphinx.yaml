@@ -1,24 +1,39 @@
 name: Build and Deploy Sphinx Documentation
-on: [push, pull_request, workflow_dispatch]
+on:
+  push:
+    branches:
+      - master
+    workflow_dispatch:
+
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
 jobs:
-  docs:
+  deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v3
       - name: Install dependencies
         run: |
+          pip install -U pip
           pip install sphinx sphinx_rtd_theme
       - name: Sphinx build
         run: |
           sphinx-build docs docs/_build
-      - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
         with:
-          publish_branch: gh-pages
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: docs/_build/
-          force_orphan: true
+          path: docs/_build
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1
