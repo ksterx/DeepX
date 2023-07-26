@@ -6,19 +6,19 @@ Customizing workflow
 Creating a new model
 --------------------
 
-`<new_model>.py` should be placed in `deepx/nn/`.
+``<new_model>.py`` should be placed in ``deepx/nn/``.
 
 .. code-block:: python
 
     class NewModel(nn.Module):
         NAME = "new_model"
 
-Declare your model name as `NAME = <new_model>` at the top of the class, and also add this class to `registered_models` in `deepx/nn/__init__.py`.
+Declare your model name as ``NAME = <new_model>`` at the top of the class, and also add this class to ``registered_models`` in ``deepx/nn/__init__.py``.
 
 Creating a new algorithm and datamodule
 ----------------------------------
 
-- `<new_algo>.py` should be placed in `deepx/algos`.
+- ``<new_algo>.py`` should be placed in ``deepx/algos``.
 
 .. code-block:: python
 
@@ -28,7 +28,7 @@ Creating a new algorithm and datamodule
         NAME = "new_algo"
 
 
-- `<new_datamodule>.py` (this is for specific dataset such as `MNIST`) should be placed in `deepx/dms/data`.
+- ``<new_datamodule>.py`` (this is for specific dataset such as ``MNIST``) should be placed in ``deepx/dms/data``.
 
 .. code-block:: python
 
@@ -40,7 +40,7 @@ Creating a new algorithm and datamodule
 Creating a new dataset module
 -----------------------------
 
-`<new_dataset>.py` should be placed in `deepx/dms/data`. For example, `MNIST` is defined as follows:
+``<new_dataset>.py`` should be placed in ``deepx/dms/data``. For example, ``MNIST`` is defined as follows:
 
 .. code-block:: python
 
@@ -52,7 +52,7 @@ Creating a new dataset module
 Creating a new trainer
 ----------------------
 
-`<new_trainer>.py` should be placed in `deepx/trainers/`.
+``<new_trainer>.py`` should be placed in ``deepx/trainers/``.
 
 .. code-block:: python
 
@@ -61,8 +61,10 @@ Creating a new trainer
     class NewTrainer(TrainerX):
         NAME = "new_trainer"
 
-Register your algorithm to `deepx/__init__.py`
+Register your algorithm 
 ---------------------------------------------
+
+Register your algorithm to ``deepx/__init__.py``.
 
 .. code-block:: python
 
