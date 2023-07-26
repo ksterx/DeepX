@@ -12,12 +12,14 @@ Ubuntu/WSL2 installation
 ------------------------
 
 Build the docker image and run the container:
+
 .. code-block:: bash
 
     cd envs
     docker compose up -d
 
 After entering the container, install our python package:
+
 .. code-block:: bash
 
     cd /workspace
