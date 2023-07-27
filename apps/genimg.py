@@ -1,5 +1,3 @@
-from tkinter import filedialog
-
 import gradio as gr
 from torchvision.utils import save_image
 from utils import set_ckpt_path
@@ -23,7 +21,7 @@ def generate(ckpt_path, model_name, tgt_shape, latent_dim, base_dim_g, base_dim_
     model = ImageGeneration.load_from_checkpoint(ckpt_path, model=model)
     model.eval()
     z = model.generate_noize(16)
-    generated = model.model.generator(z)
+    generated = model.model.generator(z)  # type: ignore
     save_image(generated, "generated.png", normalize=True, nrow=4)
     return "generated.png"
 

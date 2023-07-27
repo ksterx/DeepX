@@ -1,8 +1,7 @@
 from typing import Any
 
-import torch
 from lightning import LightningModule
-from torch import nn
+from torch import nn, optim
 from torchmetrics import Accuracy
 from transformers import AutoTokenizer
 
@@ -17,8 +16,8 @@ class LangModel(Algorithm):
         model: str | LightningModule,
         lr: float = 0.001,
         loss_fn: nn.Module | str = "ce",
-        optimizer: str | torch.optim.Optimizer = "adam",
-        scheduler: str | torch.optim.lr_scheduler._LRScheduler = "cos",
+        optimizer: str | optim.Optimizer = "adam",
+        scheduler: str | optim.lr_scheduler._LRScheduler = "cos",
         tokenizer: str | Any = "bert-base-uncased",
         max_length: int = 128,
         **kwargs,

@@ -3,10 +3,10 @@ from lightning import LightningDataModule, LightningModule
 from torch import nn
 from transformers import AutoTokenizer
 
-from .trainer import TrainerX
+from .trainer import Trainer
 
 
-class LangModelTrainer(TrainerX):
+class LangModelTrainer(Trainer):
     NAME = "langmodel"
 
     def __init__(

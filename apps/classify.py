@@ -1,5 +1,3 @@
-from tkinter import filedialog
-
 import gradio as gr
 import torch
 from utils import set_ckpt_path

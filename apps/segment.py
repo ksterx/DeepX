@@ -1,9 +1,6 @@
-from os import path as osp
-
 import cv2
 import gradio as gr
 import torch
-from PIL import Image
 from utils import set_ckpt_path
 
 from deepx import registered_algos

@@ -31,4 +31,6 @@ Image Generation
 .. code-block:: bash
 
     cd apps
-    python imggenerator.py
+    python genimg.py
+
+.. image:: ../_static/imggenerator.png

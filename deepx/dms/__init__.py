@@ -13,14 +13,14 @@ from .data import (
     VOCSegDM,
     WikiText103DM,
 )
-from .dm import DataModuleX
+from .dm import DataModule
 from .langmodel import LangModelDM
 from .segmentation import SegmentationDM
 from .translation import TranslationDM
 
 __all__ = [
     "AnimeDM",
-    "DataModuleX",
+    "DataModule",
     "ClassificationDM",
     "LangModelDM",
     "SegmentationDM",

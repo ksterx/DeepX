@@ -1,11 +1,8 @@
-import glob
-import os
 import tempfile
 
 import numpy as np
 import torch
-from PIL import Image, ImageDraw
-from torch import Tensor, nn
+from torch import Tensor, nn, optim
 
 # from torchmetrics.classification import BinaryAccuracy
 from torchmetrics.image.fid import FrechetInceptionDistance
@@ -23,9 +20,9 @@ class ImageGeneration(Algorithm):
         self,
         model: nn.Module,
         lr: float = 1e-3,
-        loss_fn: nn.Module | str = "bce",
-        optimizer: str | torch.optim.Optimizer = "adam",
-        scheduler: str | torch.optim.lr_scheduler._LRScheduler = "cos",
+        loss_fn: str | nn.Module = "bce",
+        optimizer: str | optim.Optimizer = "adam",
+        scheduler: str | optim.lr_scheduler.LRScheduler = "cos",
         one_side_label_smoothing: float = 0.9,
         beta1: float = 0.9,
         beta2: float = 0.999,
@@ -45,6 +42,9 @@ class ImageGeneration(Algorithm):
         self.one_side_label_smoothing = one_side_label_smoothing
 
         self.automatic_optimization = False
+
+        if not isinstance(self.model.generator, nn.Module):
+            raise ValueError(f"Invalid model: {model}")
 
         self.generator = self.model.generator
         self.discriminator = self.model.discriminator
@@ -155,10 +155,10 @@ class ImageGeneration(Algorithm):
     def generate_noize(self, batch_size: int, seed: int | None = None):
         if isinstance(seed, int):
             np.random.seed(seed)
-            z = np.random.randn(batch_size, self.generator.latent_dim, 1, 1)
+            z = np.random.randn(batch_size, self.generator.latent_dim, 1, 1)  # type: ignore
             z = torch.from_numpy(z).float().to(self.device)
         else:
             z = torch.randn(
                 batch_size, self.generator.latent_dim, 1, 1, device=self.device
-            )
+            )  # type: ignore
         return z

@@ -1,14 +1,12 @@
-import math
 import warnings
 
-import torch
 from lightning import LightningDataModule, LightningModule
 from torch import nn, optim
 
-from .trainer import TrainerX
+from .trainer import Trainer
 
 
-class ImageGenerationTrainer(TrainerX):
+class ImageGenerationTrainer(Trainer):
     NAME = "imagegeneration"
 
     def __init__(

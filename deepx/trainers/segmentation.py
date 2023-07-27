@@ -2,10 +2,10 @@ import torch
 from lightning import LightningDataModule, LightningModule
 from torch import nn
 
-from .trainer import TrainerX
+from .trainer import Trainer
 
 
-class SegmentationTrainer(TrainerX):
+class SegmentationTrainer(Trainer):
     NAME = "segmentation"
 
     def __init__(

@@ -1,10 +1,10 @@
 from lightning import LightningDataModule, LightningModule
 from torch import nn, optim
 
-from .trainer import TrainerX
+from .trainer import Trainer
 
 
-class ClassificationTrainer(TrainerX):
+class ClassificationTrainer(Trainer):
     NAME = "classification"
 
     def __init__(

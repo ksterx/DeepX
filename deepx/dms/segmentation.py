@@ -1,10 +1,10 @@
 import torch
 from torchvision import transforms
 
-from .dm import DataModuleX
+from .dm import DataModule
 
 
-class SegmentationDM(DataModuleX):
+class SegmentationDM(DataModule):
     SIZE: tuple[int, int]
     NUM_CHANNELS: int
     CLASSES: list[str]

@@ -1,5 +1,5 @@
 import torch
-from torch import nn
+from torch import nn, optim
 from torchmetrics import Accuracy
 
 from .algo import Algorithm
@@ -13,9 +13,9 @@ class Classification(Algorithm):
         model: nn.Module,
         num_classes: int,
         lr: float = 1e-4,
-        loss_fn: nn.Module | str = "ce",
-        optimizer: str | torch.optim.Optimizer = "adam",
-        scheduler: str | torch.optim.lr_scheduler._LRScheduler = "cos",
+        loss_fn: str | nn.Module = "ce",
+        optimizer: str | optim.Optimizer = "adam",
+        scheduler: str | optim.lr_scheduler.LRScheduler = "cos",
         **kwargs,
     ):
         super().__init__(
@@ -43,7 +43,8 @@ class Classification(Algorithm):
         loss = self.loss_fn(logits, y)
         preds = torch.argmax(logits, dim=1)
 
-        exec(f"self.{mode}_acc.update(preds, y)")
+        acc = eval(f"self.{mode}_acc")
+        acc(preds, y)
         self.log(f"{mode}_acc", eval(f"self.{mode}_acc"), prog_bar=True)
         self.log(f"{mode}_loss", loss, prog_bar=True)
 

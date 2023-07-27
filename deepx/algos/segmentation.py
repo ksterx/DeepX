@@ -2,7 +2,7 @@ import tempfile
 
 import torch
 from lightning import LightningModule
-from torch import nn
+from torch import nn, optim
 from torch.nn import functional as F
 from torchmetrics.classification import MulticlassJaccardIndex
 from torchvision.utils import save_image
@@ -22,8 +22,8 @@ class Segmentation(Algorithm):
         num_classes: int,
         lr: float = 1e-4,
         loss_fn: nn.Module | str = "ce",
-        optimizer: str | torch.optim.Optimizer = "adam",
-        scheduler: str | torch.optim.lr_scheduler._LRScheduler = "cos",
+        optimizer: str | optim.Optimizer = "adam",
+        scheduler: str | optim.lr_scheduler._LRScheduler = "cos",
         beta1: float = 0.9,
         beta2: float = 0.999,
         **kwargs,

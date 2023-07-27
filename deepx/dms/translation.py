@@ -3,10 +3,10 @@ import pathlib
 from torch.utils.data import DataLoader
 from transformers import AutoTokenizer
 
-from .dm import DataModuleX
+from .dm import DataModule
 
 
-class TranslationDM(DataModuleX):
+class TranslationDM(DataModule):
     def __init__(
         self,
         tokenizer: str,

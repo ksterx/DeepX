@@ -73,7 +73,7 @@ class Attention(nn.Module):
 
 
 class SelfAttention(Attention):
-    def forward(self, x: Tensor, mask: Tensor | None = None) -> tuple[Tensor, Tensor]:
+    def forward(self, x: Tensor, mask: Tensor | None = None) -> tuple[Tensor, Tensor]:  # type: ignore
         return super().forward(x, x, x, mask)
 
 
@@ -121,7 +121,7 @@ class MultiHeadAttention(nn.Module):
 
 
 class MultiHeadSelfAttention(MultiHeadAttention):
-    def forward(self, x: Tensor, mask: Tensor | None = None) -> tuple[Tensor, Tensor]:
+    def forward(self, x: Tensor, mask: Tensor | None = None) -> tuple[Tensor, Tensor]:  # type: ignore
         return super().forward(x, x, x, mask)
 
 

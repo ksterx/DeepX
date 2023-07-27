@@ -1,6 +1,7 @@
 from typing import Any
 
-from lightning import LightningDataModule, LightningModule, Trainer
+import lightning as L
+from lightning import LightningDataModule, LightningModule
 from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint, ModelSummary
 from lightning.pytorch.loggers import MLFlowLogger, TensorBoardLogger
 from torch import nn, optim
@@ -9,7 +10,7 @@ from deepx import registered_algos
 from deepx.nn import registered_models
 
 
-class TrainerX:
+class Trainer:
     NAME: str
 
     def __init__(
@@ -54,7 +55,7 @@ class TrainerX:
         self.hparams = kwargs
         self.hparams.update(
             {
-                "model": model,
+                "model": model if isinstance(model, str) else model.NAME,
                 "datamodule": datamodule,
                 "batch_size": batch_size,
                 "train_ratio": train_ratio,
@@ -227,7 +228,7 @@ class TrainerX:
         else:
             monitor_mode = "min"
 
-        self.trainer = Trainer(
+        self.trainer = L.Trainer(
             max_epochs=epochs,
             accelerator=accelerator,
             devices=devices,

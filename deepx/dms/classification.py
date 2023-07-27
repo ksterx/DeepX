@@ -1,11 +1,11 @@
 from torchvision import transforms
 
-from .dm import DataModuleX
+from .dm import DataModule
 
 
-class ClassificationDM(DataModuleX):
+class ClassificationDM(DataModule):
     NAME: str
-    NUM_CLASSES: int
+    NUM_CLASSES: int | None
     NUM_CHANNELS: int
     SIZE: tuple[int, int]
 

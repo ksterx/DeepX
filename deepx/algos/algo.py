@@ -2,9 +2,8 @@ import glob
 import os
 import tempfile
 
-import torch
 from lightning import LightningModule
-from torch import nn, optim
+from torch import Tensor, nn, optim
 
 from ..nn import registered_losses
 from ..utils.vision import make_gif_from_images
@@ -19,9 +18,9 @@ class Algorithm(LightningModule):
         self,
         model: nn.Module,
         lr: float,
-        loss_fn: nn.Module | str,
+        loss_fn: str | nn.Module,
         optimizer: str | optim.Optimizer,
-        scheduler: str | optim.lr_scheduler._LRScheduler,
+        scheduler: str | optim.lr_scheduler.LRScheduler,
         beta1: float = 0.9,
         beta2: float = 0.999,
         ignore_index: int = -1,
@@ -30,11 +29,11 @@ class Algorithm(LightningModule):
         """Base class for all task algorithms.
 
         Args:
-            model (nn.Module): The model to train.
+            model (ModuleType): The model to train.
             lr (float): Learning rate.
-            loss_fn (nn.Module | str): Loss function.
-            optimizer (str | optim.Optimizer): Optimizer.
-            scheduler (str | optim.lr_scheduler._LRScheduler): Learning rate scheduler.
+            loss_fn (str | ModuleType): Loss function.
+            optimizer (str | OptimType): Optimizer.
+            scheduler (str | LRSchedulerType): Learning rate scheduler.
             beta1 (float, optional): Adam beta1. Defaults to 0.9
             beta2 (float, optional): Adam beta2. Defaults to 0.999
 
@@ -56,11 +55,11 @@ class Algorithm(LightningModule):
         elif isinstance(loss_fn, str):
             self.loss_fn = registered_losses[loss_fn]()
         elif isinstance(loss_fn, nn.Module):
-            self.loss_fn = loss_fn
+            self.loss_fn = loss_fn  # type: ignore
         else:
             raise ValueError(f"Invalid loss function: {loss_fn}")
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: Tensor) -> Tensor:
         return self.model(x)
 
     def training_step(self, batch, batch_idx):

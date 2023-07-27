@@ -7,7 +7,7 @@ from torch.utils.data import DataLoader, random_split
 from ..utils.wrappers import watch_kwargs
 
 
-class DataModuleX(LightningDataModule, ABC):
+class DataModule(LightningDataModule, ABC):
     @watch_kwargs
     def __init__(
         self,

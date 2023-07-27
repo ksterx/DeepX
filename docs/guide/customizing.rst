@@ -32,9 +32,9 @@ Creating a new algorithm and datamodule
 
 .. code-block:: python
 
-    from .dm import DataModuleX
+    from .dm import DataModule
 
-    class NewAlgoDM(DatamoduleX):
+    class NewAlgoDM(Datamodule):
 
 
 Creating a new dataset module
@@ -56,12 +56,12 @@ Creating a new trainer
 
 .. code-block:: python
 
-    from .trainer import TrainerX
+    from .trainer import Trainer
 
-    class NewTrainer(TrainerX):
+    class NewTrainer(Trainer):
         NAME = "new_trainer"
 
-Register your algorithm 
+Register your algorithm
 ---------------------------------------------
 
 Register your algorithm to ``deepx/__init__.py``.

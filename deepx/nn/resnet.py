@@ -29,7 +29,7 @@ class ResidualBlock(nn.Module):
                 in_channels, out_channels, kernel_size=1, padding=0
             )
         else:
-            self.rescale = lambda x: x
+            self.rescale = lambda x: x  # type: ignore
 
     def forward(self, x):
         """
@@ -95,7 +95,7 @@ class BottleneckBlock(nn.Module):
                 in_channels, out_channels, kernel_size=1, padding=0
             )
         else:
-            self.rescale = lambda x: x
+            self.rescale = lambda x: x  # type: ignore
 
     def forward(self, x):
         """

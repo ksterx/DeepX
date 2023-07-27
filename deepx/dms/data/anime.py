@@ -2,7 +2,7 @@ import glob
 import os
 import zipfile
 
-import requests
+import requests  # type: ignore
 from PIL import Image
 from torch.utils.data import Dataset
 from torchvision import transforms
