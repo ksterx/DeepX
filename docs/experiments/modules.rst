@@ -1,4 +1,4 @@
-training
+Training
 ========
 
 .. toctree::

@@ -8,8 +8,8 @@ Image Classification
 
 .. code-block:: bash
 
-    cd apps
-    python classify.py
+    cd experiments/inference
+    python predict.py task=classification dataset=cifar10
 
 .. image:: ../_static/classifier.png
     :align: center
@@ -19,8 +19,8 @@ Image Segmentation
 
 .. code-block:: bash
 
-    cd apps
-    python segment.py
+    cd experiments/inference
+    python predict.py task=segmentation dataset=vocseg
 
 .. image:: ../_static/segmenter.png
 
@@ -30,7 +30,7 @@ Image Generation
 
 .. code-block:: bash
 
-    cd apps
-    python genimg.py
+    cd experiments/inference
+    python predict.py task=imggen dataset=lfw
 
 .. image:: ../_static/imggenerator.png
