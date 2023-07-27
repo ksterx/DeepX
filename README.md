@@ -7,12 +7,12 @@
 ## Features
 
 - Backbone
-
+  - [x] MLP
   - [x] ResNet
   - [ ] Vision Transformer
   - [x] Transformer
 
-- Algorithms
+- Algorithms/Architectures
 
   - Vision
     - Classification
@@ -22,7 +22,7 @@
     - Object Detection
       - [ ] YOLO
       - [ ] SSD
-    - Image Generation
+    - Generation
       - [ ] VAE
       - [x] DCGAN
       - [ ] Diffusion Models

@@ -1,5 +1,3 @@
-import math
-
 from torch import nn
 
 from ..utils.wrappers import watch_kwargs
