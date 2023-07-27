@@ -7,7 +7,7 @@ from deepx.trainers import (
 )
 
 
-@hydra.main(config_path="./conf", config_name="config", version_base=None)
+@hydra.main(config_path="../conf", config_name="config", version_base=None)
 def main(cfg):
     ds_cfg = cfg.dataset
     machine_cfg = cfg.machine
