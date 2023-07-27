@@ -1,3 +1,5 @@
+name: segmentation
+
 model: unet
 batch_size: 16
 lr: 1e-4

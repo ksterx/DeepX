@@ -1,0 +1,10 @@
+root_dir: C:/Users/tomkj/Development/DeepX
+data_dir: C:/Users/tomkj/Development/DeepX/experiments/data
+log_dir: C:/Users/tomkj/Development/DeepX/experiments/mlruns
+
+num_workers: 8
+accelerator: gpu
+devices: 1
+
+defaults:
+  - base

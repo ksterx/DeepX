@@ -11,8 +11,8 @@ MNIST
 
 .. code-block:: bash
 
-    cd experiments/training
-    python imggenerator.py dataset=mnist machine=docker task=imggen
+    cd experiments
+    python train.py dataset=mnist machine=docker task=imggen
 
 .. image:: ../_static/mnist.gif
     :align: center
@@ -22,8 +22,8 @@ LFW
 
 .. code-block:: bash
 
-    cd experiments/training
-    python imggenerator.py dataset=lfw machine=docker task=imggen
+    cd experiments
+    python train.py dataset=lfw machine=docker task=imggen
 
 .. image:: ../_static/lfw.gif
     :align: center
@@ -38,8 +38,8 @@ MNIST
 
 .. code-block:: bash
 
-    cd experiments/training
-    python classifier.py dataset=mnist machine=docker task=classification
+    cd experiments
+    python train.py dataset=mnist machine=docker task=classification
 
 - Python script
 

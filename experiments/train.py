@@ -1,15 +1,27 @@
 import hydra
 
-from deepx.trainers import SegmentationTrainer
+from deepx.trainers import (
+    ClassificationTrainer,
+    ImageGenerationTrainer,
+    SegmentationTrainer,
+)
 
 
-@hydra.main(config_path="../conf", config_name="config", version_base=None)
+@hydra.main(config_path="./conf", config_name="config", version_base=None)
 def main(cfg):
     ds_cfg = cfg.dataset
     machine_cfg = cfg.machine
     task_cfg = cfg.task
 
-    trainer = SegmentationTrainer(
+    match task_cfg.name:
+        case "classification":
+            trainer_cls = ClassificationTrainer
+        case "imggen":
+            trainer_cls = ImageGenerationTrainer
+        case "segmentation":
+            trainer_cls = SegmentationTrainer
+
+    trainer = trainer_cls(
         model=task_cfg.model,
         datamodule=ds_cfg.name,
         batch_size=task_cfg.batch_size,
@@ -26,6 +38,12 @@ def main(cfg):
         dropout=task_cfg.dropout if hasattr(task_cfg, "dropout") else None,
         train_ratio=ds_cfg.train_ratio if hasattr(ds_cfg, "train_ratio") else None,
         download=ds_cfg.download if hasattr(ds_cfg, "download") else False,
+        negative_slope=task_cfg.negative_slope
+        if hasattr(task_cfg, "negative_slope")
+        else None,
+        latent_dim=task_cfg.latent_dim if hasattr(task_cfg, "latent_dim") else None,
+        base_dim_g=task_cfg.base_dim_g if hasattr(task_cfg, "base_dim_g") else None,
+        base_dim_d=task_cfg.base_dim_d if hasattr(task_cfg, "base_dim_d") else None,
     )
     trainer.train(
         ckpt_path=task_cfg.ckpt_path,
