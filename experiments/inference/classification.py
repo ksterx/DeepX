@@ -2,16 +2,16 @@ import gradio as gr
 import torch
 from app import App
 
-from deepx import registered_algos
-from deepx.algos import Classification
+from deepx import registered_tasks
 from deepx.nn import registered_models
+from deepx.tasks import Classification
 
 
 class ClassificationApp(App):
     def __init__(self, initialdir):
         super().__init__(initialdir)
 
-        self.registered_dms = registered_algos["classification"]["datamodule"]
+        self.registered_dms = registered_tasks["classification"]["datamodule"]
 
         with gr.Blocks("Model") as self.app:
             gr.Markdown(

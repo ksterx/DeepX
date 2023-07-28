@@ -1,15 +1,15 @@
-from .algo import Algorithm
 from .classification import Classification
-from .imggen import ImageGeneration
+from .core import Task
+from .gan import GAN
 from .langmodel import LangModel
 from .segmentation import Segmentation
 from .translation import Translation
 
 __all__ = [
-    "Algorithm",
+    "Task",
     "Classification",
     "LangModel",
     "Segmentation",
     "Translation",
-    "ImageGeneration",
+    "GAN",
 ]

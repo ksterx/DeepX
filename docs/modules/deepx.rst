@@ -7,7 +7,7 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   deepx.algos
+   deepx.tasks
    deepx.callbacks
    deepx.dms
    deepx.nn

@@ -9,10 +9,10 @@ from torchvision.utils import save_image
 
 from ..utils.vision import denormalize
 from ..utils.wrappers import watch_kwargs
-from .algo import Algorithm
+from .core import Task
 
 
-class Segmentation(Algorithm):
+class Segmentation(Task):
     NAME = "segmentation"
 
     @watch_kwargs

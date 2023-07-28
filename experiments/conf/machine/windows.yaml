@@ -1,6 +1,6 @@
 root_dir: C:/Users/tomkj/Development/DeepX
-data_dir: C:/Users/tomkj/Development/DeepX/experiments/data
-log_dir: C:/Users/tomkj/Development/DeepX/experiments/mlruns
+data_dir: C:/Users/tomkj/Development/data
+log_dir: C:/Users/tomkj/Development/mlruns
 
 num_workers: 8
 accelerator: gpu

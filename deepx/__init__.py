@@ -1,4 +1,3 @@
-from .algos import Classification, ImageGeneration, LangModel, Segmentation
 from .dms import (
     CIFAR10DM,
     CIFAR100DM,
@@ -12,10 +11,11 @@ from .dms import (
     VOCSegDM,
     WikiText103DM,
 )
+from .tasks import GAN, Classification, LangModel, Segmentation
 
-registered_algos = {
+registered_tasks = {
     "classification": {
-        "algo": Classification,
+        "name": Classification,
         "datamodule": {
             "mnist": MNISTDM,
             "fashionmnist": FashionMNISTDM,
@@ -25,13 +25,13 @@ registered_algos = {
         },
     },
     "segmentation": {
-        "algo": Segmentation,
+        "task": Segmentation,
         "datamodule": {
             "vocseg": VOCSegDM,
         },
     },
-    "imagegeneration": {
-        "algo": ImageGeneration,
+    "gan": {
+        "name": GAN,
         "datamodule": {
             "mnist": MNISTDM,
             "fashionmnist": FashionMNISTDM,
@@ -44,7 +44,7 @@ registered_algos = {
         },
     },
     "langmodel": {
-        "algo": LangModel,
+        "name": LangModel,
         "datamodule": {
             "wiki103": WikiText103DM,
             "penn": PennTreebankDM,
@@ -52,7 +52,7 @@ registered_algos = {
         },
     },
     # "translation": {
-    #     "algo": Translation,
+    #     "name": Translation,
     #     "dataset": [
     #         Multi30kDataset,
     #         IWSLTDataset,

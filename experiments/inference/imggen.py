@@ -2,8 +2,8 @@ import gradio as gr
 from app import App
 from torchvision.utils import save_image
 
-from deepx.algos import ImageGeneration
 from deepx.nn import registered_models
+from deepx.tasks import GAN
 
 
 class ImageGenerationApp(App):
@@ -81,7 +81,7 @@ class ImageGenerationApp(App):
             dropout=0.0,
             negative_slope=0.0,
         )
-        model = ImageGeneration.load_from_checkpoint(ckpt_path, model=model)
+        model = GAN.load_from_checkpoint(ckpt_path, model=model)
         model.eval()
         z = model.generate_noize(16)
         generated = model.model.generator(z)  # type: ignore

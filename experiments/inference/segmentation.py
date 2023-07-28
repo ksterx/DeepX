@@ -3,9 +3,9 @@ import gradio as gr
 import torch
 from app import App
 
-from deepx import registered_algos
-from deepx.algos import Segmentation
+from deepx import registered_tasks
 from deepx.nn import registered_models
+from deepx.tasks import Segmentation
 
 # data_dir = "../experiments/data/images"
 # examples = [
@@ -19,7 +19,7 @@ class SegmentationApp(App):
     def __init__(self, initialdir):
         super().__init__(initialdir)
 
-        self.registered_dms = registered_algos["segmentation"]["datamodule"]
+        self.registered_dms = registered_tasks["segmentation"]["datamodule"]
 
         with gr.Blocks("Model") as self.app:
             gr.Markdown(

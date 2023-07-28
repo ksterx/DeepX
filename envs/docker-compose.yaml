@@ -14,6 +14,8 @@ services:
       - "2525:2525"
     volumes:
       - ../:/workspace
+      - ../../data:/workspace/experiments/data
+      - ../../mlruns:/workspace/experiments/mlruns
       # Uncomment the following line to enable X11 forwarding
       # - /tmp/.X11-unix:/tmp/.X11-unix
     environment:

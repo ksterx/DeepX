@@ -5,10 +5,10 @@ from torch import nn, optim
 from torchmetrics import Accuracy
 from transformers import AutoTokenizer
 
-from .algo import Algorithm
+from .core import Task
 
 
-class LangModel(Algorithm):
+class LangModel(Task):
     NAME = "langmodel"
 
     def __init__(

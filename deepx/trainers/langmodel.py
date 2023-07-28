@@ -67,15 +67,15 @@ class LangModelTrainer(Trainer):
         )
         self.model = self.get_model(model, **self.model_cfg)
 
-        self.algo_cfg.update(
+        self.task_cfg.update(
             {
                 "model": self.model,
                 "tokenizer": tokenizer,
                 "max_length": max_length,
             }
         )
-        self.algo = self.get_algo(algo=self.NAME, **self.algo_cfg)
+        self.task = self.get_task(task=self.NAME, **self.task_cfg)
 
         self.hparams.update(self.dm_cfg)
         self.hparams.update(self.model_cfg)
-        self.hparams.update(self.algo_cfg)
+        self.hparams.update(self.task_cfg)

@@ -1,5 +1,5 @@
 from .classification import ClassificationTrainer
-from .imggen import ImageGenerationTrainer
+from .gan import GANTrainer
 from .langmodel import LangModelTrainer
 from .segmentation import SegmentationTrainer
 from .trainer import Trainer
@@ -11,5 +11,5 @@ __all__ = [
     "LangModelTrainer",
     "SegmentationTrainer",
     "TranslationTrainer",
-    "ImageGenerationTrainer",
+    "GANTrainer",
 ]

@@ -1,53 +1,53 @@
-deepx.algos package
+deepx.tasks package
 ===================
 
 Submodules
 ----------
 
-deepx.algos.algo module
+deepx.tasks.task module
 -----------------------
 
-.. automodule:: deepx.algos.algo
+.. automodule:: deepx.tasks.task
    :members:
    :undoc-members:
    :show-inheritance:
 
-deepx.algos.classification module
+deepx.tasks.classification module
 ---------------------------------
 
-.. automodule:: deepx.algos.classification
+.. automodule:: deepx.tasks.classification
    :members:
    :undoc-members:
    :show-inheritance:
 
-deepx.algos.imggen module
+deepx.tasks.imggen module
 -------------------------
 
-.. automodule:: deepx.algos.imggen
+.. automodule:: deepx.tasks.imggen
    :members:
    :undoc-members:
    :show-inheritance:
 
-deepx.algos.langmodel module
+deepx.tasks.langmodel module
 ----------------------------
 
-.. automodule:: deepx.algos.langmodel
+.. automodule:: deepx.tasks.langmodel
    :members:
    :undoc-members:
    :show-inheritance:
 
-deepx.algos.segmentation module
+deepx.tasks.segmentation module
 -------------------------------
 
-.. automodule:: deepx.algos.segmentation
+.. automodule:: deepx.tasks.segmentation
    :members:
    :undoc-members:
    :show-inheritance:
 
-deepx.algos.translation module
+deepx.tasks.translation module
 ------------------------------
 
-.. automodule:: deepx.algos.translation
+.. automodule:: deepx.tasks.translation
    :members:
    :undoc-members:
    :show-inheritance:
@@ -55,7 +55,7 @@ deepx.algos.translation module
 Module contents
 ---------------
 
-.. automodule:: deepx.algos
+.. automodule:: deepx.tasks
    :members:
    :undoc-members:
    :show-inheritance:

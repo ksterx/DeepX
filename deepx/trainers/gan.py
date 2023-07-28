@@ -6,8 +6,8 @@ from torch import nn, optim
 from .trainer import Trainer
 
 
-class ImageGenerationTrainer(Trainer):
-    NAME = "imagegeneration"
+class GANTrainer(Trainer):
+    NAME = "gan"
 
     def __init__(
         self,
@@ -74,9 +74,9 @@ class ImageGenerationTrainer(Trainer):
         )
         self.model = self.get_model(model, **self.model_cfg)
 
-        self.algo_cfg.update({"model": self.model})
-        self.algo = self.get_algo(algo=self.NAME, **self.algo_cfg)
+        self.task_cfg.update({"model": self.model})
+        self.task = self.get_task(task=self.NAME, **self.task_cfg)
 
         self.hparams.update(self.dm_cfg)
         self.hparams.update(self.model_cfg)
-        self.hparams.update(self.algo_cfg)
+        self.hparams.update(self.task_cfg)

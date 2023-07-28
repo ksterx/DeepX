@@ -1,18 +1,177 @@
+import glob
+import os
+import tempfile
+from abc import ABC, abstractmethod
 from typing import Any
 
 import lightning as L
 from lightning import LightningDataModule, LightningModule
 from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint, ModelSummary
 from lightning.pytorch.loggers import MLFlowLogger, TensorBoardLogger
-from torch import nn, optim
+from torch import Tensor, nn, optim
 
 from deepx import registered_tasks
 from deepx.nn import registered_models
 
+from ..nn import registered_losses
+from ..utils.vision import make_gif_from_images
+from ..utils.wrappers import watch_kwargs
 
-class Trainer:
+
+class Task(LightningModule, ABC):
     NAME: str
 
+    @watch_kwargs
+    def __init__(
+        self,
+        model: str,
+        lr: float,
+        loss_fn: str | nn.Module,
+        optimizer: str,
+        scheduler: str,
+        beta1: float = 0.9,
+        beta2: float = 0.999,
+        ignore_index: int = -1,
+        **kwargs,
+    ):
+        """Base class for all task algorithms.
+
+        Args:
+            model (str): The model to train.
+            lr (float): Learning rate.
+            loss_fn (str | ModuleType): Loss function.
+            optimizer (str | OptimType): Optimizer.
+            scheduler (str | LRSchedulerType): Learning rate scheduler.
+            beta1 (float, optional): Adam beta1. Defaults to 0.9
+            beta2 (float, optional): Adam beta2. Defaults to 0.999
+
+        Raises:
+            ValueError: Invalid loss function.
+        """
+        LightningModule.__init__(self)
+        ABC.__init__(self)
+
+        self.model = self.build_model(model, **kwargs)
+
+        # Loss function
+        if loss_fn == "ce" and ignore_index != -1:
+            self.loss_fn = nn.CrossEntropyLoss(ignore_index=ignore_index)
+        elif isinstance(loss_fn, str):
+            self.loss_fn = registered_losses[loss_fn]()
+        elif isinstance(loss_fn, nn.Module):
+            self.loss_fn = loss_fn  # type: ignore
+        else:
+            raise ValueError(f"Invalid loss function: {loss_fn}")
+
+    @abstractmethod
+    def initialize(self):
+        self.save_hyperparameters()  # This must be called to load a checkpoint
+
+    def forward(self, x: Tensor) -> Tensor:
+        return self.model(x)
+
+    def training_step(self, batch, batch_idx):
+        return self._mode_step(batch, batch_idx, "train")
+
+    def validation_step(self, batch, batch_idx):
+        return self._mode_step(batch, batch_idx, "val")
+
+    def test_step(self, batch, batch_idx):
+        return self._mode_step(batch, batch_idx, "test")
+
+    def _mode_step(self, batch, batch_idx, mode):
+        return NotImplementedError
+
+    def configure_optimizers(self):
+        if isinstance(self.hparams.optimizer, str):
+            match self.hparams.optimizer:
+                case "adam":
+                    optimizer = optim.Adam(
+                        self.parameters(),
+                        lr=self.hparams.lr,
+                        betas=(self.hparams.beta1, self.hparams.beta2),
+                    )
+                case "sgd":
+                    optimizer = optim.SGD(self.parameters(), lr=self.hparams.lr)
+                case _:
+                    raise ValueError(f"Invalid optimizer: {self.hparams.optimizer}")
+        else:
+            optimizer = self.hparams.optimizer(self.parameters(), lr=self.hparams.lr)
+
+        if isinstance(self.hparams.scheduler, str):
+            match self.hparams.scheduler:
+                case "cos":
+                    scheduler = optim.lr_scheduler.CosineAnnealingLR(
+                        optimizer, T_max=self.trainer.max_epochs
+                    )
+                case "step":
+                    scheduler = optim.lr_scheduler.StepLR(
+                        optimizer, step_size=30, gamma=0.1
+                    )
+                case "plateau":
+                    scheduler = optim.lr_scheduler.ReduceLROnPlateau(
+                        optimizer, mode="min", factor=0.1, patience=10
+                    )
+                case "coswarm":
+                    scheduler = optim.lr_scheduler.CosineAnnealingWarmRestarts(
+                        optimizer, T_0=10, T_mult=2
+                    )
+                case "none":
+                    scheduler = None
+                case _:
+                    raise ValueError(f"Invalid scheduler: {self.hparams.scheduler}")
+        else:
+            scheduler = self.hparams.scheduler(optimizer)
+
+        return [optimizer], [scheduler]
+
+    def _make_gif_from_images(
+        self,
+        src_filename: str,
+        metric: str,
+        tgt_filename: str = "out.gif",
+        duration: int = 100,
+        loop: int = 0,
+    ):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            img_paths = sorted(
+                glob.glob(
+                    os.path.join(
+                        self.logger.save_dir,
+                        self.logger.experiment_id,
+                        self.logger.run_id,
+                        "artifacts",
+                        src_filename,
+                    )
+                )
+            )
+
+            save_path = os.path.join(tmpdir, tgt_filename)
+
+            make_gif_from_images(
+                img_paths=img_paths,
+                save_path=save_path,
+                metric=metric.title(),
+                duration=duration,
+                loop=loop,
+            )
+
+            self.logger.experiment.log_artifact(self.logger.run_id, save_path)
+
+    def build_model(self, model_name: str, **kwargs) -> nn.Module:
+        try:
+            model_cls = registered_models[model_name]
+            return model_cls(**kwargs)
+        except KeyError:
+            raise ValueError(
+                f"Model {model_name} not supported. Please register it at deepx/nn/__init__.py"
+            )
+
+
+class Trainer(ABC):
+    NAME: str
+
+    @watch_kwargs
     def __init__(
         self,
         model: str | LightningModule,
@@ -51,6 +210,7 @@ class Trainer:
             data_dir (str): Data directory
             log_dir (str): Log directory
         """
+        super().__init__()
 
         self.hparams = kwargs
         self.hparams.update(
@@ -84,7 +244,7 @@ class Trainer:
             "download": download,
         }
 
-        self.model_cfg: dict[str, Any] = {}
+        self.model_cfg: dict[str, Any] = {"model": model}
 
         self.task_cfg = {
             "lr": lr,
@@ -132,6 +292,10 @@ class Trainer:
                 )
         else:
             return task
+
+    @abstractmethod
+    def build_task(self, task: Task, **kwargs) -> Task:
+        return Task(**kwargs)
 
     def train(
         self,

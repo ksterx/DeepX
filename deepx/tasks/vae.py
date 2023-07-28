@@ -9,11 +9,11 @@ from torchmetrics.image.fid import FrechetInceptionDistance
 from torchvision.utils import make_grid, save_image
 
 from ..utils.vision import denormalize
-from .algo import Algorithm
+from .core import Task
 
 
-class ImageGeneration(Algorithm):
-    NAME = "imagegeneration"
+class VAETask(Task):
+    NAME = "vae"
     SEED = 2525
 
     def __init__(
@@ -130,10 +130,14 @@ class ImageGeneration(Algorithm):
 
     def configure_optimizers(self):
         opt_g = torch.optim.Adam(
-            self.generator.parameters(), lr=self.lr, betas=(self.beta1, self.beta2)
+            self.generator.parameters(),
+            lr=self.hparams.lr,
+            betas=(self.hparams.beta1, self.hparams.beta2),
         )
         opt_d = torch.optim.Adam(
-            self.discriminator.parameters(), lr=self.lr, betas=(self.beta1, self.beta2)
+            self.discriminator.parameters(),
+            lr=self.hparams.lr,
+            betas=(self.hparams.beta1, self.hparams.beta2),
         )
         print("Generator optimizer:", opt_g)
         print("Discriminator optimizer:", opt_d)
@@ -162,3 +166,55 @@ class ImageGeneration(Algorithm):
                 batch_size, self.generator.latent_dim, 1, 1, device=self.device
             )  # type: ignore
         return z
+
+
+class VAETrainer(VAETask):
+    NAME = "vae_trainer"
+
+    def __init__(
+        self,
+        model: str | nn.Module,
+        datamodule: str | nn.Module,
+        batch_size: int = 32,
+        train_ratio: float = 0.8,
+        num_workers: int = 2,
+        download: bool = False,
+        lr: float = 1e-3,
+        loss_fn: str | nn.Module = "bce",
+        optimizer: str | optim.Optimizer = "adam",
+        scheduler: str | optim.lr_scheduler.LRScheduler = "cos",
+        root_dir: str = "/workspace",
+        data_dir: str = "/workspace/experiments/data",
+        log_dir: str = "/workspace/experiments/mlruns",
+        one_side_label_smoothing: float = 0.9,
+        beta1: float = 0.9,
+        beta2: float = 0.999,
+        **kwargs,
+    ):
+        super().__init__(
+            model=model,
+            lr=lr,
+            loss_fn=loss_fn,
+            optimizer=optimizer,
+            scheduler=scheduler,
+            one_side_label_smoothing=one_side_label_smoothing,
+            beta1=beta1,
+            beta2=beta2,
+            **kwargs,
+        )
+
+        self.dm_cfg.update(
+            {
+                "batch_size": batch_size,
+                "train_ratio": train_ratio,
+                "num_workers": num_workers,
+                "download": download,
+            }
+        )
+        self.datamodule = self.get_datamodule(datamodule=datamodule, **self.dm_cfg)
+
+        self.model_cfg.update({"latent_dim": self.datamodule.NUM_CLASSES})
+        self.model = self.get_model(model, **self.model_cfg)
+
+        self.task_cfg.update({"model": self.model})
+        self.task = self.get_task(task=self.NAME, **self.task_cfg)

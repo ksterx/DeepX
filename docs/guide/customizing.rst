@@ -15,17 +15,17 @@ Creating a new model
 
 Declare your model name as ``NAME = <new_model>`` at the top of the class, and also add this class to ``registered_models`` in ``deepx/nn/__init__.py``.
 
-Creating a new algorithm and datamodule
+Creating a new task and datamodule
 ----------------------------------
 
-- ``<new_algo>.py`` should be placed in ``deepx/algos``.
+- ``<new_task>.py`` should be placed in ``deepx/tasks``.
 
 .. code-block:: python
 
-    from .algo import Algorithm
+    from .task import Task
 
-    class NewAlgo(Algorithm):
-        NAME = "new_algo"
+    class NewTask(Task):
+        NAME = "new_task"
 
 
 - ``<new_datamodule>.py`` (this is for specific dataset such as ``MNIST``) should be placed in ``deepx/dms/data``.
@@ -34,7 +34,7 @@ Creating a new algorithm and datamodule
 
     from .dm import DataModule
 
-    class NewAlgoDM(Datamodule):
+    class NewTaskDM(Datamodule):
 
 
 Creating a new dataset module
@@ -44,7 +44,7 @@ Creating a new dataset module
 
 .. code-block:: python
 
-    from deepx.algos import ClassificationDM
+    from deepx.tasks import ClassificationDM
 
     class MNISTDM(ClassificationDM):
         NAME = "mnist"
@@ -69,11 +69,11 @@ Register your algorithm to ``deepx/__init__.py``.
 .. code-block:: python
 
     from .dms import MNISTDM
-    from .algos import NewAlgo
+    from .tasks import NewTask
 
-    registered_algos = {
-        "new_algo" {
-            "algo": NewAlgo,
+    registered_tasks = {
+        "new_task" {
+            "name": NewTask,
             "datamodule": {
                 "mnist": MNISTDM
             }
