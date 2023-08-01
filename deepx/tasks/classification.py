@@ -43,17 +43,11 @@ class Classification(Task):
             task_cfg=task_cfg,
         )
 
-        # self.initialize()
-        # self.save_hyperparameters()
-
         num_classes = model_cfg.num_classes
 
         self.train_acc = Accuracy(task="multiclass", num_classes=num_classes)
         self.val_acc = Accuracy(task="multiclass", num_classes=num_classes)
         self.test_acc = Accuracy(task="multiclass", num_classes=num_classes)
-
-    # def initialize(self):
-    #     super().initialize()
 
     def predict_step(self, batch, batch_idx, dataloader_idx):
         x = batch

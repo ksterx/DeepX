@@ -13,8 +13,8 @@ class MNISTDM(ClassificationDM):
         self,
         data_dir: str,
         batch_size: int,
-        train_ratio: float,
         num_workers: int,
+        train_ratio: float,
         download: bool = False,
         **kwargs,
     ):

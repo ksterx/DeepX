@@ -27,8 +27,9 @@ class GANModelConfig(ModelConfig):
 
 
 class GANConfig(TaskConfig):
-    def __init__(self, **kwargs):
+    def __init__(self, one_side_label_smoothing: float, **kwargs):
         super().__init__(**kwargs)
+        self.one_side_label_smoothing = one_side_label_smoothing
 
 
 class GAN(Task):
@@ -37,33 +38,18 @@ class GAN(Task):
 
     def __init__(
         self,
-        model: nn.Module,
-        lr: float = 1e-3,
-        loss_fn: str | nn.Module = "bce",
-        optimizer: str | optim.Optimizer = "adam",
-        scheduler: str | optim.lr_scheduler.LRScheduler = "cos",
-        one_side_label_smoothing: float = 0.9,
-        beta1: float = 0.9,
-        beta2: float = 0.999,
-        **kwargs,
+        model_cfg: GANModelConfig,
+        task_cfg: GANConfig,
     ):
         super().__init__(
-            model=model,
-            lr=lr,
-            loss_fn=loss_fn,
-            optimizer=optimizer,
-            scheduler=scheduler,
-            beta1=beta1,
-            beta2=beta2,
-            **kwargs,
+            model_cfg=model_cfg,
+            task_cfg=task_cfg,
         )
-
-        self.one_side_label_smoothing = one_side_label_smoothing
 
         self.automatic_optimization = False
 
-        if not isinstance(self.model.generator, nn.Module):
-            raise ValueError(f"Invalid model: {model}")
+        # if not isinstance(self.model.generator, nn.Module):
+        #     raise ValueError(f"Invalid model: {self.model}")
 
         self.generator = self.model.generator
         self.discriminator = self.model.discriminator
@@ -88,7 +74,7 @@ class GAN(Task):
         # for real images
         preds = self.discriminator(img)  # [batch_size, 1]
         tgt = torch.ones_like(preds)
-        loss_real = self.loss_fn(preds, tgt * self.one_side_label_smoothing)
+        loss_real = self.loss_fn(preds, tgt * self.tparams.one_side_label_smoothing)
         # if mode == "val":
         #     acc_real = self.val_acc_real(preds, tgt)
 

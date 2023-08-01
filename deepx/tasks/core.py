@@ -38,9 +38,9 @@ class TaskConfig:
 @dataclass
 class DataModuleConfig:
     dm: str
+    data_dir: str
     batch_size: int
     num_workers: int
-    data_dir: str
 
 
 @dataclass
@@ -64,12 +64,10 @@ class TrainingConfig:
 class Task(LightningModule, ABC):
     NAME: str
 
-    @watch_kwargs
     def __init__(
         self,
         model_cfg: ModelConfig,
         task_cfg: TaskConfig,
-        **kwargs,
     ):
         """Base class for all task algorithms.
 
@@ -297,6 +295,10 @@ class Trainer(ABC):
         self.summarize()
 
         self.trainer = L.Trainer(
+            limit_train_batches=2,
+            limit_val_batches=2,
+            limit_test_batches=2,
+            limit_predict_batches=2,
             max_epochs=tcfg.epochs,
             accelerator=tcfg.accelerator,
             devices=tcfg.devices,
@@ -310,7 +312,7 @@ class Trainer(ABC):
                 ),
                 ModelSummary(max_depth=tcfg.max_depth),
                 ModelCheckpoint(
-                    monitor=tcfg.monitor_mode,
+                    monitor=tcfg.monitor_metric,
                     save_top_k=1,
                     mode=monitor_mode,
                     save_last=True,

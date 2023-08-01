@@ -7,38 +7,53 @@ from torch.nn import functional as F
 from torchmetrics.classification import MulticlassJaccardIndex
 from torchvision.utils import save_image
 
+from deepx.tasks.core import ModelConfig, Task, TaskConfig
+
 from ..utils.vision import denormalize
 from ..utils.wrappers import watch_kwargs
-from .core import Task
+from .core import DataModuleConfig, ModelConfig, Task, TaskConfig, Trainer
+
+
+class SegmentationModelConfig(ModelConfig):
+    def __init__(
+        self,
+        num_classes: int,
+        in_channels: int,
+        dropout: float = 0.0,
+        **kwargs,
+    ):
+        super().__init__(**kwargs)
+        self.num_classes = num_classes
+        self.in_channels = in_channels
+        self.dropout = dropout
+
+
+class SegmentationConfig(TaskConfig):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+
+class SegmentationDMConfig(DataModuleConfig):
+    def __init__(self, train_ratio: float, download: bool = False, **kwargs):
+        super().__init__(**kwargs)
+        self.train_ratio = train_ratio
+        self.download = download
 
 
 class Segmentation(Task):
     NAME = "segmentation"
 
-    @watch_kwargs
     def __init__(
         self,
-        model: str | LightningModule,
-        num_classes: int,
-        lr: float = 1e-4,
-        loss_fn: nn.Module | str = "ce",
-        optimizer: str | optim.Optimizer = "adam",
-        scheduler: str | optim.lr_scheduler._LRScheduler = "cos",
-        beta1: float = 0.9,
-        beta2: float = 0.999,
-        **kwargs,
+        model_cfg: SegmentationModelConfig,
+        task_cfg: SegmentationConfig,
     ):
         super().__init__(
-            model=model,
-            lr=lr,
-            loss_fn=loss_fn,
-            optimizer=optimizer,
-            scheduler=scheduler,
-            beta1=beta1,
-            beta2=beta2,
-            ignore_index=255,
-            **kwargs,
+            model_cfg=model_cfg,
+            task_cfg=task_cfg,
         )
+
+        num_classes = model_cfg.num_classes
 
         self.train_iou = MulticlassJaccardIndex(
             num_classes=num_classes,
@@ -96,3 +111,13 @@ class Segmentation(Task):
             self.val_step_outputs = (x[0], logits[0])
 
         return loss
+
+
+class SegmentationTrainer(Trainer):
+    NAME = "segmentation"
+
+    def _update_configs(self):
+        pass
+
+    def _build_task(self, model_cfg: ModelConfig, task_cfg: TaskConfig) -> Task:
+        return Segmentation(model_cfg=model_cfg, task_cfg=task_cfg)
