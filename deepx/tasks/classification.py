@@ -1,7 +1,7 @@
 import torch
 from torchmetrics import Accuracy
 
-from deepx.tasks.core import DataModuleConfig, ModelConfig, Task, TaskConfig, Trainer
+from .core import DataModuleConfig, ModelConfig, Task, TaskConfig, Trainer
 
 
 class ClassificationModelConfig(ModelConfig):

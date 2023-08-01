@@ -5,7 +5,7 @@ from torch import nn, optim
 from torchmetrics import Accuracy
 from transformers import AutoTokenizer
 
-from .core import Task
+from .core import DataModuleConfig, ModelConfig, Task, TaskConfig, Trainer
 
 
 class LangModel(Task):

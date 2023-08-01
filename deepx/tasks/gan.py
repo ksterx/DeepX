@@ -9,7 +9,26 @@ from torchmetrics.image.fid import FrechetInceptionDistance
 from torchvision.utils import make_grid, save_image
 
 from ..utils.vision import denormalize
-from .core import Task
+from .core import DataModuleConfig, ModelConfig, Task, TaskConfig, Trainer
+
+
+class GANModelConfig(ModelConfig):
+    def __init__(
+        self,
+        latent_dim: int,
+        generator: nn.Module,
+        discriminator: nn.Module,
+        **kwargs,
+    ):
+        super().__init__(**kwargs)
+        self.latent_dim = latent_dim
+        self.generator = generator
+        self.discriminator = discriminator
+
+
+class GANConfig(TaskConfig):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
 
 class GAN(Task):
@@ -166,3 +185,7 @@ class GAN(Task):
                 batch_size, self.generator.latent_dim, 1, 1, device=self.device
             )  # type: ignore
         return z
+
+
+class GANTrainer(Trainer):
+    NAME = "gan"
