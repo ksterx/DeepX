@@ -29,6 +29,10 @@ class TaskConfig:
     lr: float
     loss_fn: str
     optimizer: str
+    scheduler: str
+    beta1: float
+    beta2: float
+    ignore_index: int = -100
 
 
 @dataclass
@@ -79,15 +83,15 @@ class Task(LightningModule, ABC):
         self.mparams = self.hparams.model_cfg
         self.tparams = self.hparams.task_cfg
 
-        self.model = self.build_model(**vars(model_cfg))
+        self.model = self._build_model(**vars(model_cfg))
 
         self.loss_fn = self.configure_loss_fn(
             self.tparams.loss_fn, ignore_index=self.tparams.ignore_index
         )
 
-    @abstractmethod
-    def initialize(self):
-        self.save_hyperparameters()  # This must be called to load a checkpoint
+    # @abstractmethod
+    # def initialize(self):
+    #     self.save_hyperparameters()  # This must be called to load a checkpoint
 
     def forward(self, x: Tensor) -> Tensor:
         return self.model(x)
@@ -147,13 +151,13 @@ class Task(LightningModule, ABC):
 
         return [optimizer], [scheduler]
 
-    def configure_loss_fn(self, loss_fn, ignore_index=None):
-        if loss_fn == "ce" and ignore_index is not None:
-            self.loss_fn = nn.CrossEntropyLoss(ignore_index=ignore_index)
+    def configure_loss_fn(self, loss_fn, ignore_index=-100):
+        if loss_fn == "ce" and ignore_index != -100:
+            return nn.CrossEntropyLoss(ignore_index=ignore_index)
         elif isinstance(loss_fn, str):
-            self.loss_fn = registered_losses[loss_fn]()
+            return registered_losses[loss_fn]()
         elif isinstance(loss_fn, nn.Module):
-            self.loss_fn = loss_fn  # type: ignore
+            return loss_fn  # type: ignore
         else:
             raise ValueError(f"Invalid loss function: {loss_fn}")
 
@@ -190,13 +194,13 @@ class Task(LightningModule, ABC):
 
             self.logger.experiment.log_artifact(self.logger.run_id, save_path)
 
-    def build_model(self, model_name: str, **kwargs) -> nn.Module:
+    def _build_model(self, model: str, **kwargs) -> nn.Module:
         try:
-            model_cls = registered_models[model_name]
+            model_cls = registered_models[model]
             return model_cls(**kwargs)
         except KeyError:
             raise ValueError(
-                f"Model {model_name} not supported. Please register it at deepx/nn/__init__.py"
+                f"Model {model} not supported. Please register it at deepx/nn/__init__.py"
             )
 
 
@@ -338,6 +342,7 @@ class Trainer(ABC):
         }
 
         for k, v in cfgs.items():
-            print(f"{k.title()} Config:\n")
-            for kk, vv in v.items():
-                print(f"{kk}: {vv}")
+            print("==============================")
+            print(f"{k.title()} Config:")
+            for kk, vv in vars(v).items():
+                print(f"\t{kk}: {vv}")

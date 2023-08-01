@@ -1,7 +1,8 @@
 import hydra
-from classification import ClassificationApp
 from imggen import ImageGenerationApp
 from segmentation import SegmentationApp
+
+from docs.examples.classification import ClassificationApp
 
 
 @hydra.main(config_path="../conf", config_name="config")

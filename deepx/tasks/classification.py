@@ -43,7 +43,8 @@ class Classification(Task):
             task_cfg=task_cfg,
         )
 
-        self.initialize()
+        # self.initialize()
+        # self.save_hyperparameters()
 
         num_classes = model_cfg.num_classes
 
@@ -51,8 +52,8 @@ class Classification(Task):
         self.val_acc = Accuracy(task="multiclass", num_classes=num_classes)
         self.test_acc = Accuracy(task="multiclass", num_classes=num_classes)
 
-    def initialize(self):
-        super().initialize()
+    # def initialize(self):
+    #     super().initialize()
 
     def predict_step(self, batch, batch_idx, dataloader_idx):
         x = batch
@@ -75,33 +76,16 @@ class Classification(Task):
 
 
 class ClassificationTrainer(Trainer):
-    # def __init__(
-    #     self,
-    #     model_cfg: ClassificationModelConfig,
-    #     task_cfg: ClassificationConfig,
-    #     dm_cfg: DataModuleConfig,
-    #     **kwargs,
-    # ):
-    #     super().__init__(
-    #         model_cfg=model_cfg,
-    #         task_cfg=task_cfg,
-    #         dm_cfg=dm_cfg,
-    #         **kwargs,
-    #     )
-
-    #     self._update_configs()
-
-    #     self.task = Classification(
-    #         model_cfg=self.model_cfg, task_cfg=self.task_cfg, **kwargs
-    #     )
+    NAME = "classification"
 
     def _update_configs(self):
-        self.model_cfg.update(
-            {
-                "num_classes": self.dm.NUM_CLASSES,
-                "in_channels": self.dm.NUM_CHANNELS,
-            }
-        )
+        pass
+        # self.model_cfg.update(
+        #     {
+        #         "num_classes": self.dm.NUM_CLASSES,
+        #         "in_channels": self.dm.NUM_CHANNELS,
+        #     }
+        # )
 
         # self.task_cfg.update({})
 
