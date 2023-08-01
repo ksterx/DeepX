@@ -19,21 +19,24 @@ from .segmentation import SegmentationDM
 from .translation import TranslationDM
 
 __all__ = [
-    "AnimeDM",
     "DataModule",
     "ClassificationDM",
     "LangModelDM",
     "SegmentationDM",
     "TranslationDM",
-    "CIFAR10DM",
-    "CIFAR100DM",
-    "KFTTDM",
-    "MNISTDM",
-    "FashionMNISTDM",
-    "Flowers102DM",
-    "PennTreebankDM",
-    "VOCSegDM",
-    "WikiText103DM",
-    "CelebADM",
-    "LFWPeopleDM",
 ]
+
+dm_aliases = {
+    "mnist": MNISTDM,
+    "fashionmnist": FashionMNISTDM,
+    "cifar10": CIFAR10DM,
+    "cifar100": CIFAR100DM,
+    "flowers102": Flowers102DM,
+    "celeba": CelebADM,
+    "lfw": LFWPeopleDM,
+    "anime": AnimeDM,
+    "vocseg": VOCSegDM,
+    "wiki103": WikiText103DM,
+    "penn": PennTreebankDM,
+    "kftt": KFTTDM,
+}

@@ -1,8 +1,33 @@
 import torch
-from torch import nn, optim
 from torchmetrics import Accuracy
 
-from .core import Task, Trainer
+from deepx.tasks.core import DataModuleConfig, ModelConfig, Task, TaskConfig, Trainer
+
+
+class ClassificationModelConfig(ModelConfig):
+    def __init__(
+        self,
+        num_classes: int,
+        in_channels: int,
+        dropout: float = 0.0,
+        **kwargs,
+    ):
+        super().__init__(**kwargs)
+        self.num_classes = num_classes
+        self.in_channels = in_channels
+        self.dropout = dropout
+
+
+class ClassificationConfig(TaskConfig):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+
+class ClassificationDMConfig(DataModuleConfig):
+    def __init__(self, train_ratio: float, download: bool = False, **kwargs):
+        super().__init__(**kwargs)
+        self.train_ratio = train_ratio
+        self.download = download
 
 
 class Classification(Task):
@@ -10,24 +35,17 @@ class Classification(Task):
 
     def __init__(
         self,
-        model: str,
-        num_classes: int,
-        lr: float = 1e-4,
-        loss_fn: str | nn.Module = "ce",
-        optimizer: str | optim.Optimizer = "adam",
-        scheduler: str | optim.lr_scheduler.LRScheduler = "cos",
-        **kwargs,
+        model_cfg: ClassificationModelConfig,
+        task_cfg: ClassificationConfig,
     ):
         super().__init__(
-            model=model,
-            lr=lr,
-            loss_fn=loss_fn,
-            optimizer=optimizer,
-            scheduler=scheduler,
-            **kwargs,
+            model_cfg=model_cfg,
+            task_cfg=task_cfg,
         )
 
         self.initialize()
+
+        num_classes = model_cfg.num_classes
 
         self.train_acc = Accuracy(task="multiclass", num_classes=num_classes)
         self.val_acc = Accuracy(task="multiclass", num_classes=num_classes)
@@ -57,45 +75,37 @@ class Classification(Task):
 
 
 class ClassificationTrainer(Trainer):
-    def __init__(
-        self,
-        model: str,
-        datamodule: str,
-        batch_size: int = 32,
-        train_ratio: float = 0.8,
-        num_workers: int = 2,
-        download: bool = False,
-        lr: float = 1e-4,
-        loss_fn: str | nn.Module = "ce",
-        optimizer: str | optim.Optimizer = "adam",
-        scheduler: str | optim.lr_scheduler._LRScheduler = "cos",
-        root_dir: str = "/workspace",
-        data_dir: str = "/workspace/experiments/data",
-        log_dir: str = "/workspace/experiments/mlruns",
-        dropout: float = 0.0,
-        **kwargs,
-    ):
-        super().__init__(
-            model=model,
-            datamodule=datamodule,
-            batch_size=batch_size,
-            train_ratio=train_ratio,
-            num_workers=num_workers,
-            download=download,
-            lr=lr,
-            loss_fn=loss_fn,
-            optimizer=optimizer,
-            scheduler=scheduler,
-            root_dir=root_dir,
-            data_dir=data_dir,
-            log_dir=log_dir,
-            **kwargs,
+    # def __init__(
+    #     self,
+    #     model_cfg: ClassificationModelConfig,
+    #     task_cfg: ClassificationConfig,
+    #     dm_cfg: DataModuleConfig,
+    #     **kwargs,
+    # ):
+    #     super().__init__(
+    #         model_cfg=model_cfg,
+    #         task_cfg=task_cfg,
+    #         dm_cfg=dm_cfg,
+    #         **kwargs,
+    #     )
+
+    #     self._update_configs()
+
+    #     self.task = Classification(
+    #         model_cfg=self.model_cfg, task_cfg=self.task_cfg, **kwargs
+    #     )
+
+    def _update_configs(self):
+        self.model_cfg.update(
+            {
+                "num_classes": self.dm.NUM_CLASSES,
+                "in_channels": self.dm.NUM_CHANNELS,
+            }
         )
 
-        self.datamodule = self.get_datamodule(datamodule=datamodule, **self.dm_cfg)
+        # self.task_cfg.update({})
 
-        num_classes = self.datamodule.NUM_CLASSES
-        num_channels = self.datamodule.NUM_CHANNELS
+        # self.dm_cfg.update()
 
-        self.task_cfg.update({"model": model, "num_classes": num_classes})
-        self.task = Classification(**self.task_cfg)
+    def _build_task(self, model_cfg: ModelConfig, task_cfg: TaskConfig) -> Task:
+        return Classification(model_cfg=model_cfg, task_cfg=task_cfg)

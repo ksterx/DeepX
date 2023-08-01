@@ -2,7 +2,8 @@ import glob
 import os
 import tempfile
 from abc import ABC, abstractmethod
-from typing import Any
+from dataclasses import dataclass
+from logging import getLogger
 
 import lightning as L
 from lightning import LightningDataModule, LightningModule
@@ -10,12 +11,50 @@ from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint, ModelSum
 from lightning.pytorch.loggers import MLFlowLogger, TensorBoardLogger
 from torch import Tensor, nn, optim
 
-from deepx import registered_tasks
-from deepx.nn import registered_models
-
-from ..nn import registered_losses
+from ..dms import dm_aliases
+from ..nn import registered_losses, registered_models
 from ..utils.vision import make_gif_from_images
 from ..utils.wrappers import watch_kwargs
+
+process_logger = getLogger(__name__)
+
+
+@dataclass
+class ModelConfig:
+    model: str
+
+
+@dataclass
+class TaskConfig:
+    lr: float
+    loss_fn: str
+    optimizer: str
+
+
+@dataclass
+class DataModuleConfig:
+    dm: str
+    batch_size: int
+    num_workers: int
+    data_dir: str
+
+
+@dataclass
+class TrainingConfig:
+    ckpt_path: str | None
+    epochs: int
+    patience: int
+    max_depth: int
+    benchmark: bool
+    debug: bool
+    monitor_metric: str
+    monitor_mode: str
+    logging: bool
+    logger: str
+    accelerator: str
+    devices: str | None
+    root_dir: str
+    log_dir: str
 
 
 class Task(LightningModule, ABC):
@@ -24,44 +63,27 @@ class Task(LightningModule, ABC):
     @watch_kwargs
     def __init__(
         self,
-        model: str,
-        lr: float,
-        loss_fn: str | nn.Module,
-        optimizer: str,
-        scheduler: str,
-        beta1: float = 0.9,
-        beta2: float = 0.999,
-        ignore_index: int = -1,
+        model_cfg: ModelConfig,
+        task_cfg: TaskConfig,
         **kwargs,
     ):
         """Base class for all task algorithms.
 
         Args:
-            model (str): The model to train.
-            lr (float): Learning rate.
-            loss_fn (str | ModuleType): Loss function.
-            optimizer (str | OptimType): Optimizer.
-            scheduler (str | LRSchedulerType): Learning rate scheduler.
-            beta1 (float, optional): Adam beta1. Defaults to 0.9
-            beta2 (float, optional): Adam beta2. Defaults to 0.999
 
-        Raises:
-            ValueError: Invalid loss function.
         """
         LightningModule.__init__(self)
         ABC.__init__(self)
 
-        self.model = self.build_model(model, **kwargs)
+        self.save_hyperparameters()
+        self.mparams = self.hparams.model_cfg
+        self.tparams = self.hparams.task_cfg
 
-        # Loss function
-        if loss_fn == "ce" and ignore_index != -1:
-            self.loss_fn = nn.CrossEntropyLoss(ignore_index=ignore_index)
-        elif isinstance(loss_fn, str):
-            self.loss_fn = registered_losses[loss_fn]()
-        elif isinstance(loss_fn, nn.Module):
-            self.loss_fn = loss_fn  # type: ignore
-        else:
-            raise ValueError(f"Invalid loss function: {loss_fn}")
+        self.model = self.build_model(**vars(model_cfg))
+
+        self.loss_fn = self.configure_loss_fn(
+            self.tparams.loss_fn, ignore_index=self.tparams.ignore_index
+        )
 
     @abstractmethod
     def initialize(self):
@@ -83,23 +105,23 @@ class Task(LightningModule, ABC):
         return NotImplementedError
 
     def configure_optimizers(self):
-        if isinstance(self.hparams.optimizer, str):
-            match self.hparams.optimizer:
+        if isinstance(self.tparams.optimizer, str):
+            match self.tparams.optimizer:
                 case "adam":
                     optimizer = optim.Adam(
                         self.parameters(),
-                        lr=self.hparams.lr,
-                        betas=(self.hparams.beta1, self.hparams.beta2),
+                        lr=self.tparams.lr,
+                        betas=(self.tparams.beta1, self.tparams.beta2),
                     )
                 case "sgd":
-                    optimizer = optim.SGD(self.parameters(), lr=self.hparams.lr)
+                    optimizer = optim.SGD(self.parameters(), lr=self.tparams.lr)
                 case _:
-                    raise ValueError(f"Invalid optimizer: {self.hparams.optimizer}")
+                    raise ValueError(f"Invalid optimizer: {self.tparams.optimizer}")
         else:
-            optimizer = self.hparams.optimizer(self.parameters(), lr=self.hparams.lr)
+            optimizer = self.tparams.optimizer(self.parameters(), lr=self.tparams.lr)
 
-        if isinstance(self.hparams.scheduler, str):
-            match self.hparams.scheduler:
+        if isinstance(self.tparams.scheduler, str):
+            match self.tparams.scheduler:
                 case "cos":
                     scheduler = optim.lr_scheduler.CosineAnnealingLR(
                         optimizer, T_max=self.trainer.max_epochs
@@ -119,11 +141,21 @@ class Task(LightningModule, ABC):
                 case "none":
                     scheduler = None
                 case _:
-                    raise ValueError(f"Invalid scheduler: {self.hparams.scheduler}")
+                    raise ValueError(f"Invalid scheduler: {self.tparams.scheduler}")
         else:
-            scheduler = self.hparams.scheduler(optimizer)
+            scheduler = self.tparams.scheduler(optimizer)
 
         return [optimizer], [scheduler]
+
+    def configure_loss_fn(self, loss_fn, ignore_index=None):
+        if loss_fn == "ce" and ignore_index is not None:
+            self.loss_fn = nn.CrossEntropyLoss(ignore_index=ignore_index)
+        elif isinstance(loss_fn, str):
+            self.loss_fn = registered_losses[loss_fn]()
+        elif isinstance(loss_fn, nn.Module):
+            self.loss_fn = loss_fn  # type: ignore
+        else:
+            raise ValueError(f"Invalid loss function: {loss_fn}")
 
     def _make_gif_from_images(
         self,
@@ -174,206 +206,72 @@ class Trainer(ABC):
     @watch_kwargs
     def __init__(
         self,
-        model: str | LightningModule,
-        datamodule: str | LightningDataModule,
-        batch_size: int,
-        train_ratio: float | None,
-        num_workers: int,
-        download: bool,
-        lr: float,
-        beta1: float,
-        beta2: float,
-        loss_fn: str | nn.Module,
-        optimizer: str | optim.Optimizer,
-        scheduler: str | optim.lr_scheduler._LRScheduler,
-        root_dir: str,
-        data_dir: str,
-        log_dir: str,
+        model_cfg: ModelConfig,
+        task_cfg: TaskConfig,
+        dm_cfg: DataModuleConfig,
+        train_cfg: TrainingConfig | None = None,
         **kwargs,
     ):
         """Base class for all trainers.
 
         Args:
-            model (str | LightningModule): Model to train. If str, it should be registered at `deepx/nn/__init__.py`
-            datamodule (str | LightningDataModule): Data module. If str, it should be registered at `deepx/dms/__init__.py`
-            batch_size (int): Batch size
-            train_ratio (float): Ratio of training data
-            num_workers (int): Number of workers
-            download (bool): Whether to download data
-            lr (float): Learning rate
-            beta1 (float): Adam beta1
-            beta2 (float): Adam beta2
-            loss_fn (str | nn.Module): Loss function. If str, it should be registered at `deepx/nn/__init__.py`
-            optimizer (str | optim.Optimizer): Optimizer
-            scheduler (str | optim.lr_scheduler._LRScheduler): Learning rate scheduler
-            root_dir (str): Root directory for the project
-            data_dir (str): Data directory
-            log_dir (str): Log directory
+
         """
         super().__init__()
 
+        self.model_cfg = model_cfg
+        self.task_cfg = task_cfg
+        self.dm_cfg = dm_cfg
+        self.train_cfg = train_cfg
+
+        # Register hyperparameters to be logged
         self.hparams = kwargs
-        self.hparams.update(
-            {
-                "model": model if isinstance(model, str) else model.NAME,
-                "datamodule": datamodule,
-                "batch_size": batch_size,
-                "train_ratio": train_ratio,
-                "lr": lr,
-                "beta1": beta1,
-                "beta2": beta2,
-                "loss_fn": loss_fn,
-                "optimizer": optimizer,
-                "scheduler": scheduler,
-            }
-        )
+        self.hparams.update(**vars(model_cfg))
+        self.hparams.update(**vars(task_cfg))
+        self.hparams.update(**vars(dm_cfg))
+        if train_cfg is not None:
+            self.hparams.update(**vars(train_cfg))
 
-        self.root_dir = root_dir
-        self.data_dir = data_dir
-        self.log_dir = log_dir
-        self.batch_size = batch_size
-        self.train_ratio = train_ratio
-        self.num_workers = num_workers
-        self.download = download
+        self.dm = self._get_datamodule(**vars(dm_cfg))
+        self._update_configs()
+        self.task = self._build_task(model_cfg=model_cfg, task_cfg=task_cfg)
 
-        self.dm_cfg = {
-            "data_dir": data_dir,
-            "batch_size": batch_size,
-            "train_ratio": train_ratio,
-            "num_workers": num_workers,
-            "download": download,
-        }
-
-        self.model_cfg: dict[str, Any] = {"model": model}
-
-        self.task_cfg = {
-            "lr": lr,
-            "beta1": beta1,
-            "beta2": beta2,
-            "loss_fn": loss_fn,
-            "optimizer": optimizer,
-            "scheduler": scheduler,
-        }
-
-    def get_datamodule(
-        self, datamodule: str | LightningDataModule, **kwargs
-    ) -> LightningDataModule:
-        if isinstance(datamodule, str):
-            try:
-                dm_cls = registered_tasks[self.NAME]["datamodule"][datamodule]
-                return dm_cls(**kwargs)
-            except KeyError:
-                raise ValueError(
-                    f"Datamodule {datamodule} not supported. Please register it at deepx/__init__.py"
-                )
-        else:
-            return datamodule
-
-    def get_model(self, model, **kwargs):
-        if isinstance(model, str):
-            try:
-                model_cls = registered_models[model]
-                return model_cls(**kwargs)
-            except KeyError:
-                raise ValueError(
-                    f"Model {model} not supported. Please register it at deepx/nn/__init__.py"
-                )
-        else:
-            return model
-
-    def get_task(self, task, **kwargs):
-        if isinstance(task, str):
-            try:
-                task_cls = registered_tasks[task]["name"]
-                return task_cls(**kwargs)
-            except KeyError:
-                raise ValueError(
-                    f"Task {task} not supported. Please register it at deepx/__init__.py"
-                )
-        else:
-            return task
+    def _get_datamodule(self, dm: str, **kwargs) -> LightningDataModule:
+        try:
+            dm_cls = dm_aliases[dm]
+            return dm_cls(**kwargs)
+        except KeyError:
+            raise ValueError(
+                f"Datamodule {dm} not supported. Please register it at deepx/dms/__init__.py"
+            )
 
     @abstractmethod
-    def build_task(self, task: Task, **kwargs) -> Task:
-        return Task(**kwargs)
+    def _build_task(self, model_cfg: ModelConfig, task_cfg: TaskConfig) -> Task:
+        pass
 
-    def train(
-        self,
-        ckpt_path: str | None,
-        epochs: int,
-        stopping_patience: int,
-        max_depth: int,
-        benchmark: bool,
-        debug: bool,
-        monitor: str,
-        monitor_max: bool,
-        logger: str,
-        accelerator: str,
-        devices: str | None,
-        **kwargs,
-    ):
-        self.hparams.update(kwargs)
-        self.hparams.update(
-            {
-                "epochs": epochs,
-                "stopping_patience": stopping_patience,
-                "ckpt_path": ckpt_path,
-                "monitor": monitor,
-                "monitor_max": monitor_max,
-            }
-        )
-        self.set(
-            epochs=epochs,
-            stopping_patience=stopping_patience,
-            max_depth=max_depth,
-            benchmark=benchmark,
-            debug=debug,
-            logging=True,
-            logger=logger,
-            monitor=monitor,
-            monitor_max=monitor_max,
-            accelerator=accelerator,
-            devices=devices,
-            **kwargs,
-        )
-        # self.task = torch.compile(self.task)  # ERROR: NotImplementedError
-        self.trainer.fit(
-            self.task,
-            datamodule=self.datamodule,
-            ckpt_path=ckpt_path,
-        )
-        if not debug:
-            self.trainer.test(ckpt_path="best", datamodule=self.datamodule)
+    @abstractmethod
+    def _update_configs(self):
+        pass
 
-    def test(self, ckpt_path: str | None = None):
-        try:
-            self.trainer.test(ckpt_path=ckpt_path, datamodule=self.datamodule)
-        except AttributeError:
-            self.set(logging=False)
-            self.trainer.test(ckpt_path=ckpt_path, datamodule=self.datamodule)
+    def train(self, train_cfg: TrainingConfig | None = None):
+        if self.train_cfg is None:
+            if train_cfg is None:
+                raise ValueError("No training config provided.")
+            else:
+                tcfg = train_cfg
+        else:
+            if train_cfg is None:
+                tcfg = self.train_cfg
+            else:
+                process_logger.warning("Overriding training config.")
+                tcfg = self.train_cfg
 
-    def set(
-        self,
-        epochs: int = 2,
-        stopping_patience: int = 5,
-        max_depth: int = 1,
-        benchmark: bool = False,
-        debug: bool = False,
-        logging: bool = True,
-        logger: str = "mlflow",
-        monitor: str = "val_loss",
-        monitor_max: bool = False,
-        accelerator: str = "cpu",
-        devices: str | None = None,
-        **kwargs,
-    ):
-        if logging:
-            match logger:
+        if tcfg.logging:
+            match tcfg.logger:
                 case "mlflow":
                     logger = MLFlowLogger(
-                        experiment_name=f"{self.datamodule.NAME}-{self.NAME}",
-                        tags={"model": self.model.NAME},
-                        tracking_uri=f"file://{self.log_dir}",
+                        experiment_name=f"{self.dm.NAME}-{self.NAME}",
+                        tracking_uri=f"file://{tcfg.log_dir}",
                     )
                     print(f"Experiment ID: {logger.experiment_id}")
                     print(f"Run ID: {logger.run_id}")
@@ -382,39 +280,64 @@ class Trainer(ABC):
 
                 case "tensorboard":
                     logger = TensorBoardLogger(
-                        save_dir=self.log_dir, name=self.datamodule.NAME
+                        save_dir=tcfg.log_dir, name=self.dm_cfg.dm
                     )
         else:
             logger = None
 
-        if monitor_max:
+        if tcfg.monitor_mode:
             monitor_mode = "max"
         else:
             monitor_mode = "min"
 
+        self.summarize()
+
         self.trainer = L.Trainer(
-            max_epochs=epochs,
-            accelerator=accelerator,
-            devices=devices,
+            max_epochs=tcfg.epochs,
+            accelerator=tcfg.accelerator,
+            devices=tcfg.devices,
             logger=logger,
             enable_checkpointing=True,
             callbacks=[
                 EarlyStopping(
-                    monitor=monitor, patience=stopping_patience, mode=monitor_mode
+                    monitor=tcfg.monitor_metric,
+                    patience=tcfg.patience,
+                    mode=monitor_mode,
                 ),
-                ModelSummary(max_depth=max_depth),
+                ModelSummary(max_depth=tcfg.max_depth),
                 ModelCheckpoint(
-                    monitor=monitor, save_top_k=1, mode=monitor_mode, save_last=True
+                    monitor=tcfg.monitor_mode,
+                    save_top_k=1,
+                    mode=monitor_mode,
+                    save_last=True,
                 ),
             ],
-            benchmark=benchmark,
-            fast_dev_run=debug,
+            benchmark=tcfg.benchmark,
+            fast_dev_run=tcfg.debug,
             num_sanity_val_steps=0,
-            **kwargs,
         )
 
-        self.task_summary()
+        # self.task = torch.compile(self.task)  # ERROR: NotImplementedError
+        self.trainer.fit(
+            model=self.task,
+            datamodule=self.dm,
+            ckpt_path=tcfg.ckpt_path,
+        )
+        if not tcfg.debug:
+            self.trainer.test(ckpt_path="best", datamodule=self.dm)
 
-    def task_summary(self):
-        for k, v in self.hparams.items():
-            print(f"{k}: {v}")
+    def test(self, ckpt_path: str | None = None):
+        self.trainer.test(ckpt_path=ckpt_path, datamodule=self.dm)
+
+    def summarize(self):
+        cfgs = {
+            "datamodule": self.dm_cfg,
+            "model": self.model_cfg,
+            "task": self.task_cfg,
+            "training": self.train_cfg,
+        }
+
+        for k, v in cfgs.items():
+            print(f"{k.title()} Config:\n")
+            for kk, vv in v.items():
+                print(f"{kk}: {vv}")

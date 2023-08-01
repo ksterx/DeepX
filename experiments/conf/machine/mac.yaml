@@ -1,6 +1,6 @@
 root_dir: /Users/ksterx/Development/PythonProjects/DeepX
-data_dir: /Users/ksterx/Development/PythonProjects/DeepX/experiments/data
-log_dir: /Users/ksterx/Development/PythonProjects/DeepX/experiments/mlruns
+data_dir: /Users/ksterx/Development/PythonProjects/data
+log_dir: /Users/ksterx/Development/PythonProjects/mlruns
 
 num_workers: 1
 accelerator: cpu
