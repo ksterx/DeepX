@@ -3,7 +3,7 @@ data_dir: /Users/ksterx/Development/PythonProjects/data
 log_dir: /Users/ksterx/Development/PythonProjects/mlruns
 
 num_workers: 1
-accelerator: cpu
+accelerator: mps
 devices: null
 
 defaults:

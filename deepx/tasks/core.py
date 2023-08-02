@@ -1,4 +1,5 @@
 import glob
+import inspect
 import os
 import tempfile
 from abc import ABC, abstractmethod
@@ -19,13 +20,27 @@ from ..utils.wrappers import watch_kwargs
 process_logger = getLogger(__name__)
 
 
+class ConfigMixin:
+    def split_kwargs(self, kwargs, parent_cls):
+        parent_kwargs = {}
+        child_kwargs = {}
+        sig = inspect.signature(parent_cls)
+        keys = sig.parameters.keys()
+        for k, v in kwargs.items():
+            if k in keys:
+                parent_kwargs[k] = v
+            else:
+                child_kwargs[k] = v
+        return parent_kwargs, child_kwargs
+
+
 @dataclass
-class ModelConfig:
+class ModelConfig(ConfigMixin):
     model: str
 
 
 @dataclass
-class TaskConfig:
+class TaskConfig(ConfigMixin):
     lr: float
     loss_fn: str
     optimizer: str
@@ -36,7 +51,7 @@ class TaskConfig:
 
 
 @dataclass
-class DataModuleConfig:
+class DataModuleConfig(ConfigMixin):
     dm: str
     data_dir: str
     batch_size: int
@@ -44,7 +59,7 @@ class DataModuleConfig:
 
 
 @dataclass
-class TrainingConfig:
+class TrainingConfig(ConfigMixin):
     ckpt_path: str | None
     epochs: int
     patience: int

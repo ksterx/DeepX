@@ -1,8 +1,7 @@
 import tempfile
+from logging import getLogger
 
 import torch
-from lightning import LightningModule
-from torch import nn, optim
 from torch.nn import functional as F
 from torchmetrics.classification import MulticlassJaccardIndex
 from torchvision.utils import save_image
@@ -10,8 +9,9 @@ from torchvision.utils import save_image
 from deepx.tasks.core import ModelConfig, Task, TaskConfig
 
 from ..utils.vision import denormalize
-from ..utils.wrappers import watch_kwargs
 from .core import DataModuleConfig, ModelConfig, Task, TaskConfig, Trainer
+
+process_logger = getLogger(__name__)
 
 
 class SegmentationModelConfig(ModelConfig):
@@ -19,13 +19,14 @@ class SegmentationModelConfig(ModelConfig):
         self,
         num_classes: int,
         in_channels: int,
-        dropout: float = 0.0,
         **kwargs,
     ):
-        super().__init__(**kwargs)
+        parent_kwargs, child_kwargs = self.split_kwargs(kwargs, ModelConfig)
+        super().__init__(**parent_kwargs)
         self.num_classes = num_classes
         self.in_channels = in_channels
-        self.dropout = dropout
+        for k, v in child_kwargs.items():
+            setattr(self, k, v)
 
 
 class SegmentationConfig(TaskConfig):
