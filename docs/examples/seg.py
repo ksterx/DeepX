@@ -1,5 +1,5 @@
 # %%
-from deepx.tasks.core import DataModuleConfig, TrainingConfig
+from deepx.tasks.core import TrainingConfig
 from deepx.tasks.segmentation import (
     SegmentationConfig,
     SegmentationDMConfig,
@@ -8,23 +8,31 @@ from deepx.tasks.segmentation import (
 )
 
 # %%
-model_cfg = SegmentationModelConfig(model="resnet18", num_classes=10, in_channels=1)
+model_cfg = SegmentationModelConfig(
+    model="unet",
+    num_classes=21,
+    in_channels=3,
+)
 
 # %%
 task_cfg = SegmentationConfig(
-    lr=1e-4, loss_fn="ce", optimizer="adam", scheduler="cos", beta1=0.9, beta2=0.999
+    lr=1e-4,
+    loss_fn="ce",
+    optimizer="adam",
+    scheduler="cos",
+    beta1=0.9,
+    beta2=0.999,
 )
-
 
 # %%
 dm_cfg = SegmentationDMConfig(
-    dm="mnist",
-    batch_size=32,
+    dm="vocseg",
+    batch_size=1,
     num_workers=2,
     train_ratio=0.8,
-    data_dir="/Users/ksterx/Development/PythonProjects/data",
+    data_dir="C:/Users/tomkj/Development/data",
+    download=False,
 )
-
 
 # %%
 train_cfg = TrainingConfig(
@@ -38,20 +46,21 @@ train_cfg = TrainingConfig(
     monitor_mode="min",
     logging=True,
     logger="mlflow",
-    accelerator="cpu",
-    devices=None,
-    root_dir="/Users/ksterx/Development/PythonProjects/DeepX",
-    log_dir="/Users/ksterx/Development/PythonProjects/mlruns",
+    accelerator="cuda",
+    devices=1,
+    root_dir="C:/Users/tomkj/Development/DeepX",
+    log_dir="C:/Users/tomkj/Development/mlruns",
 )
-
 
 # %%
 trainer = SegmentationTrainer(
-    model_cfg=model_cfg, task_cfg=task_cfg, dm_cfg=dm_cfg, train_cfg=train_cfg
+    model_cfg=model_cfg,
+    task_cfg=task_cfg,
+    dm_cfg=dm_cfg,
+    train_cfg=train_cfg,
 )
 
 # %%
 trainer.train()
-
 
 # %%

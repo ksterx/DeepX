@@ -16,20 +16,31 @@ class GANModelConfig(ModelConfig):
     def __init__(
         self,
         latent_dim: int,
-        generator: nn.Module,
-        discriminator: nn.Module,
+        base_dim_g: int,
+        base_dim_d: int,
+        dropout: float,
+        negative_slope: float,
         **kwargs,
     ):
         super().__init__(**kwargs)
         self.latent_dim = latent_dim
-        self.generator = generator
-        self.discriminator = discriminator
+        self.base_dim_g = base_dim_g
+        self.base_dim_d = base_dim_d
+        self.dropout = dropout
+        self.negative_slope = negative_slope
 
 
 class GANConfig(TaskConfig):
     def __init__(self, one_side_label_smoothing: float, **kwargs):
         super().__init__(**kwargs)
         self.one_side_label_smoothing = one_side_label_smoothing
+
+
+class GANDMConfig(DataModuleConfig):
+    def __init__(self, train_ratio: float, download: bool = False, **kwargs):
+        super().__init__(**kwargs)
+        self.train_ratio = train_ratio
+        self.download = download
 
 
 class GAN(Task):
@@ -136,13 +147,13 @@ class GAN(Task):
     def configure_optimizers(self):
         opt_g = torch.optim.Adam(
             self.generator.parameters(),
-            lr=self.hparams.lr,
-            betas=(self.hparams.beta1, self.hparams.beta2),
+            lr=self.tparams.lr,
+            betas=(self.tparams.beta1, self.tparams.beta2),
         )
         opt_d = torch.optim.Adam(
             self.discriminator.parameters(),
-            lr=self.hparams.lr,
-            betas=(self.hparams.beta1, self.hparams.beta2),
+            lr=self.tparams.lr,
+            betas=(self.tparams.beta1, self.tparams.beta2),
         )
         print("Generator optimizer:", opt_g)
         print("Discriminator optimizer:", opt_d)
@@ -175,3 +186,10 @@ class GAN(Task):
 
 class GANTrainer(Trainer):
     NAME = "gan"
+
+    def _update_configs(self):
+        h, w = self.dm.SIZE
+        self.model_cfg.update(tgt_shape=(self.dm.NUM_CHANNELS, h, w))
+
+    def _build_task(self, model_cfg: ModelConfig, task_cfg: TaskConfig) -> Task:
+        return GAN(model_cfg=model_cfg, task_cfg=task_cfg)

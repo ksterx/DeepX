@@ -1,6 +1,6 @@
 import hydra
 
-from deepx.tasks import SegmentationTrainer
+from deepx.tasks import ClassificationTrainer, SegmentationTrainer
 
 
 @hydra.main(config_path="../conf", config_name="config", version_base=None)

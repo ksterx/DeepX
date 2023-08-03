@@ -10,11 +10,11 @@ class DCGAN(nn.Module):
     def __init__(
         self,
         tgt_shape: tuple[int, int, int],
-        negative_slope: float = 0.01,
-        dropout: float = 0.0,
         latent_dim: int = 100,
         base_dim_g: int = 128,
         base_dim_d: int = 128,
+        negative_slope: float = 0.01,
+        dropout: float = 0.0,
         **kwargs,
     ) -> None:
         """Generative Adversarial Network

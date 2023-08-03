@@ -33,6 +33,10 @@ class ConfigMixin:
                 child_kwargs[k] = v
         return parent_kwargs, child_kwargs
 
+    def update(self, **kwargs):
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
 
 @dataclass
 class ModelConfig(ConfigMixin):
@@ -268,6 +272,9 @@ class Trainer(ABC):
 
     @abstractmethod
     def _update_configs(self):
+        # self.model_cfg.update()
+        # self.task_cfg.update()
+        # self.dm_cfg.update()
         pass
 
     def train(self, train_cfg: TrainingConfig | None = None):

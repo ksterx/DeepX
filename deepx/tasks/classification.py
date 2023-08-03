@@ -7,14 +7,10 @@ from .core import DataModuleConfig, ModelConfig, Task, TaskConfig, Trainer
 class ClassificationModelConfig(ModelConfig):
     def __init__(
         self,
-        num_classes: int,
-        in_channels: int,
         dropout: float = 0.0,
         **kwargs,
     ):
         super().__init__(**kwargs)
-        self.num_classes = num_classes
-        self.in_channels = in_channels
         self.dropout = dropout
 
 
@@ -73,13 +69,10 @@ class ClassificationTrainer(Trainer):
     NAME = "classification"
 
     def _update_configs(self):
-        pass
-        # self.model_cfg.update(
-        #     {
-        #         "num_classes": self.dm.NUM_CLASSES,
-        #         "in_channels": self.dm.NUM_CHANNELS,
-        #     }
-        # )
+        self.model_cfg.update(
+            num_classes=self.dm.NUM_CLASSES,
+            in_channels=self.dm.NUM_CHANNELS,
+        )
 
         # self.task_cfg.update({})
 
