@@ -3,7 +3,7 @@ from logging import getLogger
 
 import hydra
 
-from deepx.tasks import GAN, Classification, Segmentation, TrainingConfig
+from deepx.tasks import GAN, VAE, Classification, Segmentation, TrainingConfig
 from deepx.tasks.core import DataModuleConfig, ModelConfig, TaskConfig
 from deepx.utils.config import check_duplicate_keys
 
@@ -23,6 +23,8 @@ def main(cfg):
             task_cls = GAN
         case "segmentation":
             task_cls = Segmentation
+        case "vae":
+            task_cls = VAE
         case _:
             raise ValueError(f"Unknown task: {task_cfg.name}")
 
@@ -48,7 +50,6 @@ def main(cfg):
 
     for c in [ds_cfg, machine_cfg, task_cfg]:
         for k, v in c.items():
-            print(f"{k}: {v}")
             if k in keys["model"]:
                 model_dict[k] = v
             elif k in keys["task"]:

@@ -1,15 +1,56 @@
 import tempfile
+from dataclasses import dataclass
 
 import numpy as np
 import torch
-from torch import Tensor, nn, optim
+from torch import Tensor
+from torch.nn import functional as F
+from torchmetrics.classification import BinaryAccuracy
 
-# from torchmetrics.classification import BinaryAccuracy
-from torchmetrics.image.fid import FrechetInceptionDistance
+# from torchmetrics.image.fid import FrechetInceptionDistance
 from torchvision.utils import make_grid, save_image
 
 from ..utils.vision import denormalize
-from .core import Task
+from .core import DataModuleConfig, ModelConfig, Task, TaskConfig, Trainer
+
+
+class VAEModelConfig(ModelConfig):
+    def __init__(
+        self,
+        backbone: str,
+        latent_dim: int,
+        base_dim_g: int,
+        dropout: float,
+        negative_slope: float,
+        **kwargs,
+    ):
+        super().__init__(**kwargs)
+        self.backbone = backbone
+        self.latent_dim = latent_dim
+        self.base_dim_g = base_dim_g
+        self.dropout = dropout
+        self.negative_slope = negative_slope
+
+
+class VAETaskConfig(TaskConfig):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+
+class VAEDMConfig(DataModuleConfig):
+    def __init__(
+        self,
+        train_ratio: float,
+        mean: tuple[float, ...],
+        std: tuple[float, ...],
+        download: bool = False,
+        **kwargs,
+    ):
+        super().__init__(**kwargs)
+        self.train_ratio = train_ratio
+        self.mean = mean
+        self.std = std
+        self.download = download
 
 
 class VAETask(Task):
@@ -18,137 +59,48 @@ class VAETask(Task):
 
     def __init__(
         self,
-        model: nn.Module,
-        lr: float = 1e-3,
-        loss_fn: str | nn.Module = "bce",
-        optimizer: str | optim.Optimizer = "adam",
-        scheduler: str | optim.lr_scheduler.LRScheduler = "cos",
-        one_side_label_smoothing: float = 0.9,
-        beta1: float = 0.9,
-        beta2: float = 0.999,
-        **kwargs,
+        model_cfg: VAEModelConfig,
+        task_cfg: VAETaskConfig,
     ):
         super().__init__(
-            model=model,
-            lr=lr,
-            loss_fn=loss_fn,
-            optimizer=optimizer,
-            scheduler=scheduler,
-            beta1=beta1,
-            beta2=beta2,
-            **kwargs,
+            model_cfg=model_cfg,
+            task_cfg=task_cfg,
         )
-
-        self.one_side_label_smoothing = one_side_label_smoothing
 
         self.automatic_optimization = False
 
-        if not isinstance(self.model.generator, nn.Module):
-            raise ValueError(f"Invalid model: {model}")
+        self.decoder = self.model.decoder
+        self.encoder = self.model.encoder
 
-        self.generator = self.model.generator
-        self.discriminator = self.model.discriminator
-
-        # self.val_acc_real = BinaryAccuracy()
-        # self.val_acc_fake = BinaryAccuracy()
-        self.test_metric = FrechetInceptionDistance()
+        self.train_acc = BinaryAccuracy()
+        self.val_acc = BinaryAccuracy()
+        self.test_acc = BinaryAccuracy()
 
     def forward(self, x: Tensor) -> Tensor:
-        return self.generator(x)
+        return self.decoder(x)
 
     def _mode_step(self, batch, batch_idx, mode):
-        img, _ = batch
-        self.type_ = img
+        tgt, _ = batch
+        logits, z, mu, logvar = self.model(tgt)
+        pred = torch.sigmoid(logits)
+        loss, rec_loss, kl_loss = self.criterion(pred, tgt, mu, logvar)
 
-        opt_g, opt_d = self.optimizers()
+        self.log(f"{mode}_loss", loss, prog_bar=True)
 
-        # Train discriminator
-        if mode == "train":
-            self.toggle_optimizer(opt_d)
+        return loss
 
-        # for real images
-        preds = self.discriminator(img)  # [batch_size, 1]
-        tgt = torch.ones_like(preds)
-        loss_real = self.loss_fn(preds, tgt * self.one_side_label_smoothing)
-        # if mode == "val":
-        #     acc_real = self.val_acc_real(preds, tgt)
-
-        #     self.log("val_acc_real", acc_real, on_step=True, on_epoch=True)
-
-        # for fake images
-        z = self.generate_noize(img.shape[0])
-        fake_img = self.generator(z)
-        preds = self.discriminator(fake_img)  # [batch_size, 1]
-        tgt = torch.zeros_like(preds)
-        loss_fake = self.loss_fn(preds, tgt)
-        # if mode == "val":
-        #     acc_fake = self.val_acc_fake(preds, tgt)
-        #     acc = (acc_real + acc_fake) / 2
-
-        #     self.log("val_acc_fake", acc_fake, on_step=True, on_epoch=True)
-        #     self.log("val_acc", acc, on_step=True, on_epoch=True, prog_bar=True)
-
-        # Discriminator loss
-        loss_d = (loss_real + loss_fake) / 2
-
-        if mode == "train":
-            self.manual_backward(loss_d)
-            opt_d.step()
-            opt_d.zero_grad()
-            self.untoggle_optimizer(opt_d)
-
-        # Train generator
-        if mode == "train":
-            self.toggle_optimizer(opt_g)
-        fake_img = self.generator(z)
-        preds = self.discriminator(fake_img)
-
-        # Generator loss
-        loss_g = self.loss_fn(preds, torch.ones_like(preds))
-
-        # Metrics
-        if img.shape[1] == 3 and mode == "test":
-            img = denormalize(img, mean=0.1307, std=0.3081, is_batch=True)
-            fake_img = denormalize(fake_img, mean=0.1307, std=0.3081, is_batch=True)
-            exec(f"self.{mode}_metric.update(img, real=True)")
-            exec(f"self.{mode}_metric.update(fake_img, real=False)")
-            fid = eval(f"self.{mode}_metric.compute()")
-            self.log(f"{mode}_fid", fid)
-
-        self.log(f"{mode}_loss_g", loss_g, on_step=True, on_epoch=True)
-        self.log(f"{mode}_loss_d", loss_d, on_step=True, on_epoch=True)
-
-        if mode != "train":
-            self.log(f"{mode}_loss_real", loss_real, on_step=True, on_epoch=True)
-            self.log(f"{mode}_loss_fake", loss_fake, on_step=True, on_epoch=True)
-
-        if mode == "train":
-            self.manual_backward(loss_g)
-            opt_g.step()
-            opt_g.zero_grad()
-            self.untoggle_optimizer(opt_g)
-
-    def configure_optimizers(self):
-        opt_g = torch.optim.Adam(
-            self.generator.parameters(),
-            lr=self.hparams.lr,
-            betas=(self.hparams.beta1, self.hparams.beta2),
-        )
-        opt_d = torch.optim.Adam(
-            self.discriminator.parameters(),
-            lr=self.hparams.lr,
-            betas=(self.hparams.beta1, self.hparams.beta2),
-        )
-        print("Generator optimizer:", opt_g)
-        print("Discriminator optimizer:", opt_d)
-        return opt_g, opt_d
+    def criterion(self, pred, tgt, mu, logvar):
+        rec_loss = F.binary_cross_entropy(pred, tgt)
+        kl_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
+        loss = rec_loss + kl_loss
+        return loss, rec_loss, kl_loss
 
     def on_train_end(self):
         self._make_gif_from_images("img_*.png", "epoch", "training.gif")
 
     def on_validation_epoch_end(self):
         z = self.generate_noize(16, seed=self.SEED)
-        fake_img = self.generator(z)
+        fake_img = self.decoder(z)
         grid = make_grid(fake_img, nrow=4)
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -159,62 +111,29 @@ class VAETask(Task):
     def generate_noize(self, batch_size: int, seed: int | None = None):
         if isinstance(seed, int):
             np.random.seed(seed)
-            z = np.random.randn(batch_size, self.generator.latent_dim, 1, 1)  # type: ignore
+            z = np.random.randn(batch_size, self.decoder.latent_dim, 1, 1)  # type: ignore
             z = torch.from_numpy(z).float().to(self.device)
         else:
             z = torch.randn(
-                batch_size, self.generator.latent_dim, 1, 1, device=self.device
+                batch_size, self.decoder.latent_dim, 1, 1, device=self.device
             )  # type: ignore
         return z
 
 
-class VAETrainer(VAETask):
-    NAME = "vae_trainer"
+class VAETrainer(Trainer):
+    NAME = "vae"
 
-    def __init__(
-        self,
-        model: str | nn.Module,
-        datamodule: str | nn.Module,
-        batch_size: int = 32,
-        train_ratio: float = 0.8,
-        num_workers: int = 2,
-        download: bool = False,
-        lr: float = 1e-3,
-        loss_fn: str | nn.Module = "bce",
-        optimizer: str | optim.Optimizer = "adam",
-        scheduler: str | optim.lr_scheduler.LRScheduler = "cos",
-        root_dir: str = "/workspace",
-        data_dir: str = "/workspace/experiments/data",
-        log_dir: str = "/workspace/experiments/mlruns",
-        one_side_label_smoothing: float = 0.9,
-        beta1: float = 0.9,
-        beta2: float = 0.999,
-        **kwargs,
-    ):
-        super().__init__(
-            model=model,
-            lr=lr,
-            loss_fn=loss_fn,
-            optimizer=optimizer,
-            scheduler=scheduler,
-            one_side_label_smoothing=one_side_label_smoothing,
-            beta1=beta1,
-            beta2=beta2,
-            **kwargs,
-        )
+    def _update_configs(self):
+        h, w = self.dm.SIZE
+        self.model_cfg.update(tgt_shape=(self.dm.NUM_CHANNELS, h, w))
 
-        self.dm_cfg.update(
-            {
-                "batch_size": batch_size,
-                "train_ratio": train_ratio,
-                "num_workers": num_workers,
-                "download": download,
-            }
-        )
-        self.datamodule = self.get_datamodule(datamodule=datamodule, **self.dm_cfg)
+    def _build_task(self, model_cfg: ModelConfig, task_cfg: TaskConfig) -> Task:
+        return VAETask(model_cfg=model_cfg, task_cfg=task_cfg)
 
-        self.model_cfg.update({"latent_dim": self.datamodule.NUM_CLASSES})
-        self.model = self.get_model(model, **self.model_cfg)
 
-        self.task_cfg.update({"model": self.model})
-        self.task = self.get_task(task=self.NAME, **self.task_cfg)
+@dataclass
+class VAE:
+    model_cfg: ModelConfig = VAEModelConfig
+    task_cfg: TaskConfig = VAETaskConfig
+    dm_cfg: DataModuleConfig = VAEDMConfig
+    trainer: Trainer = VAETrainer

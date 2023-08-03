@@ -6,6 +6,17 @@ from .mlp import MLP
 from .resnet import ResNet, ResNet18, ResNet34, ResNet50, ResNet101, ResNet152
 from .transformer import LangModelTransformer
 from .unet import UNet
+from .vae import VAE
+
+backbone_aliases = {
+    "resnet": ResNet,
+    "resnet18": ResNet18,
+    "resnet34": ResNet34,
+    "resnet50": ResNet50,
+    "resnet101": ResNet101,
+    "resnet152": ResNet152,
+    "mlp": MLP,
+}
 
 registered_models = {
     "resnet": ResNet,
@@ -18,6 +29,7 @@ registered_models = {
     "mlp": MLP,
     "lmtransformer": LangModelTransformer,
     "dcgan": DCGAN,
+    "vae": VAE,
 }
 
 registered_losses = {

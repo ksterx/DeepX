@@ -3,27 +3,27 @@ from torch import nn
 
 from ..utils.wrappers import watch_kwargs
 from .dcgan import Generator
+from .resnet import ResNet18
 
 
 class Encoder(nn.Module):
     def __init__(
         self,
-        backbone,
-        in_channels,
-        hidden_dim,
-        latent_dim,
-        dropout,
+        backbone: str,
+        in_channels: int,
+        latent_dim: int,
+        dropout: float,
     ):
         super().__init__()
 
-        self.backbone = backbone(
+        self.backbone = ResNet18(
             in_channels=in_channels, num_classes=1, dropout=dropout, has_head=False
         )
         self.head_mu = nn.Sequential(
             nn.AdaptiveAvgPool2d((1, 1)),
             nn.Flatten(),
             nn.Linear(
-                hidden_dim,
+                self.backbone.block.CHANNELS_IN_LAYERS[-1],
                 latent_dim,
             ),
         )
@@ -48,13 +48,12 @@ class VAE(nn.Module):
     @watch_kwargs
     def __init__(
         self,
-        backbone,
+        backbone: str,
+        latent_dim: int,
+        base_dim_g: int,
         tgt_shape: tuple[int, int, int],
         negative_slope: float = 0.01,
         dropout: float = 0.0,
-        latent_dim: int = 100,
-        hidden_dim: int = 128,
-        base_dim_g: int = 128,
         **kwargs,
     ) -> None:
         """Variational Autoencoder
@@ -67,7 +66,6 @@ class VAE(nn.Module):
         self.encoder = Encoder(
             backbone=backbone,
             in_channels=tgt_shape[0],
-            hidden_dim=hidden_dim,
             latent_dim=latent_dim,
             dropout=dropout,
         )
@@ -78,3 +76,9 @@ class VAE(nn.Module):
             negative_slope=negative_slope,
             dropout=dropout,
         )
+
+    def forward(self, x):
+        z, mu, logvar = self.encoder(x)
+        z = z.view(z.size(0), z.size(1), 1, 1)
+        x = self.decoder(z)
+        return x, z, mu, logvar

@@ -24,7 +24,7 @@ class ClassificationDM(DataModule):
         )
 
     @classmethod
-    def _transform(cls, size, antialias=True, mean=(0.1307,), std=(0.3081,)):
+    def _transform(cls, size, mean, std, antialias=True):
         return transforms.Compose(
             [
                 transforms.ToTensor(),
@@ -38,7 +38,7 @@ class ClassificationDM(DataModule):
         )
 
     @classmethod
-    def _train_transform(cls, size, antialias=True, mean=(0.1307,), std=(0.3081,)):
+    def _train_transform(cls, size, mean, std, antialias=True):
         return transforms.Compose(
             [
                 transforms.RandomCrop(size, padding=4),
