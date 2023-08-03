@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 import torch
 from torchmetrics import Accuracy
 
@@ -14,7 +16,7 @@ class ClassificationModelConfig(ModelConfig):
         self.dropout = dropout
 
 
-class ClassificationConfig(TaskConfig):
+class ClassificationTaskConfig(TaskConfig):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -26,13 +28,13 @@ class ClassificationDMConfig(DataModuleConfig):
         self.download = download
 
 
-class Classification(Task):
+class ClassificationTask(Task):
     NAME = "classification"
 
     def __init__(
         self,
         model_cfg: ClassificationModelConfig,
-        task_cfg: ClassificationConfig,
+        task_cfg: ClassificationTaskConfig,
     ):
         super().__init__(
             model_cfg=model_cfg,
@@ -74,9 +76,13 @@ class ClassificationTrainer(Trainer):
             in_channels=self.dm.NUM_CHANNELS,
         )
 
-        # self.task_cfg.update({})
-
-        # self.dm_cfg.update()
-
     def _build_task(self, model_cfg: ModelConfig, task_cfg: TaskConfig) -> Task:
-        return Classification(model_cfg=model_cfg, task_cfg=task_cfg)
+        return ClassificationTask(model_cfg=model_cfg, task_cfg=task_cfg)
+
+
+@dataclass
+class Classification:
+    model_cfg: ModelConfig = ClassificationModelConfig
+    task_cfg: TaskConfig = ClassificationTaskConfig
+    dm_cfg: DataModuleConfig = ClassificationDMConfig
+    trainer: Trainer = ClassificationTrainer

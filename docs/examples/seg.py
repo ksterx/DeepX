@@ -1,9 +1,9 @@
 # %%
 from deepx.tasks.core import TrainingConfig
 from deepx.tasks.segmentation import (
-    SegmentationConfig,
     SegmentationDMConfig,
     SegmentationModelConfig,
+    SegmentationTaskConfig,
     SegmentationTrainer,
 )
 
@@ -15,7 +15,7 @@ model_cfg = SegmentationModelConfig(
 )
 
 # %%
-task_cfg = SegmentationConfig(
+task_cfg = SegmentationTaskConfig(
     lr=1e-4,
     loss_fn="ce",
     optimizer="adam",

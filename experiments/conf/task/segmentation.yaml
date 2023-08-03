@@ -1,6 +1,5 @@
 name: segmentation
 
-model: unet
 batch_size: 16
 lr: 1e-4
 beta1: 0.9
@@ -8,8 +7,11 @@ beta2: 0.999
 loss_fn: ce
 optimizer: adam
 scheduler: cos
-monitor: val_iou
-monitor_max: true
+monitor_metric: val_iou
+monitor_mode: max
+
+model: unet
+ignore_index: 255
 
 defaults:
   - base

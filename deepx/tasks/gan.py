@@ -1,8 +1,9 @@
 import tempfile
+from dataclasses import dataclass
 
 import numpy as np
 import torch
-from torch import Tensor, nn, optim
+from torch import Tensor
 
 # from torchmetrics.classification import BinaryAccuracy
 from torchmetrics.image.fid import FrechetInceptionDistance
@@ -30,7 +31,7 @@ class GANModelConfig(ModelConfig):
         self.negative_slope = negative_slope
 
 
-class GANConfig(TaskConfig):
+class GANTaskConfig(TaskConfig):
     def __init__(self, one_side_label_smoothing: float, **kwargs):
         super().__init__(**kwargs)
         self.one_side_label_smoothing = one_side_label_smoothing
@@ -43,14 +44,14 @@ class GANDMConfig(DataModuleConfig):
         self.download = download
 
 
-class GAN(Task):
+class GANTask(Task):
     NAME = "gan"
     SEED = 2525
 
     def __init__(
         self,
         model_cfg: GANModelConfig,
-        task_cfg: GANConfig,
+        task_cfg: GANTaskConfig,
     ):
         super().__init__(
             model_cfg=model_cfg,
@@ -192,4 +193,12 @@ class GANTrainer(Trainer):
         self.model_cfg.update(tgt_shape=(self.dm.NUM_CHANNELS, h, w))
 
     def _build_task(self, model_cfg: ModelConfig, task_cfg: TaskConfig) -> Task:
-        return GAN(model_cfg=model_cfg, task_cfg=task_cfg)
+        return GANTask(model_cfg=model_cfg, task_cfg=task_cfg)
+
+
+@dataclass
+class GAN:
+    model_cfg: ModelConfig = GANModelConfig
+    task_cfg: TaskConfig = GANTaskConfig
+    dm_cfg: DataModuleConfig = GANDMConfig
+    trainer: Trainer = GANTrainer

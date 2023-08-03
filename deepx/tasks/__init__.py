@@ -1,6 +1,6 @@
 from .classification import Classification
-from .core import Task, Trainer
-from .gan import GANTrainer
+from .core import Task, Trainer, TrainingConfig
+from .gan import GAN
 from .langmodel import LangModel
-from .segmentation import SegmentationTrainer
+from .segmentation import Segmentation
 from .translation import Translation

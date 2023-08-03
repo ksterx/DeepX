@@ -4,7 +4,7 @@ from app import App
 
 from deepx import registered_tasks
 from deepx.nn import registered_models
-from deepx.tasks import Classification
+from deepx.tasks import ClassificationTask
 
 
 class ClassificationApp(App):
@@ -60,7 +60,7 @@ class ClassificationApp(App):
         dm = dm_class()
 
         model = model_class(num_classes=dm.NUM_CLASSES, in_channels=dm.NUM_CHANNELS)
-        model = Classification.load_from_checkpoint(
+        model = ClassificationTask.load_from_checkpoint(
             checkpoint_path, model=model, num_classes=dm.NUM_CLASSES
         )
         model.eval()
@@ -70,7 +70,7 @@ class ClassificationApp(App):
         model = registered_models[model_name]
         dm = self.registered_dms[dm_name]
         model = model(num_classes=dm.NUM_CLASSES, in_channels=dm.NUM_CHANNELS)
-        model = Classification.load_from_checkpoint(
+        model = ClassificationTask.load_from_checkpoint(
             ckpt_path, model=model, num_classes=dm.NUM_CLASSES
         )
         model.eval()

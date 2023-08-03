@@ -9,8 +9,8 @@ loss_fn: ce
 optimizer: adam
 scheduler: cos
 dropout: 0.1
-monitor: val_loss
-monitor_max: false
+monitor_metric: val_loss
+monitor_mode: min
 
 defaults:
   - base

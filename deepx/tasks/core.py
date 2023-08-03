@@ -317,10 +317,10 @@ class Trainer(ABC):
         self.summarize()
 
         self.trainer = L.Trainer(
-            limit_train_batches=2,
-            limit_val_batches=2,
-            limit_test_batches=2,
-            limit_predict_batches=2,
+            # limit_train_batches=2,
+            # limit_val_batches=2,
+            # limit_test_batches=2,
+            # limit_predict_batches=2,
             max_epochs=tcfg.epochs,
             accelerator=tcfg.accelerator,
             devices=tcfg.devices,

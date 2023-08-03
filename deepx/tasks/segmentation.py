@@ -1,4 +1,5 @@
 import tempfile
+from dataclasses import dataclass
 from logging import getLogger
 
 import torch
@@ -15,39 +16,31 @@ process_logger = getLogger(__name__)
 
 
 class SegmentationModelConfig(ModelConfig):
-    def __init__(
-        self,
-        num_classes: int,
-        in_channels: int,
-        **kwargs,
-    ):
-        parent_kwargs, child_kwargs = self.split_kwargs(kwargs, ModelConfig)
-        super().__init__(**parent_kwargs)
-        self.num_classes = num_classes
-        self.in_channels = in_channels
-        for k, v in child_kwargs.items():
-            setattr(self, k, v)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
 
-class SegmentationConfig(TaskConfig):
+class SegmentationTaskConfig(TaskConfig):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
 
 class SegmentationDMConfig(DataModuleConfig):
-    def __init__(self, train_ratio: float, download: bool = False, **kwargs):
+    def __init__(
+        self, train_ratio: float | None = None, download: bool = False, **kwargs
+    ):
         super().__init__(**kwargs)
         self.train_ratio = train_ratio
         self.download = download
 
 
-class Segmentation(Task):
+class SegmentationTask(Task):
     NAME = "segmentation"
 
     def __init__(
         self,
         model_cfg: SegmentationModelConfig,
-        task_cfg: SegmentationConfig,
+        task_cfg: SegmentationTaskConfig,
     ):
         super().__init__(
             model_cfg=model_cfg,
@@ -101,8 +94,10 @@ class Segmentation(Task):
         x, y = batch
         logits = self(x)
         y = y.squeeze(1).long()
-        loss = self.loss_fn(logits, y)
-
+        try:
+            loss = self.loss_fn(logits, y)
+        except RuntimeError:
+            raise RuntimeError(f"You might have forgotten to set ignore_index (=255)")
         exec(f"self.{mode}_iou.update(logits, y)")
         self.log(f"{mode}_iou", eval(f"self.{mode}_iou"), prog_bar=True)
         self.log(f"{mode}_loss", loss)
@@ -118,7 +113,18 @@ class SegmentationTrainer(Trainer):
     NAME = "segmentation"
 
     def _update_configs(self):
-        pass
+        self.model_cfg.update(
+            num_classes=self.dm.NUM_CLASSES,
+            in_channels=self.dm.NUM_CHANNELS,
+        )
 
     def _build_task(self, model_cfg: ModelConfig, task_cfg: TaskConfig) -> Task:
-        return Segmentation(model_cfg=model_cfg, task_cfg=task_cfg)
+        return SegmentationTask(model_cfg=model_cfg, task_cfg=task_cfg)
+
+
+@dataclass
+class Segmentation:
+    model_cfg: ModelConfig = SegmentationModelConfig
+    task_cfg: TaskConfig = SegmentationTaskConfig
+    dm_cfg: DataModuleConfig = SegmentationDMConfig
+    trainer: Trainer = SegmentationTrainer
