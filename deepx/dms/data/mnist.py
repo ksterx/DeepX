@@ -16,8 +16,8 @@ class MNISTDM(ClassificationDM):
         num_workers: int,
         train_ratio: float,
         download: bool = False,
-        mean: tuple[float, ...] = (0.1307,),
-        std: tuple[float, ...] = (0.3081,),
+        mean: tuple[float, ...] = (0.5, 0.5, 0.5),
+        std: tuple[float, ...] = (0.5, 0.5, 0.5),
         **kwargs,
     ):
         super().__init__(

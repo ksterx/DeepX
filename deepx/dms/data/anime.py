@@ -23,6 +23,8 @@ class AnimeDM(ClassificationDM):
         num_workers: int,
         train_ratio: float,
         download: bool = False,
+        mean: tuple[float, ...] = (0.5, 0.5, 0.5),
+        std: tuple[float, ...] = (0.5, 0.5, 0.5),
         **kwargs,
     ):
         super().__init__(
@@ -34,6 +36,8 @@ class AnimeDM(ClassificationDM):
 
         self.train_ratio = train_ratio
         self.download = download
+        self.mean = mean
+        self.std = std
 
     def prepare_data(self):
         URL = "https://www.kaggle.com/datasets/shanmukh05/anime-names-and-image-generation/download?datasetVersionNumber=10"
@@ -50,19 +54,21 @@ class AnimeDM(ClassificationDM):
                 print("Already downloaded.")
 
     def setup(self, stage=None):
-        data = AnimeDataset(data_dir=self.data_dir, transform=self.transform())
+        data = AnimeDataset(
+            data_dir=self.data_dir, transform=self.transform(self.mean, self.std)
+        )
         self.train_data, self.val_data = self._random_split(data, self.train_ratio)
         self.test_data = self.val_data
 
     @classmethod
-    def transform(cls):
+    def transform(cls, mean, std):
         return transforms.Compose(
             [
                 transforms.ToTensor(),
                 transforms.Resize(
                     cls.SIZE, antialias=True, interpolation=Image.BICUBIC
                 ),
-                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+                transforms.Normalize(mean=mean, std=std),
             ]
         )
 

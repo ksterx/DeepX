@@ -118,6 +118,8 @@ class CIFAR100DM(ClassificationDM):
         train_ratio: float,
         num_workers: int,
         download: bool = False,
+        mean: tuple[float, ...] = (0.5, 0.5, 0.5),
+        std: tuple[float, ...] = (0.5, 0.5, 0.5),
         **kwargs,
     ):
         super().__init__(
@@ -129,6 +131,8 @@ class CIFAR100DM(ClassificationDM):
 
         self.train_ratio = train_ratio
         self.download = download
+        self.mean = mean
+        self.std = std
 
     def prepare_data(self):
         CIFAR100(self.data_dir, train=True, download=self.download)
@@ -136,22 +140,30 @@ class CIFAR100DM(ClassificationDM):
 
     def setup(self, stage=None):
         if stage == "fit":
-            data = CIFAR100(self.data_dir, train=True, transform=self.train_transform())
+            data = CIFAR100(
+                self.data_dir,
+                train=True,
+                transform=self.train_transform(self.mean, self.std),
+            )
             self.train_data, self.val_data = self._random_split(data, self.train_ratio)
 
             self.test_data = CIFAR100(
-                self.data_dir, train=False, transform=self.transform()
+                self.data_dir,
+                train=False,
+                transform=self.transform(self.mean, self.std),
             )
 
         if stage == "predict":
             self.predict_data = CIFAR100(
-                self.data_dir, train=False, transform=self.transform()
+                self.data_dir,
+                train=False,
+                transform=self.transform(self.mean, self.std),
             )
 
     @classmethod
-    def transform(cls):
-        return cls._transform(cls.SIZE)
+    def transform(cls, mean, std):
+        return cls._transform(cls.SIZE, mean, std)
 
     @classmethod
-    def train_transform(cls):
-        return cls._train_transform(cls.SIZE)
+    def train_transform(cls, mean, std):
+        return cls._train_transform(cls.SIZE, mean, std)

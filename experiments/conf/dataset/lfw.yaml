@@ -1,3 +1,5 @@
 name: lfw
+mean: [0.5, 0.5, 0.5]
+std: [0.5, 0.5, 0.5]
 train_ratio: 0.8
 download: false

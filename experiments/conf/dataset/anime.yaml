@@ -1,3 +1,5 @@
 name: anime
+mean: [0.1307]
+std: [0.3081]
 train_ratio: 0.8
 download: false

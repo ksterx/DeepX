@@ -1,2 +1,4 @@
 name: flowers102
+mean: [0.1307]
+std: [0.3081]
 download: false
