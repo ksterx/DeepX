@@ -37,10 +37,10 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - ../experiments/mlruns:/workspace/mlruns
+      - ../../mlruns:/mlruns
     restart: always
     depends_on:
       - deepx
     tty: true
-    working_dir: /workspace
-    command: mlflow server --backend-store-uri /workspace/mlruns --host 0.0.0.0 --default-artifact-root /workspace/mlruns --port 5000
+    working_dir: /mlruns
+    command: mlflow server --backend-store-uri /mlruns --host 0.0.0.0 --default-artifact-root /mlruns --port 5000
