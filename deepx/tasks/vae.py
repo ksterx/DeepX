@@ -72,10 +72,6 @@ class VAETask(Task):
         self.decoder = self.model.decoder
         self.encoder = self.model.encoder
 
-        self.train_acc = BinaryAccuracy()
-        self.val_acc = BinaryAccuracy()
-        self.test_acc = BinaryAccuracy()
-
     def forward(self, x: Tensor) -> Tensor:
         return self.decoder(x)
 

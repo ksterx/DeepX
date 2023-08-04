@@ -290,6 +290,18 @@ class Trainer(ABC):
                 process_logger.warning("Overriding training config.")
                 tcfg = self.train_cfg
 
+        if tcfg.debug:
+            limit_train_batches = 2
+            limit_val_batches = 2
+            limit_test_batches = 2
+            limit_predict_batches = 2
+            tcfg.epochs = 1
+        else:
+            limit_train_batches = 1.0
+            limit_val_batches = 1.0
+            limit_test_batches = 1.0
+            limit_predict_batches = 1.0
+
         if tcfg.logging:
             match tcfg.logger:
                 case "mlflow":
@@ -317,10 +329,10 @@ class Trainer(ABC):
         self.summarize()
 
         self.trainer = L.Trainer(
-            limit_train_batches=2,
-            limit_val_batches=2,
-            limit_test_batches=2,
-            limit_predict_batches=2,
+            limit_train_batches=limit_train_batches,
+            limit_val_batches=limit_val_batches,
+            limit_test_batches=limit_test_batches,
+            limit_predict_batches=limit_predict_batches,
             max_epochs=tcfg.epochs,
             accelerator=tcfg.accelerator,
             devices=tcfg.devices,
@@ -341,8 +353,8 @@ class Trainer(ABC):
                 ),
             ],
             benchmark=tcfg.benchmark,
-            fast_dev_run=tcfg.debug,
-            num_sanity_val_steps=0,
+            # fast_dev_run=tcfg.debug,
+            # num_sanity_val_steps=0,
         )
 
         # self.task = torch.compile(self.task)  # ERROR: NotImplementedError

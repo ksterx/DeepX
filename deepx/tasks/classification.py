@@ -22,9 +22,18 @@ class ClassificationTaskConfig(TaskConfig):
 
 
 class ClassificationDMConfig(DataModuleConfig):
-    def __init__(self, train_ratio: float, download: bool = False, **kwargs):
+    def __init__(
+        self,
+        train_ratio: float,
+        mean: tuple[float, ...],
+        std: tuple[float, ...],
+        download: bool = False,
+        **kwargs,
+    ):
         super().__init__(**kwargs)
         self.train_ratio = train_ratio
+        self.mean = mean
+        self.std = std
         self.download = download
 
 
